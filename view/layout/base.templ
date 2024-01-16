@@ -1,0 +1,46 @@
+package layout
+
+import (
+    "time"
+    "fmt"
+)
+
+templ Base(title string) {
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>{ title }</title>
+            <script defer src={fmt.Sprintf("/static/js/components.js?v=%s", time.Now().Format("20060102150405"))}></script>
+            <link href={fmt.Sprintf("/static/css/tailwind.css?v=%s", time.Now().Format("20060102150405"))} rel="stylesheet" />
+        </head>
+        <body>
+            @Header()
+            { children... }
+            @Footer()
+        </body>
+    </html>
+}
+
+templ Header() {
+    <header class="bg-gray-800 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl md:text-3xl font-bold">My Website</h1>
+            <nav>
+                <ul class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                    <li><a href="#" class="hover:text-gray-300">Home</a></li>
+                    <li><a href="#" class="hover:text-gray-300">About</a></li>
+                    <li><a href="#" class="hover:text-gray-300">Services</a></li>
+                    <li><a href="#" class="hover:text-gray-300">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+}
+
+templ Footer() {
+    <h1>
+        Hello from Footer!
+    </h1>
+}
