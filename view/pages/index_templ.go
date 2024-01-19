@@ -33,16 +33,57 @@ func Index() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"text-slate-500\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<my-carousel autoplay=\"3500\" controls indicator><div><img class=\"relative object-cover w-full h-full\" src=\"https://tecdn.b-cdn.net/img/Photos/Slides/img%20(22).jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-5 py-5 text-center text-white\"><h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var3 := `Hello from Index!`
+			templ_7745c5c3_Var3 := `Hola!`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div><div><img class=\"object-cover w-full h-full\" src=\"https://tecdn.b-cdn.net/img/Photos/Slides/img%20(15).jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-5 py-5 text-center text-white\"><h1>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var4 := `Adios!`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div><div><img class=\"object-cover w-full h-full\" src=\"https://tecdn.b-cdn.net/img/Photos/Slides/img%20(23).jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-5 py-5 text-center text-white\"><h1>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var5 := `Gato!`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div></my-carousel> <button id=\"test\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var6 := `Test`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button><script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var7 := `
+			document.querySelector("#test").addEventListener("click", () => {
+				const carousel = document.querySelector("my-carousel")
+				carousel.appendChild(carousel.lastChild.cloneNode(true))
+			})
+		`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -6,6 +6,32 @@ import (
 
 templ Index() {
 	@layout.Base("Index") {
-		<div class="text-slate-500">Hello from Index!</div>
+		<my-carousel autoplay="3500" controls indicator>
+			<div>
+				<img class="relative object-cover w-full h-full" src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(22).jpg" alt=""/>
+				<div class="absolute inset-x-[15%] bottom-5 py-5 text-center text-white">
+					<h1>Hola!</h1>
+				</div>
+			</div>
+			<div>
+				<img class="object-cover w-full h-full" src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(15).jpg" alt=""/>
+				<div class="absolute inset-x-[15%] bottom-5 py-5 text-center text-white">
+					<h1>Adios!</h1>
+				</div>
+			</div>
+			<div>
+				<img class="object-cover w-full h-full" src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(23).jpg" alt=""/>
+				<div class="absolute inset-x-[15%] bottom-5 py-5 text-center text-white">
+					<h1>Gato!</h1>
+				</div>
+			</div>
+		</my-carousel>
+		<button id="test">Test</button>
+		<script>
+			document.querySelector("#test").addEventListener("click", () => {
+				const carousel = document.querySelector("my-carousel")
+				carousel.appendChild(carousel.lastChild.cloneNode(true))
+			})
+		</script>
 	}
 }
