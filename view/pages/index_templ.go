@@ -33,57 +33,43 @@ func Index() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<my-carousel autoplay=\"3500\" controls indicator><div><img class=\"relative object-cover w-full h-full\" src=\"https://tecdn.b-cdn.net/img/Photos/Slides/img%20(22).jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-5 py-5 text-center text-white\"><h1>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main><my-carousel class=\"h-[calc(100dvh-4rem)]\" autoplay=\"3500\" controls indicator><div><img class=\"relative object-cover w-full h-full\" src=\"/static/img/image1.jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-9 py-5 text-center text-white\"><h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var3 := `Hola!`
+			templ_7745c5c3_Var3 := `Picture 1`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div><div><img class=\"object-cover w-full h-full\" src=\"https://tecdn.b-cdn.net/img/Photos/Slides/img%20(15).jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-5 py-5 text-center text-white\"><h1>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div><div><img class=\"object-cover w-full h-full\" src=\"/static/img/image2.jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-9 py-5 text-center text-white\"><h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var4 := `Adios!`
+			templ_7745c5c3_Var4 := `Picture 2`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div><div><img class=\"object-cover w-full h-full\" src=\"https://tecdn.b-cdn.net/img/Photos/Slides/img%20(23).jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-5 py-5 text-center text-white\"><h1>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div><div><img class=\"object-cover w-full h-full\" src=\"/static/img/image3.jpg\" alt=\"\"><div class=\"absolute inset-x-[15%] bottom-9 py-5 text-center text-white\"><h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var5 := `Gato!`
+			templ_7745c5c3_Var5 := `Picture 3`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div></my-carousel> <button id=\"test\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></div></my-carousel><section class=\"px-4 py-4 max-w-7xl mx-auto\"><h1 class=\"text-5xl font-bold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var6 := `Test`
+			templ_7745c5c3_Var6 := `Hello from Index!`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button><script>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Var7 := `
-			document.querySelector("#test").addEventListener("click", () => {
-				const carousel = document.querySelector("my-carousel")
-				carousel.appendChild(carousel.lastChild.cloneNode(true))
-			})
-		`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></section></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

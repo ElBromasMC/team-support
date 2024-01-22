@@ -8,10 +8,8 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "tailwindcss": "^3.4.1"
-  },
   "devDependencies": {
-    "esbuild": "0.19.11"
+    "esbuild": "0.19.11",
+    "tailwindcss": "^3.4.1"
   }
 }

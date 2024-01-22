@@ -7,13 +7,13 @@
             <slot></slot>
         </div>
         <!-- Controls -->
-        <button class="btn btn-prev hidden"><span>&#8249;</span></button>
-        <button class="btn btn-next hidden"><span>&#8250;</span></button>
+        <button class="btn btn-prev hidden" type="button"><span>&#8249;</span></button>
+        <button class="btn btn-next hidden" type="button"><span>&#8250;</span></button>
 
         <!-- Indicator -->
         <div class="indicator hidden">
             <template>
-                <button class="tab"><span></span></button>
+                <button class="tab" type="button"><span></span></button>
             </template>
         </div>
     </div>
@@ -82,7 +82,7 @@
             gap: 0.5rem;
 
             position: absolute;
-            bottom: 1rem;
+            bottom: 0.75rem;
             left: 0;
             right: 0;
 
@@ -106,7 +106,7 @@
             cursor: pointer;
             & span {
                 width: 100%;
-                height: 0.2rem;
+                height: 0.18rem;
                 background-color: #9ca3af;
             }
             &:hover span,

@@ -6,32 +6,30 @@ import (
 
 templ Index() {
 	@layout.Base("Index") {
-		<my-carousel autoplay="3500" controls indicator>
-			<div>
-				<img class="relative object-cover w-full h-full" src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(22).jpg" alt=""/>
-				<div class="absolute inset-x-[15%] bottom-5 py-5 text-center text-white">
-					<h1>Hola!</h1>
+		<main>
+			<my-carousel class="h-[calc(100dvh-4rem)]" autoplay="3500" controls indicator>
+				<div>
+					<img class="relative object-cover w-full h-full" src="/static/img/image1.jpg" alt=""/>
+					<div class="absolute inset-x-[15%] bottom-9 py-5 text-center text-white">
+						<h1>Picture 1</h1>
+					</div>
 				</div>
-			</div>
-			<div>
-				<img class="object-cover w-full h-full" src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(15).jpg" alt=""/>
-				<div class="absolute inset-x-[15%] bottom-5 py-5 text-center text-white">
-					<h1>Adios!</h1>
+				<div>
+					<img class="object-cover w-full h-full" src="/static/img/image2.jpg" alt=""/>
+					<div class="absolute inset-x-[15%] bottom-9 py-5 text-center text-white">
+						<h1>Picture 2</h1>
+					</div>
 				</div>
-			</div>
-			<div>
-				<img class="object-cover w-full h-full" src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(23).jpg" alt=""/>
-				<div class="absolute inset-x-[15%] bottom-5 py-5 text-center text-white">
-					<h1>Gato!</h1>
+				<div>
+					<img class="object-cover w-full h-full" src="/static/img/image3.jpg" alt=""/>
+					<div class="absolute inset-x-[15%] bottom-9 py-5 text-center text-white">
+						<h1>Picture 3</h1>
+					</div>
 				</div>
-			</div>
-		</my-carousel>
-		<button id="test">Test</button>
-		<script>
-			document.querySelector("#test").addEventListener("click", () => {
-				const carousel = document.querySelector("my-carousel")
-				carousel.appendChild(carousel.lastChild.cloneNode(true))
-			})
-		</script>
+			</my-carousel>
+			<section class="px-4 py-4 max-w-7xl mx-auto">
+				<h1 class="text-5xl font-bold">Hello from Index!</h1>
+			</section>
+		</main>
 	}
 }
