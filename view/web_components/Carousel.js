@@ -179,7 +179,7 @@ export default class Carousel extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "autoplay") {
-            if (newValue !== null) {
+            if (newValue != null) {
                 this.autoplayInterval = setInterval(() => {
                     const n = this.numberSlides
                     this.currentSlide = ((this.currentSlide + 1) % n + n) % n  
@@ -192,19 +192,20 @@ export default class Carousel extends HTMLElement {
         } else if (name === "controls") {
             const prevButton = this.shadow.querySelector(".btn-prev")
             const nextButton = this.shadow.querySelector(".btn-next")
-            if (newValue === null) {
-                prevButton.classList.add("hidden")
-                nextButton.classList.add("hidden")
-            } else {
+            if (newValue != null) {
                 prevButton.classList.remove("hidden")
                 nextButton.classList.remove("hidden")
+
+            } else {
+                prevButton.classList.add("hidden")
+                nextButton.classList.add("hidden")
             }
         } else if (name === "indicator") {
             const indicator = this.shadow.querySelector(".indicator")
-            if (newValue === null) {
-                indicator.classList.add("hidden")
-            } else {
+            if (newValue != null) {
                 indicator.classList.remove("hidden")
+            } else {
+                indicator.classList.add("hidden")
             }
         }
     }
