@@ -1,5 +1,5 @@
 (() => {
-  // view/web_components/Carousel.js
+  // view/js/components/Carousel.js
   var template = document.createElement("template");
   template.innerHTML = `
     <div class="carousel">
@@ -214,6 +214,6 @@
     }
   };
 
-  // view/web_components/index.mjs
+  // view/js/main.js
   customElements.define("my-carousel", Carousel);
 })();

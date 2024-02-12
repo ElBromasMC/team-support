@@ -1,0 +1,30 @@
+package user
+
+import "alc/view/layout"
+
+templ SignupShow() {
+    @layout.Base("Registro"){
+        <main class="flex justify-center items-center">
+            <section>
+                <h2>Registrate!</h2>
+                <form action="/signup" method="post">
+                    <div>
+                        <label for="name">Name:</label>
+                        <input type="text" name="name" required/>
+                    </div>
+                    <div>
+                        <label for="email">Email:</label>
+                        <input type="email" name="email" required/>
+                    </div>
+                    <div>
+                        <label for="password">Password:</label>
+                        <input type="password" name="password" required minlength="8"/>
+                    </div>
+                    <div>
+                        <button type="submit">Signup</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    }
+}

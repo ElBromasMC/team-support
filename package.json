@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tailwindcss build -i tailwind.css -o static/css/tailwind.css && ./node_modules/.bin/esbuild view/web_components/index.mjs --bundle --outfile=static/js/components.js"
+    "dev": "tailwindcss build -i tailwind.css -o static/css/tailwind.css && ./node_modules/.bin/esbuild view/js/main.js --bundle --outfile=static/js/main.js"
   },
   "author": "",
   "license": "ISC",

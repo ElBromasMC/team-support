@@ -7,13 +7,16 @@ import (
 
 templ Base(title string) {
 	<!DOCTYPE html>
-	<html>
+	<html class="scroll-smooth">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
-			<script defer src={ fmt.Sprintf("/static/js/components.js?v=%s", time.Now().Format("20060102150405")) }></script>
+			<!-- HTMX -->
+			<script src="/static/js/htmx.min.js"></script>
+			<script defer src={ fmt.Sprintf("/static/js/main.js?v=%s", time.Now().Format("20060102150405")) }></script>
 			<link href={ fmt.Sprintf("/static/css/tailwind.css?v=%s", time.Now().Format("20060102150405")) } rel="stylesheet"/>
+			<link rel="icon" href="/static/img/favicon.ico" />
 		</head>
 		<body>
 			@Header()
