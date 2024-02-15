@@ -1,6 +1,3 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -20,13 +17,10 @@ go.work
 # node modules
 node_modules
 
-# air build files
+# build files
+build
 tmp
-
-# task file temporary files
-.task
+testdata
 
 # Env file
 .env
-
-# Credits to https://github.com/bnprtr/go-templ-htmx-template

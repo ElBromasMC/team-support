@@ -1,39 +1,46 @@
 package main
 
 import (
+	"alc/assets"
 	"alc/handler"
 	middle "alc/middleware"
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
+	// Live reload
+	http.Get("http://localhost:8020")
+
 	e := echo.New()
 
 	// Root level middleware
 	// e.Use(middleware.Logger())
-	// e.Use(middleware.Recover())
+	e.Use(middleware.Recover())
+
+	// Static files
+	e.GET("/static/*", echo.WrapHandler(http.FileServer(http.FS(assets.Assets))))
 
 	// Database connection
-	db, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
-
-	// Static files
-	e.Static("/static", "static")
+	defer dbpool.Close()
 
 	// Initialize handler
 	h := handler.Handler{
-		DB: db,
+		DB: dbpool,
 	}
 
 	// Auth middleware
-	e.Use(middle.Auth(db))
+	e.Use(middle.Auth(dbpool))
 
 	// Routes
 	e.GET("/", h.HandleIndexShow)

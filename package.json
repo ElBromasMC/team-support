@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "dev": "tailwindcss build -i tailwind.css -o static/css/tailwind.css && ./node_modules/.bin/esbuild view/js/main.js --bundle --outfile=static/js/main.js"
-  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "esbuild": "0.19.11",
     "tailwindcss": "^3.4.1"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
   }
 }

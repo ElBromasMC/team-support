@@ -1,21 +1,21 @@
 root = "."
 testdata_dir = "testdata"
-tmp_dir = "tmp"
+tmp_dir = "build"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
-  cmd = "task build"
+  bin = "./build/server"
+  cmd = "make ./build/server -j2"
   delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata", "node_modules", "static"]
-  exclude_file = []
-  exclude_regex = ["_test.go", ".*_templ.go"]
+  exclude_dir = ["tmp", "build", "vendor", "testdata", "node_modules"]
+  exclude_file = ["assets/static/css/tailwind.css", "assets/static/js/main.js"]
+  exclude_regex = ["_test.go", "_templ.go"]
   exclude_unchanged = false
   follow_symlink = false
   full_bin = ""
   include_dir = []
-  include_ext = ["go", "tpl", "tmpl", "templ", "html", "css", "js", "jpg", "jpeg", "svg", "mjs"]
-  include_file = ["main.go"]
+  include_ext = ["go", "tpl", "tmpl", "templ", "js", "html", "css", "jpg", "jpeg", "png", "svg", "ico"]
+  include_file = []
   kill_delay = "0s"
   log = "build-errors.log"
   post_cmd = []

@@ -1,7 +1,7 @@
 package handler
 
-import "github.com/jackc/pgx/v5"
+import "github.com/jackc/pgx/v5/pgxpool"
 
 type Handler struct {
-	DB *pgx.Conn
+	DB *pgxpool.Pool
 }

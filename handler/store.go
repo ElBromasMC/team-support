@@ -13,8 +13,8 @@ import (
 func (h *Handler) HandleStoreShow(c echo.Context) error {
 	items := []model.StoreItem{
 		{
-			Name:  "hola",
-			Price: 200,
+			Name:  "hola que pasa perros",
+			Price: 391283983,
 		},
 	}
 	return render(c, http.StatusOK, store.Show(items))
