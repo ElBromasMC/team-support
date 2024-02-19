@@ -2,16 +2,12 @@ package user
 
 import "alc/view/layout"
 
-templ SignupShow() {
-	@layout.Base("Registro") {
+templ LoginShow() {
+	@layout.Base("Login") {
 		<main class="flex justify-center items-center">
 			<section>
 				<h2>Registrate!</h2>
-				<form action="/signup" method="post">
-					<div>
-						<label for="name">Name:</label>
-						<input type="text" name="name" required/>
-					</div>
+				<form action="/login" method="post">
 					<div>
 						<label for="email">Email:</label>
 						<input type="email" name="email" required/>

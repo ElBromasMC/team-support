@@ -2,124 +2,130 @@ package page
 
 import (
 	"alc/view/layout"
+	"alc/model"
 )
 
-templ Index() {
-	@layout.Base("Team Support Services") {
+templ Index(items []model.ServiceItem) {
+	@layout.BasePage("Team Support Services") {
 		<main>
 			<!-- Carousel -->
 			<my-carousel class="h-[36rem]" controls indicator>
 				<div>
 					<img class="relative object-cover w-full h-full" src="/static/img/background1.jpg" alt=""/>
-					<section class="absolute flex flex-col items-center inset-x-0 inset-y-0 pb-9 text-white lg:flex-row-reverse lg:justify-evenly">
+					<section class="absolute flex flex-col items-center inset-x-0 inset-y-0 pb-9 text-chalky lg:flex-row-reverse lg:justify-evenly">
 						<img class="w-[60%] mt-5 max-w-64 lg:w-[30%] lg:max-w-96" src="/static/img/laptop.png" alt="laptop"/>
 						<div class="flex flex-col lg:items-start">
 							<img src="/static/img/logo2.png" alt="logo"/>
 							<h2 class="my-3 text-2xl font-semibold text-center lg:my-9 lg:text-6xl lg:text-left">Empiezo bien el año <br/> protege tu equipo</h2>
 							<div class="flex flex-col gap-5 items-center lg:flex-row lg:gap-12">
 								<img src="/static/img/garantia.png" alt="garantia"/>
-								<a class="px-8 py-2 rounded-2xl font-semibold bg-sky-500" href="#">Consulte aquí</a>
+								<a class="px-8 py-2 rounded-2xl font-semibold bg-azure" href="#">Consulte aquí</a>
 							</div>
 						</div>
 					</section>
 				</div>
 				<div>
 					<img class="object-cover w-full h-full" src="/static/img/image2.jpg" alt=""/>
-					<section class="absolute inset-x-[15%] bottom-9 py-5 text-center text-white">
+					<section class="absolute inset-x-[15%] bottom-9 py-5 text-center text-chalky">
 						<h1>Picture 2</h1>
 					</section>
 				</div>
 				<div>
 					<img class="object-cover w-full h-full" src="/static/img/image3.jpg" alt=""/>
-					<section class="absolute inset-x-[15%] bottom-9 py-5 text-center text-white">
+					<section class="absolute inset-x-[15%] bottom-9 py-5 text-center text-chalky">
 						<h1>Picture 3</h1>
 					</section>
 				</div>
 			</my-carousel>
 			<!-- Servicios -->
 			<section>
-				<div class="px-4 py-16 max-w-6xl mx-auto">
-					<h2 class="mb-8 text-center text-3xl font-semibold text-slate-900">Nuestros servicios</h2>
-					<div class="flex justify-center flex-wrap gap-6 lg:justify-between">
-						<section class="flex flex-col items-center p-9 max-w-56 rounded-3xl bg-sky-500 text-white text-center">
-							<h3 class="mb-6 text-2xl font-semibold">Renting de equipos</h3>
-							<p class="mb-6">Alquiler de equipos tecnológicos</p>
-							<a class="mt-auto text-sky-800 hover:text-white" href="#">
-								<svg class="w-8 h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"></path>
+				<div id="servicios" class="relative bottom-16 lg:bottom-24"></div>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-16 lg:text-5xl lg:font-semibold">Nuestros servicios</h2>
+					<div class="flex flex-col items-center gap-6 lg:flex-row lg:gap-14">
+						<script>
+							function handleItemDisplay(event) {
+								el = event.currentTarget
+								if (el.dataset.open != null) {
+									delete el.dataset.open
+								} else {
+									el.dataset.open = ""
+								}
+							}
+						</script>
+						for _, i := range items {
+							<section class="relative max-w-xl px-3 py-1 w-full rounded-3xl shadow bg-chalky lg:h-80 lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white" onclick="handleItemDisplay(event)">
+								<h3 class="text-xl text-center font-semibold lg:mb-6 lg:text-left lg:font-bold lg:text-2xl">{ i.Name }</h3>
+								<svg class="absolute w-6 h-6 right-8 top-2 text-azure lg:hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+									<path fill-rule="evenodd" d="M18.4 10.3A2 2 0 0 0 17 7H7a2 2 0 0 0-1.5 3.3l4.9 5.9a2 2 0 0 0 3 0l5-6Z" clip-rule="evenodd"></path>
 								</svg>
-							</a>
-						</section>
-						<section class="flex flex-col items-center p-9 max-w-56 rounded-3xl bg-sky-500 text-white text-center">
-							<h3 class="mb-6 text-2xl font-semibold">Soporte para Hardware</h3>
-							<p class="mb-6">Soporte, servicio y mantenimiento</p>
-							<a class="mt-auto text-sky-800 hover:text-white" href="#">
-								<svg class="w-8 h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"></path>
-								</svg>
-							</a>
-						</section>
-						<section class="flex flex-col items-center p-9 max-w-56 rounded-3xl bg-sky-500 text-white text-center">
-							<h3 class="mb-6 text-2xl font-semibold">Proyectos de T.I.</h3>
-							<p class="mb-6">Supervisión, actualizaciones e implementación</p>
-							<a class="mt-auto text-sky-800 hover:text-white" href="#">
-								<svg class="w-8 h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"></path>
-								</svg>
-							</a>
-						</section>
+								<div class="hidden lg:block">
+									<p>{ i.Description }</p>
+									<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"></path>
+									</svg>
+								</div>
+							</section>
+						}
 					</div>
 				</div>
 			</section>
 			<!-- Nosotros -->
-			<section class="flex flex-col gap-6 bg-sky-500 lg:flex-row">
-				<div class="flex items-center grow basis-0 text-white bg-slate-900">
-					<div class="px-4 py-12 max-w-2xl mx-auto">
-						<h2 class="mb-6 text-3xl font-semibold">Nosotros</h2>
-						<p class="mb-2">Somos una empresa relacionada al rubro de la tecnología, con el respaldo de COMPUCARE contamos con 26 años de experiencia.</p>
-						<p class="mb-10">Tenemos alianza con dos grandes marcas reconocidas internacionalmente en el área de garantía.</p>
-						<div class="flex flex-col gap-6 items-center lg:flex-row">
-							<img src="/static/img/viewsonic.png" alt="viewsonic"/>
-							<img src="/static/img/asus.png" alt="asus"/>
+			<section>
+				<div id="nosotros" class="relative bottom-16 lg:bottom-24"></div>
+				<div class="flex flex-col gap-6 bg-azure lg:flex-row">
+					<div class="flex items-center grow basis-0 text-chalky bg-navy">
+						<div class="px-4 py-12 max-w-lg mx-auto">
+							<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-12 lg:text-left lg:text-4xl lg:font-semibold">Nosotros</h2>
+							<p class="mb-2">Somos una empresa relacionada al rubro de la tecnología, con el respaldo de COMPUCARE contamos con 26 años de experiencia.</p>
+							<p class="mb-10">Tenemos alianza con dos grandes marcas reconocidas internacionalmente en el área de garantía.</p>
+							<div class="flex flex-col gap-6 items-center lg:flex-row">
+								<img src="/static/img/viewsonic.png" alt="viewsonic"/>
+								<img src="/static/img/asus.png" alt="asus"/>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="grow basis-0">
-					<img class="object-cover w-full h-full" src="/static/img/nosotros1.jpg" alt="nosotros"/>
+					<div class="grow basis-0">
+						<img class="object-cover w-full h-full" src="/static/img/nosotros1.jpg" alt="nosotros"/>
+					</div>
 				</div>
 			</section>
 			<!-- Clientes -->
 			<section>
-				<div class="px-4 py-16 space-y-8 max-w-3xl mx-auto text-center">
-					<h2 class="text-3xl font-semibold text-slate-900">Clientes</h2>
-					<h3 class="text-xl font-semibold text-slate-900">Staff comercial</h3>
+				<div class="px-4 py-16 space-y-8 max-w-3xl mx-auto text-center lg:pt-24">
+					<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-16 lg:text-5xl lg:font-semibold">Clientes</h2>
+					<h3 class="text-xl font-bold">Staff comercial</h3>
 					<p>
 						Asesoramos en el diseño y ejecución de cada proyecto T.I. 
 						<br/>
 						Nuestro personal comercial está conformado por ingenieros de sistemas, informáticos y electrónicos.
 					</p>
-					<h3 class="text-xl font-semibold text-slate-900">Servicio de mesa de ayuda</h3>
+					<h3 class="text-xl font-bold">Servicio de mesa de ayuda</h3>
 					<p>Contamos con nuestro propio Help Desk Cada proyecto es supervisado por un Ejecutivo Senior, que garantiza el cumplimiento de los plazos así como de la gestión inherente a cada atención.</p>
 				</div>
 				<!-- Logos -->
-				<div></div>
+				<div class="flex justify-center items-center gap-7 bg-navy py-6 mb-16 lg:gap-16 lg:mb-24">
+					<img class="w-16 lg:w-24" src="/static/img/lenovo.png" alt="lenovo"/>
+					<img class="w-16 lg:w-28" src="/static/img/sunat.png" alt="sunat"/>
+					<img class="w-24 lg:w-36" src="/static/img/interbank.png" alt="interbank"/>
+				</div>
 			</section>
 			<!-- Cobertura -->
-			<section class="bg-slate-900">
-				<div class="flex flex-col gap-9 px-4 py-12 max-w-7xl mx-auto lg:flex-row lg:items-center">
+			<section class="bg-navy">
+				<div class="flex flex-col gap-9 px-4 py-12 max-w-7xl mx-auto lg:flex-row lg:items-center lg:py-24">
 					<!-- Info -->
-					<div class="text-white lg:basis-[60%]">
-						<h2 class="mb-6 text-3xl font-semibold">Cobertura</h2>
+					<div class="text-chalky lg:basis-[60%]">
+						<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-9 lg:text-5xl lg:text-left lg:font-semibold">Cobertura</h2>
 						<p class="mb-2">Contamos con 2 Sedes en Lima y 24 representantes en provincias del país.</p>
 						<p class="mb-10">Esto nos garantiza una cobertura total del alcance de sus requerimientos.</p>
 						<!-- Ubicaciones -->
 						<div class="space-y-6">
-							<h3 class="text-2xl font-semibold">Lima</h3>
+							<h3 class="text-2xl font-bold text-azure">Lima</h3>
 							<ul class="list-disc list-inside">
 								<li>Surco</li>
 								<li>Cyberplaza</li>
 							</ul>
-							<h3 class="text-2xl font-semibold">Provincia</h3>
+							<h3 class="text-2xl font-bold text-azure">Provincia</h3>
 							<ul class="grid grid-cols-2 list-disc list-inside md:grid-cols-3">
 								<li>Áncash</li>
 								<li>Chimbote</li>
@@ -152,7 +158,7 @@ templ Index() {
 					</script>
 					<div class="group relative flex justify-center mb-auto lg:flex-grow" data-current="LIMA" onclick="handleMapClick(event)">
 						<!-- Peru, creditos a (https://commons.wikimedia.org/wiki/File:Blank_map_of_Peru.svg) -->
-						<svg class="relative max-w-96 [&_path]:fill-sky-500 [&_path:hover]:fill-sky-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 624.4166870117188 905.3333740234375">
+						<svg class="relative max-w-96 [&_path]:fill-azure [&_path:hover]:fill-sky-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 624.4166870117188 905.3333740234375">
 							<g transform="matrix(1.2556897,0,0,1.2577222,-14.0833129882813,-5.48333740234375)">
 								<path class="group-data-[current='TACNA']:fill-white" data-name="TACNA" d="M 440.23559,723.27791 C 439.65228,722.57506 438.62487,722 437.95245,722 c -0.67241,0 -2.03705,-0.9 -3.03254,-2 -0.99549,-1.1 -2.32154,-2 -2.94678,-2 -0.62524,0 -3.143,-2.05725 -5.59501,-4.57167 -2.45202,-2.51441 -6.40392,-5.46579 -8.78201,-6.55861 -1.16477,-0.53525 -2.01187,-0.97204 -2.58674,-1.35694 -1.09197,-0.73111 -1.20176,-1.275 -0.64083,-1.95088 0.60292,-0.72648 2.40757,-1.58314 4.01033,-1.90369 2.18295,-0.43659 3.43977,-1.65861 5.00922,-4.87052 4.99785,-10.22823 7.89639,-14.25503 10.80311,-15.00823 3.36552,-0.8721 5.30609,-4.27513 6.14696,-10.77946 0.51203,-3.96069 0.90268,-4.53709 3.25959,-4.80946 2.28137,-0.26364 2.72554,0.1058 3,2.49525 0.25665,2.23441 0.93217,2.90911 3.32216,3.31812 2.3094,0.39522 3.2447,1.26846 4.06298,3.79338 0.86631,2.67314 2.33579,3.92036 7.94266,6.74134 3.78383,1.90375 8.17258,3.46137 9.75277,3.46137 3.79109,0 6.7416,1.65662 6.74156,3.78518 -4e-5,2.31263 -6.74028,7.59465 -10.4827,8.21482 -2.76592,0.45835 -3.04366,0.86994 -3.33409,4.94088 -0.17426,2.44248 0.20649,5.4187 0.8461,6.61382 1.36289,2.5466 -0.31031,6.56831 -4.18427,10.05727 -2.01167,1.81175 -3.91235,2.76374 -7.64277,3.46419 -1.61124,0.30254 -3.56382,0.55814 -6.01412,0.81584 -4.58383,0.48208 -6.60223,0.31395 -7.37244,-0.61409 z"></path>
 								<path class="group-data-[current='MOQUEGUA']:fill-white" data-name="MOQUEGUA" d="M 408.34436,701.40896 C 407.70122,700.63403 406.65298,700 406.01493,700 c -0.70251,0 -1.24941,-2.05288 -1.38654,-5.20467 -0.17387,-3.99597 -0.80741,-5.81104 -2.72804,-7.81575 l -2.50158,-2.61109 2.60239,-2.43424 c 4.29265,-4.0153 4.66072,-5.4426 2.42843,-9.41701 C 402.06961,668.31548 401.77517,664 403.84848,664 c 2.34449,0 4.57143,-2.94515 4.57143,-6.04575 0,-2.2543 0.71493,-3.27259 3.1998,-4.55757 l 3.1998,-1.65468 -2.34146,-1.89601 c -1.28781,-1.0428 -2.01443,-2.22225 -1.61473,-2.62099 0.73832,-0.73656 4.93941,3.55217 5.83613,5.95787 0.57573,1.54456 3.63581,-1.79466 3.68866,-4.02514 0.0175,-0.73825 0.9318,-2.48644 2.0318,-3.88486 1.18118,-1.50162 2,-4.05678 2,-6.24106 0,-4.26622 0.7818,-5.45779 2.59407,-3.95374 0.90632,0.75218 1.92042,0.71695 3.48634,-0.1211 1.70108,-0.91039 3.03982,-0.90738 5.82897,0.0131 4.01788,1.32602 6.09062,4.58477 6.09062,9.57564 0,4.15277 2.54148,9.1011 5.00528,9.7454 1.08385,0.28343 2.41492,1.68388 2.95793,3.1121 0.71316,1.87576 1.70846,2.59677 3.58462,2.59677 l 2.59733,0 -2.07258,2.63486 c -1.13992,1.44917 -2.07258,3.69917 -2.07258,5 0,1.69847 -0.56374,2.36514 -2,2.36514 -2.22921,0 -2.56701,-1.03299 -0.88713,-2.71287 1.83224,-1.83224 0.0174,-3.28713 -4.10046,-3.28713 -4.80839,0 -7.01241,2.08103 -7.01241,6.62109 0,5.09084 -2.36871,9.00265 -5.87612,9.70413 -1.72514,0.34503 -3.22364,1.41374 -3.58684,2.55809 -0.3431,1.08101 -1.77609,3.66344 -3.18442,5.73873 -1.40833,2.07529 -3.39284,5.32603 -4.41002,7.22386 -1.40343,2.61851 -3.05508,3.87521 -6.84911,5.21132 -4.27871,1.5068 -5.16833,1.55752 -6.16904,0.35174 z"></path>
@@ -181,7 +187,7 @@ templ Index() {
 							</g>
 						</svg>
 						<!-- Informacion del mapa -->
-						<div class="text-sm font-semibold [&>div]:hidden [&>div]:absolute [&>div]:top-0 [&>div]:left-0 [&>div]:w-32 [&>div]:h-16 [&>div]:p-3 [&>div]:rounded-2xl [&>div]:bg-white">
+						<div class="text-sm font-semibold [&>div]:hidden [&>div]:absolute [&>div]:top-0 [&>div]:left-0 [&>div]:w-32 [&>div]:h-16 [&>div]:p-3 [&>div]:rounded-2xl [&>div]:bg-chalky">
 							<div class="group-data-[current='TACNA']:block">TACNA</div>
 							<div class="group-data-[current='MOQUEGUA']:block">MOQUEGUA</div>
 							<div class="group-data-[current='PUNO']:block">PUNO</div>
@@ -212,28 +218,29 @@ templ Index() {
 			</section>
 			<!-- Contacto -->
 			<section>
-				<div class="px-4 py-16 max-w-7xl mx-auto">
-					<h2 class="mb-8 text-center text-3xl font-semibold text-slate-900">Contáctenos</h2>
+				<div id="contacto" class="relative bottom-16 lg:bottom-24"></div>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-16 lg:text-left lg:text-5xl lg:font-semibold">Contáctenos</h2>
 					<div class="grid gap-x-20 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
 						<!-- Direccion -->
 						<div class="space-y-3">
-							<h3 class="text-2xl font-semibold">Dirección</h3>
-							<p>Av. Monte de los Olivos 993 <br/> Cercado de Lima 15039</p>
+							<h3 class="text-2xl font-bold">Dirección</h3>
+							<p>Santiago de Surco <span class="text-azure">(Principal)</span><br/> Av. Monte de los Olivos 993</p>
 							<iframe class="w-[100%] h-52 border-0" loading="lazy" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d298.40382121917594!2d-76.98894103753177!3d-12.144075965868417!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c797432f8065%3A0xaa8db0df8e2a74d0!2sCompucare%20SA!5e0!3m2!1ses-419!2spe!4v1706234045904!5m2!1ses-419!2spe" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"></iframe>
 						</div>
 						<!-- Telefonos -->
 						<div class="space-y-3">
-							<h3 class="text-2xl font-semibold text-slate-900">Teléfonos</h3>
+							<h3 class="text-2xl font-bold">Teléfonos</h3>
 							<p>Atención telefónica y mensajería de lunes a viernes 9am a 6pm</p>
-							<h4 class="text-xl font-semibold text-slate-900">Central telefónica</h4>
-							<a class="block ml-9 text-slate-900 hover:text-slate-600" href="#">
+							<h4 class="text-2xl font-bold">Central telefónica</h4>
+							<a class="block ml-9 hover:text-livid" href="#">
 								<svg class="inline w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
 									<path d="M8 4a2.6 2.6 0 0 0-2 .9 6.2 6.2 0 0 0-1.8 6 12 12 0 0 0 3.4 5.5 12 12 0 0 0 5.6 3.4 6.2 6.2 0 0 0 6.6-2.7 2.6 2.6 0 0 0-.7-3L18 12.9a2.7 2.7 0 0 0-3.8 0l-.6.6a.8.8 0 0 1-1.1 0l-1.9-1.8a.8.8 0 0 1 0-1.2l.6-.6a2.7 2.7 0 0 0 0-3.8L10 4.9A2.6 2.6 0 0 0 8 4Z"></path>
 								</svg>
 								(01) 743-3030
 							</a>
-							<h4 class="text-xl font-semibold text-slate-900">Mensajería WhatsApp</h4>
-							<a class="block ml-9 text-slate-900 hover:text-slate-600" href="#">
+							<h4 class="text-2xl font-bold">Mensajería WhatsApp</h4>
+							<a class="block ml-9 hover:text-livid" href="#">
 								<svg class="inline w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32">
 									<path d="M19.11 17.205c-.372 0-1.088 1.39-1.518 1.39a.63.63 0 0 1-.315-.1c-.802-.402-1.504-.817-2.163-1.447-.545-.516-1.146-1.29-1.46-1.963a.426.426 0 0 1-.073-.215c0-.33.99-.945.99-1.49 0-.143-.73-2.09-.832-2.335-.143-.372-.214-.487-.6-.487-.187 0-.36-.043-.53-.043-.302 0-.53.115-.746.315-.688.645-1.032 1.318-1.06 2.264v.114c-.015.99.472 1.977 1.017 2.78 1.23 1.82 2.506 3.41 4.554 4.34.616.287 2.035.888 2.722.888.817 0 2.15-.515 2.478-1.318.13-.33.244-.73.244-1.088 0-.058 0-.144-.03-.215-.1-.172-2.434-1.39-2.678-1.39zm-2.908 7.593c-1.747 0-3.48-.53-4.942-1.49L7.793 24.41l1.132-3.337a8.955 8.955 0 0 1-1.72-5.272c0-4.955 4.04-8.995 8.997-8.995S25.2 10.845 25.2 15.8c0 4.958-4.04 8.998-8.998 8.998zm0-19.798c-5.96 0-10.8 4.842-10.8 10.8 0 1.964.53 3.898 1.546 5.574L5 27.176l5.974-1.92a10.807 10.807 0 0 0 16.03-9.455c0-5.958-4.842-10.8-10.802-10.8z" fill-rule="evenodd"></path>
 								</svg>
@@ -242,10 +249,10 @@ templ Index() {
 						</div>
 						<!-- Correos -->
 						<div class="space-y-3">
-							<h3 class="text-2xl font-semibold">Correos</h3>
+							<h3 class="text-2xl font-bold">Correos</h3>
 							<div>
 								<p>Cualquier consulta acerca de nuestros servicios para ventas, escríbenos a:</p>
-								<a class="ml-9 text-slate-900 hover:text-slate-600" href="mailto:ventas@compucareperu.com">
+								<a class="ml-9 hover:text-livid" href="mailto:ventas@compucareperu.com">
 									<svg class="inline w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
 										<path d="M2 5.6V18c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V5.6l-.9.7-7.9 6a2 2 0 0 1-2.4 0l-8-6-.8-.7Z"></path>
 										<path d="M20.7 4.1A2 2 0 0 0 20 4H4a2 2 0 0 0-.6.1l.7.6 7.9 6 7.9-6 .8-.6Z"></path>
@@ -255,7 +262,7 @@ templ Index() {
 							</div>
 							<div>
 								<p>Para cualquier otra consulta o sugerencia:</p>
-								<a class="ml-9 text-slate-900 hover:text-slate-600" href="mailto:sugerencias@compucareperu.com">
+								<a class="ml-9 hover:text-livid" href="mailto:sugerencias@compucareperu.com">
 									<svg class="inline w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
 										<path d="M2 5.6V18c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V5.6l-.9.7-7.9 6a2 2 0 0 1-2.4 0l-8-6-.8-.7Z"></path>
 										<path d="M20.7 4.1A2 2 0 0 0 20 4H4a2 2 0 0 0-.6.1l.7.6 7.9 6 7.9-6 .8-.6Z"></path>
