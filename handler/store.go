@@ -13,7 +13,7 @@ import (
 func (h *Handler) HandleStoreShow(c echo.Context) error {
 	items := []model.StoreItem{
 		{
-			Name:  "hola que pasa perros",
+			Name:  "hola",
 			Price: 391283983,
 		},
 	}

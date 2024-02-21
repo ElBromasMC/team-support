@@ -54,7 +54,12 @@ func main() {
 
 	// Routes
 	e.GET("/", h.HandleIndexShow)
+	e.GET("/ticket", h.HandleTicketShow)
+	e.GET("/garantia", h.HandleGarantiaShow)
+	e.GET("/garantia/:slug", h.HandleGarantiaItemShow)
+
 	e.GET("/store", h.HandleStoreShow)
+
 	e.GET("/signup", h.HandleSignupShow)
 	e.GET("/login", h.HandleLoginShow)
 	e.POST("/signup", h.HandleSignup)

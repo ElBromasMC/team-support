@@ -1,30 +1,30 @@
 package store
 
 import (
-    "fmt"
+	"fmt"
 	"alc/view/layout"
-    "alc/model"
+	"alc/model"
 )
 
 templ ItemList(items []model.StoreItem) {
-    <ul>
-        for _, item := range items {
-            <li>
-                <img src="" alt=""></img>
-                <h2>{ item.Name }</h2>
-                <p>{ fmt.Sprintf("%d", item.Price) }</p>
-            </li>
-        }
-    </ul>
+	<ul>
+		for _, item := range items {
+			<li>
+				<img src="" alt=""/>
+				<h2>{ item.Name }</h2>
+				<p>{ fmt.Sprintf("%d", item.Price) }</p>
+			</li>
+		}
+	</ul>
 }
 
 templ Show(items []model.StoreItem) {
-    @layout.Base("Tienda online") {
-        <main> 
-            Hola desde la tienda online
-            @ItemList(items)
-            <br/>
-            { ctx.Value("user").(string) }
-        </main>
-    }
+	@layout.BasePage("Tienda") {
+		<main>
+			Hola desde la tienda online
+			@ItemList(items)
+			<br/>
+			{ ctx.Value("user").(string) }
+		</main>
+	}
 }
