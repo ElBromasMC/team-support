@@ -3,7 +3,7 @@ A web server written in Go using the Echo framework, Templ templating language, 
 
 ### Prerequisites
 * Go
-* Node
+* Node and npm
 * [Air](https://github.com/cosmtrek/air#installation)
 * [Templ](https://templ.guide/quick-start/installation)
 
