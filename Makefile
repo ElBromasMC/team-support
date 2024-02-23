@@ -33,12 +33,13 @@ $(MAINJS_OUT): $(JS_FILES)
 	npx esbuild $(JS_DIR)/main.js --outfile=$@ --bundle $(ES_FLAGS)
 
 # Build step for tailwind.css
-$(TAILWINDCSS_OUT): $(TEMPL_FILES) tailwind.config.js tailwind.css
-	npx tailwindcss build -i tailwind.css -o $@ $(TAILWIND_FLAGS) && touch $@
+#$(TAILWINDCSS_OUT): $(TEMPL_FILES) tailwind.config.js tailwind.css
+#npx tailwindcss build -i tailwind.css -o $@ $(TAILWIND_FLAGS) && touch $@
 
 # Live reload
 .PHONY: live
 live:
+	npx tailwindcss build -i tailwind.css -o $(TAILWINDCSS_OUT) --watch &
 	node live-reload.js &
 	air
 

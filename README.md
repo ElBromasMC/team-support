@@ -1,11 +1,23 @@
 # go-webserver-template
-A web server written in Go using the Echo framework, Templ templating language, Tailwind for styling and Web Components.
+Team Support Peru webpage
 
 ### Prerequisites
 * Go
 * Node and npm
+* PostgreSQL
 * [Air](https://github.com/cosmtrek/air#installation)
 * [Templ](https://templ.guide/quick-start/installation)
+
+### Initialize the required tables
+```shell
+$ psql -d <database_name> -U <username> -f ./db/init.sql
+```
+
+### .env file example
+```
+PORT=8080
+DATABASE_URL=postgres://<username>:<password>@localhost:5432/<database_name>
+```
 
 ### Then
 ```shell

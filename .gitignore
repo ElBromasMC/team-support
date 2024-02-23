@@ -14,13 +14,16 @@
 # Go workspace file
 go.work
 
-# node modules
+# Node modules
 node_modules
 
-# build files
+# Build files
 build
 tmp
 testdata
+assets/static/css/tailwind.css
+assets/static/js/main.js
+view/**/*_templ.go
 
 # Env file
 .env

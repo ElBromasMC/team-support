@@ -1,0 +1,72 @@
+package garantia
+
+import (
+	"fmt"
+	"alc/model"
+	"alc/view/layout"
+)
+
+templ Item(item model.GarantiaItem) {
+	@layout.BasePage(item.Name) {
+		<main>
+			<section>
+				<div class="px-4 py-9 max-w-7xl mx-auto lg:grid lg:grid-cols-5 lg:gap-x-28">
+					<!-- Navegacion -->
+					<div class="mb-9 font-semibold lg:col-span-5">
+						<a class="text-navy" href="/garantia">Paquetes de garantía ASUS&nbsp;&nbsp;</a>
+						<svg class="inline w-3 h-3 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+						</svg>
+						<span class="text-livid">&nbsp;&nbsp;{ item.Name }</span>
+					</div>
+					<!-- Formulario -->
+					<div class="lg:order-2 lg:col-span-2">
+						<div class="w-full rounded-3xl overflow-hidden"><img class="object-cover w-full h-full" src={ item.Img }/></div>
+						<div class="block lg:hidden">
+							<h3 class="my-9 text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h3>
+							<p class="text-3xl font-semibold text-navy">{ fmt.Sprintf("S/. %.2f", float64(item.Price)/100.0) }</p>
+						</div>
+						<form class="flex flex-col gap-4 my-6">
+							<div>
+								<label class="block my-2 font-bold text-lg text-navy" for="serialnumber">Número serial del equipo a proteger:</label>
+								<input class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" type="text" id="serialnumber" name="serialnumber" placeholder="Números y letras entre 12 y 15 caracteres" pattern="[A-Za-z0-9]{12,15}" required/>
+								<div class="mt-2 font-semibold text-azure"><a href="#">¿Dónde encontrar el número de serie?</a></div>
+							</div>
+							<div>
+								<label class="block my-2 font-bold text-lg text-navy" for="duration">Duración:</label>
+								<select class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" id="duration" name="duration" required>
+									<option value="12">12 meses</option>
+									<option value="24">24 meses</option>
+								</select>
+							</div>
+							<div>
+								<label class="block my-2 font-bold text-lg text-navy" for="quantity">Cantidad:</label>
+								<input class="block p-2 w-16 border border-navy rounded-xl bg-chalky text-livid" type="number" id="quantity" name="quantity" min="1" value="1" required/>
+							</div>
+							<div class="flex gap-6">
+								<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="button">Agregar al carrito</button>
+								<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit">Comprar ahora</button>
+							</div>
+						</form>
+					</div>
+					<!-- Requisitos -->
+					<div class="lg:order-1 lg:col-span-3">
+						<div class="hidden lg:block">
+							<h3 class="text-3xl font-bold text-azure">{ item.Name }</h3>
+							<p class="my-9 text-3xl font-semibold text-navy">{ fmt.Sprintf("S/. %.2f", float64(item.Price)/100.0) }</p>
+						</div>
+						<h4 class="mb-3 text-2xl font-bold text-navy">Requisitos:</h4>
+						<ul class="list-disc list-inside font-semibold text-lg text-navy">
+							<li>Tu equipo TUF ASUS debió ser comprado en Perú</li>
+							<li>Tu equipo TUF ASUS debe tener máximo 6 meses de haber sido adquirido</li>
+							<li>Tu equipo TUF ASUS debe tener la garantía estándar vigente</li>
+						</ul>
+						<p class="my-3 text-lg text-navy italic">No cumplir con estos requisitos impedirá que tu paquete de garantía extendida pueda ser activado.</p>
+						<p>Paquete de garantía extendida para equipos TUF con protección contra daño accidental y protección de batería. Agrega al carrito de compras el paquete de tiempo por el cual deseas proteger tu equipo y sus principales componentes.</p>
+						<p class="mt-3">Consulta términos y condiciones <a class="text-azure" href="#">aquí</a></p>
+					</div>
+				</div>
+			</section>
+		</main>
+	}
+}
