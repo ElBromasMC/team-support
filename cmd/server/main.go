@@ -1,12 +1,11 @@
 package main
 
 import (
-	"alc/assets"
 	"alc/handler"
 	middle "alc/middleware"
 	"context"
 	"fmt"
-	"net/http"
+	"log"
 	"os"
 
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
@@ -14,19 +13,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
 )
 
 func main() {
 	e := echo.New()
-	e.Logger.SetLevel(log.ERROR)
-	// e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
 
 	// Database connection
 	dbconfig, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
 	if err != nil {
-		e.Logger.Fatal(err)
+		log.Fatalln("Failed to parse config:", err)
 	}
 	dbconfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
 		pgxuuid.Register(conn.TypeMap())
@@ -34,7 +29,7 @@ func main() {
 	}
 	dbpool, err := pgxpool.NewWithConfig(context.Background(), dbconfig)
 	if err != nil {
-		e.Logger.Fatal(err)
+		log.Fatalln("Failed to connect to the database:", err)
 	}
 	defer dbpool.Close()
 
@@ -44,9 +39,11 @@ func main() {
 	}
 
 	// Static files
-	e.GET("/static/*", echo.WrapHandler(http.FileServer(http.FS(assets.Assets))))
+	static(e)
 
-	// Auth middleware
+	// Middleware
+	// e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 	e.Use(middle.Auth(dbpool))
 
 	// Routes
@@ -63,5 +60,5 @@ func main() {
 	e.POST("/login", h.HandleLogin)
 
 	// Start server
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", os.Getenv("PORT"))))
+	log.Fatalln(e.Start(fmt.Sprintf(":%s", os.Getenv("PORT"))))
 }

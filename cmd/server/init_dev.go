@@ -8,5 +8,5 @@ import (
 
 func init() {
 	// Live reload
-	http.Get("http://localhost:8030")
+	http.Get("http://localhost:8020")
 }

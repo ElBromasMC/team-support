@@ -1,11 +1,14 @@
 (() => {
-    let socket
-    let retryInterval = 2000
+    const retryInterval = 2000
+    let closed = false
 
     function connectWebSocket() {
-        socket = new WebSocket('ws://localhost:8010')
+        const socket = new WebSocket('ws://localhost:8010')
 
         socket.onopen = _ => {
+            if (closed) {
+                window.location.reload()
+            }
             console.log("Connected to the Live server!")
         }
 
@@ -20,6 +23,7 @@
         }
 
         socket.onclose = event => {
+            closed = true
             console.log("Live server connection closed.", event)
             setTimeout(() => {
                 console.log("Attempting to reconnect...")

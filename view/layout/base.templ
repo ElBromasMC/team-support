@@ -3,6 +3,7 @@ package layout
 import (
 	"time"
 	"fmt"
+	"os"
 )
 
 templ Base(title string) {
@@ -12,8 +13,10 @@ templ Base(title string) {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
-			<!-- Live reload -->
-			<script src="/static/js/live-reload.js"></script>
+			if os.Getenv("ENV") == "development" {
+				<!-- Live reload -->
+				<script src="/static/js/live-reload.js"></script>
+			}
 			<!-- HTMX -->
 			<script src="/static/js/htmx.min.js"></script>
 			<script defer src={ fmt.Sprintf("/static/js/main.js?v=%s", time.Now().Format("20060102150405")) }></script>

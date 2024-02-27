@@ -13,7 +13,7 @@ CMD_DIR := ./cmd
 VIEW_DIR := ./view
 JS_DIR := $(VIEW_DIR)/js
 
-GO_FILES := $(shell find . -path ./node_modules -prune -o -path $(VIEW_DIR) -prune -o -path $(CMD_DIR) -prune -o -name '*.go' -print)
+GO_FILES := $(shell find . -path ./node_modules -prune -o -path $(VIEW_DIR) -prune -o -name '*.go' -print)
 TEMPL_FILES := $(shell find $(VIEW_DIR) -name '*.templ')
 TEMPL_GO_FILES = $(TEMPL_FILES:.templ=_templ.go)
 JS_FILES := $(shell find $(JS_DIR) -name '*.js')
@@ -28,10 +28,10 @@ $(TMP_DIR)/%: $(BUILD_DIR)/% $(MAINJS_OUT) $(TAILWINDCSS_OUT)
 
 # The final build step
 ifeq ($(ENV),development)
-$(BUILD_DIR)/%: $(wildcard $(CMD_DIR)/%/*) $(GO_FILES) $(TEMPL_GO_FILES)
+$(BUILD_DIR)/%: $(GO_FILES) $(TEMPL_GO_FILES)
 	go build -tags=dev -o "$@" "$(CMD_DIR)/$*"
 else
-$(BUILD_DIR)/%: $(wildcard $(CMD_DIR)/%/*) $(GO_FILES) $(TEMPL_GO_FILES) $(MAINJS_OUT) $(TAILWINDCSS_OUT)
+$(BUILD_DIR)/%: $(GO_FILES) $(TEMPL_GO_FILES) $(MAINJS_OUT) $(TAILWINDCSS_OUT)
 	go build -o "$@" "$(CMD_DIR)/$*"
 endif
 
