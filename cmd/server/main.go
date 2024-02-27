@@ -18,12 +18,9 @@ import (
 )
 
 func main() {
-	// Live reload
-	http.Get("http://localhost:8020")
-
 	e := echo.New()
 	e.Logger.SetLevel(log.ERROR)
-	e.Use(middleware.Logger())
+	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
 	// Database connection

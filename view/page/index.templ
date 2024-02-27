@@ -54,15 +54,26 @@ templ Index(items []model.ServiceItem) {
 							}
 						</script>
 						for _, i := range items {
-							<section class="relative max-w-xl px-3 py-1 w-full rounded-3xl shadow bg-chalky lg:h-80 lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white" onclick="handleItemDisplay(event)">
-								<h3 class="text-xl text-center font-semibold lg:mb-6 lg:text-left lg:font-bold lg:text-2xl">{ i.Name }</h3>
-								<svg class="absolute w-6 h-6 right-8 top-2 text-azure lg:hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-									<path fill-rule="evenodd" d="M18.4 10.3A2 2 0 0 0 17 7H7a2 2 0 0 0-1.5 3.3l4.9 5.9a2 2 0 0 0 3 0l5-6Z" clip-rule="evenodd"></path>
-								</svg>
-								<div class="hidden lg:block">
+							<section class="group relative max-w-xl px-3 py-1 w-full rounded-3xl shadow bg-chalky lg:h-96 lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white data-[open]:bg-azure" onclick="handleItemDisplay(event)">
+								<h3 class="text-xl text-center font-bold lg:mb-6 lg:text-left lg:font-bold lg:text-2xl">{ i.Name }</h3>
+								<div class="absolute w-6 h-6 right-8 top-2 lg:hidden">
+									<svg class="text-azure group-data-[open]:hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+										<path fill-rule="evenodd" d="M18.4 10.3A2 2 0 0 0 17 7H7a2 2 0 0 0-1.5 3.3l4.9 5.9a2 2 0 0 0 3 0l5-6Z" clip-rule="evenodd"></path>
+									</svg>
+									<svg class="hidden group-data-[open]:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+										<path fill-rule="evenodd" d="M5.6 13.7A2 2 0 0 0 7 17h10a2 2 0 0 0 1.5-3.3l-4.9-5.9a2 2 0 0 0-3 0l-5 6Z" clip-rule="evenodd"></path>
+									</svg>
+								</div>
+								<div class="hidden lg:block group-data-[open]:hidden">
 									<p>{ i.Description }</p>
 									<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 12H5m14 0-4 4m4-4-4-4"></path>
+									</svg>
+								</div>
+								<div class="hidden font-semibold text-center text-chalky lg:text-left group-data-[open]:block">
+									<p class="group-data-[open]:block">{ i.LongDescription }</p>
+									<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l4-4m-4 4 4 4"></path>
 									</svg>
 								</div>
 							</section>
@@ -187,7 +198,7 @@ templ Index(items []model.ServiceItem) {
 							</g>
 						</svg>
 						<!-- Informacion del mapa -->
-						<div class="text-sm font-semibold [&>div]:hidden [&>div]:absolute [&>div]:top-0 [&>div]:left-0 [&>div]:w-32 [&>div]:h-16 [&>div]:p-3 [&>div]:rounded-2xl [&>div]:bg-chalky">
+						<div class="text-white [&>div]:hidden [&>div]:absolute [&>div]:top-0 [&>div]:left-0 [&>div]:w-48 [&>div]:p-3 [&>div]:rounded-2xl [&>div]:bg-black">
 							<div class="group-data-[current='TACNA']:block">TACNA</div>
 							<div class="group-data-[current='MOQUEGUA']:block">MOQUEGUA</div>
 							<div class="group-data-[current='PUNO']:block">PUNO</div>
@@ -197,7 +208,12 @@ templ Index(items []model.ServiceItem) {
 							<div class="group-data-[current='CUZCO']:block">CUZCO</div>
 							<div class="group-data-[current='APURIMAC']:block">APURIMAC</div>
 							<div class="group-data-[current='HUANCAVELICA']:block">HUANCAVELICA</div>
-							<div class="group-data-[current='LIMA']:block">LIMA</div>
+							<div class="group-data-[current='LIMA']:block">
+								<h3 class="mb-2 font-semibold text-azure">Opción 1</h3>
+								<p class="font-bold text-xs">Av. Monte de los Olivos 993 <br/> Cercado de Lima 15039</p>
+								<h3 class="my-2 font-semibold text-azure">Opción 2</h3>
+								<p class="font-bold text-xs">Av. Monte de los Olivos 993 <br/> Cercado de Lima 15039</p>
+							</div>
 							<div class="group-data-[current='JUNIN']:block">JUNIN</div>
 							<div class="group-data-[current='UCAYALI']:block">UCAYALI</div>
 							<div class="group-data-[current='PASCO']:block">PASCO</div>

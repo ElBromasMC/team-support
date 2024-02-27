@@ -15,6 +15,7 @@ export const theme = {
       azure: '#39a0ed',
       chalky: '#f9f9f9',
       livid: '#4c6085',
+      darkblue: "#0f151b"
     },
   },
 };

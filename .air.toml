@@ -1,11 +1,11 @@
 root = "."
 testdata_dir = "testdata"
-tmp_dir = "build"
+tmp_dir = "tmp"
 
 [build]
   args_bin = []
   bin = "./build/server"
-  cmd = "make ./build/server -j2"
+  cmd = "make tmp/server -j4"
   delay = 1000
   exclude_dir = ["tmp", "build", "vendor", "testdata", "node_modules"]
   exclude_file = ["assets/static/css/tailwind.css", "assets/static/js/main.js"]
