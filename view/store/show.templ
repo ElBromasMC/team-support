@@ -6,25 +6,33 @@ import (
 	"alc/model"
 )
 
-templ ItemList(items []model.StoreItem) {
-	<ul>
-		for _, item := range items {
-			<li>
-				<img src="" alt=""/>
-				<h2>{ item.Name }</h2>
-				<p>{ fmt.Sprintf("%d", item.Price) }</p>
-			</li>
-		}
-	</ul>
+templ ShowItems(items []model.StoreItem) {
+	for _, item := range items {
+		<li>
+			<img src={ item.Img } alt={ item.Slug }/>
+			<h3>{ item.Name }</h3>
+			<p>{ fmt.Sprintf("S/. %.2f", float64(item.Price)/100.0) }</p>
+			<button type="button">Ver más</button>
+		</li>
+	}
 }
 
 templ Show(items []model.StoreItem) {
 	@layout.BasePage("Tienda") {
 		<main>
-			Hola desde la tienda online
-			@ItemList(items)
-			<br/>
-			{ ctx.Value("user").(string) }
+			<aside class="flex justify-center items-center gap-3 px-4 py-2 text-center text-chalky bg-navy">
+				<div class="font-bold text-xl lg:text-2xl">Todo el mes de Enero y Febrero envios gratis a Surco</div>
+				<svg class="shrink-0 inline w-8 h-8 lg:w-10 lg:h-10" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 640 512">
+					<!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+					<path d="M48 0C21.5 0 0 21.5 0 48V368c0 26.5 21.5 48 48 48H64c0 53 43 96 96 96s96-43 96-96H384c0 53 43 96 96 96s96-43 96-96h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V288 256 237.3c0-17-6.7-33.3-18.7-45.3L512 114.7c-12-12-28.3-18.7-45.3-18.7H416V48c0-26.5-21.5-48-48-48H48zM416 160h50.7L544 237.3V256H416V160zM112 416a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm368-48a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"></path>
+				</svg>
+			</aside>
+			<div>
+				<div></div>
+				<ul class="grid-cols-[repeat(auto-fit,minmax(250px,1fr))]">
+					@ShowItems(items)
+				</ul>
+			</div>
 		</main>
 	}
 }

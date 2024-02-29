@@ -1,11 +1,8 @@
-# Include .env file if exists
-ifneq (,$(wildcard ./.env))
-    include .env
-    export
-endif
-
 # Variable for the environment mode 'production' or 'development'
 ENV ?= production
+
+GOBIN ?= $(shell go env GOPATH)/bin
+NODEBIN ?= ./node_modules/.bin
 
 TMP_DIR := ./tmp
 BUILD_DIR := ./build
@@ -37,22 +34,22 @@ endif
 
 # Build step for templ source
 %_templ.go: %.templ
-	templ generate -f "$<"
+	"$(GOBIN)/templ" generate -f "$<"
 
 # Build step for main.js
 $(MAINJS_OUT): $(JS_FILES)
 ifeq ($(ENV),development)
-	npx esbuild "$(JS_DIR)/main.js" --outfile="$@" --bundle
+	"$(NODEBIN)/esbuild" "$(JS_DIR)/main.js" --outfile="$@" --bundle
 else
-	npx esbuild "$(JS_DIR)/main.js" --outfile="$@" --bundle --minify
+	"$(NODEBIN)/esbuild" "$(JS_DIR)/main.js" --outfile="$@" --bundle --minify
 endif
 
 # Build step for tailwind.css
 $(TAILWINDCSS_OUT): $(TEMPL_FILES) tailwind.config.js tailwind.css
 ifeq ($(ENV),development)
-	./dev/tailwind.sh "$(TMP_DIR)" "$(TAILWINDCSS_LOG)"
+	./scripts/tailwind.sh "$(TMP_DIR)" "$(TAILWINDCSS_LOG)"
 else
-	npx tailwindcss build -i tailwind.css -o "$@" --minify
+	"$(NODEBIN)/tailwindcss" build -i tailwind.css -o "$@" --minify
 endif
 	touch "$@"
 
@@ -61,9 +58,9 @@ endif
 live:
 ifeq ($(ENV),development)
 	mkdir -p "$(TMP_DIR)"
-	npx tailwindcss build -i tailwind.css -o "$(TAILWINDCSS_OUT)" --watch=always &> "$(TMP_DIR)/$(TAILWINDCSS_LOG)" &
-	node ./dev/live-reload.js &
-	air
+	"$(NODEBIN)/tailwindcss" build -i tailwind.css -o "$(TAILWINDCSS_OUT)" --watch=always &> "$(TMP_DIR)/$(TAILWINDCSS_LOG)" &
+	node ./scripts/live-reload.js &
+	"$(GOBIN)/air"
 else
 	@echo "Must run with ENV=development"
 endif

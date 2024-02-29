@@ -4,7 +4,6 @@ import (
 	"alc/handler"
 	middle "alc/middleware"
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -60,5 +59,9 @@ func main() {
 	e.POST("/login", h.HandleLogin)
 
 	// Start server
-	log.Fatalln(e.Start(fmt.Sprintf(":%s", os.Getenv("PORT"))))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatalln(e.Start(":" + port))
 }

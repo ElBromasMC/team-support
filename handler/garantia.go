@@ -37,5 +37,5 @@ func (h *Handler) HandleGarantiaItemShow(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	return render(c, http.StatusOK, garantia.Item(item))
+	return render(c, http.StatusOK, garantia.ShowItem(item))
 }

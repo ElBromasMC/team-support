@@ -1,6 +1,9 @@
 package model
 
 type StoreItem struct {
-	Name  string
-	Price int // Stored in PEN centimos
+	Category string
+	Name     string
+	Price    int // Stored in PEN centimos
+	Slug     string
+	Img      string
 }

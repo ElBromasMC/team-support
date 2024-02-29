@@ -1,29 +1,15 @@
-# Binaries for programs and plugins
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
-# Test binary, built with `go test -c`
 *.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
-
-# Go workspace file
 go.work
 
-# Node modules
+# Heaviest thing on earth
 node_modules
 
-# Build files
+# Dotenv file
+.env
+
+# Build artifacts
 build
 tmp
-testdata
 assets/static/css/tailwind.css
 assets/static/js/main.js
 view/**/*_templ.go
-
-# Env file
-.env
