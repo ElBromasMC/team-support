@@ -27,7 +27,7 @@ Disco Duro:
 1TB SATA 7200rpm`,
 		Slug:     "servidor-xeon-poweredge-1tb",
 		Img:      "/static/img/store1.jpg",
-		LargeImg: "/static/img/_store1.jpg",
+		LargeImg: "/static/img/store1_.jpg",
 	}
 	for i := 0; i < 9; i++ {
 		storeItems = append(storeItems, item0)

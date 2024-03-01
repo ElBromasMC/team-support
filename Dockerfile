@@ -11,7 +11,7 @@ RUN go install github.com/a-h/templ/cmd/templ@latest
 
 # Use npm to install building tools
 COPY package.json package-lock.json ./
-RUN npm install --production
+RUN npm install --omit=dev
 
 COPY go.mod go.sum ./
 RUN go mod download
