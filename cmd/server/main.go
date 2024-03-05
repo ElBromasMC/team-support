@@ -55,6 +55,8 @@ func main() {
 	e.GET("/store", h.HandleStoreShow)
 	e.GET("/store/:slug", h.HandleStoreItemShow)
 
+	e.GET("/cart", h.HandleCartShow)
+
 	e.GET("/signup", h.HandleSignupShow)
 	e.GET("/login", h.HandleLoginShow)
 	e.POST("/signup", h.HandleSignup)

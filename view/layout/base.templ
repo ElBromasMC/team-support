@@ -18,12 +18,13 @@ templ Base(title string) {
 				<script src="/static/js/live-reload.js"></script>
 			}
 			<!-- HTMX -->
-			<script src="/static/js/htmx.min.js"></script>
+			<script defer src="/static/js/htmx.min.js"></script>
 			<script defer src={ fmt.Sprintf("/static/js/main.js?v=%s", time.Now().Format("20060102150405")) }></script>
 			<link href={ fmt.Sprintf("/static/css/tailwind.css?v=%s", time.Now().Format("20060102150405")) } rel="stylesheet"/>
 			<link rel="icon" href="/static/img/favicon.ico"/>
 		</head>
 		<body>
+			<shopping-cart id="shopping-cart"></shopping-cart>
 			{ children... }
 		</body>
 	</html>

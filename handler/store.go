@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/labstack/echo/v4"
 
 	"alc/model"
@@ -11,13 +12,17 @@ import (
 )
 
 var item0 model.StoreItem
+var item1 model.StoreItem
 var storeItems []model.StoreItem
 
 func init() {
+	newUuid0, _ := uuid.NewV4()
+	newUuid1, _ := uuid.NewV4()
 	item0 = model.StoreItem{
+		Uuid:             newUuid0,
 		Category:         "Cargadores",
 		Name:             "SERVIDOR XEON 2224G DELL PowerEdge T40 8|1TB Torre",
-		Price:            100,
+		Price:            200,
 		BriefDescription: "El componente fundamental para su pequeña empresa. PowerEdge T40, confiable, eficiente y asequible para brindar soporte a su empresa en crecimiento. Ideal para archivos, impresiones, correos y mensajería.",
 		Description: `Procesador:
 Intel Xeon E-2224G 3.5GHZ (caché de 8 M, 4.70 GHz)
@@ -29,9 +34,23 @@ Disco Duro:
 		Img:      "/static/img/store1.jpg",
 		LargeImg: "/static/img/store1_.jpg",
 	}
-	for i := 0; i < 9; i++ {
-		storeItems = append(storeItems, item0)
+	item1 = model.StoreItem{
+		Uuid:             newUuid1,
+		Category:         "Cargadores",
+		Name:             "LAPTOP XEON 2224G DELL PowerEdge T40 8|1TB Torre",
+		Price:            100,
+		BriefDescription: "La laptop fundamental para su pequeña empresa. PowerEdge T40, confiable, eficiente y asequible para brindar soporte a su empresa en crecimiento. Ideal para archivos, impresiones, correos y mensajería.",
+		Description: `Procesador:
+Intel Xeon E-2224G 3.5GHZ (caché de 8 M, 4.70 GHz)
+Memoria Ram:
+8GB DDR4 2666 (1x8GB) 4 Ranuras
+Disco Duro:
+1TB SATA 7200rpm`,
+		Slug:     "laptop-xeon-poweredge-1tb",
+		Img:      "/static/img/store1.jpg",
+		LargeImg: "/static/img/store1_.jpg",
 	}
+	storeItems = append(storeItems, item0, item1)
 }
 
 func (h *Handler) HandleStoreShow(c echo.Context) error {

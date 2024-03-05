@@ -122,9 +122,6 @@ template.innerHTML = `
 
 
 export default class Carousel extends HTMLElement {
-    static get observedAttributes() {
-        return ["autoplay", "controls", "indicator"]
-    }
     constructor() {
         super()
         this.currentSlide = 0
@@ -134,6 +131,10 @@ export default class Carousel extends HTMLElement {
         // Create and append contents to the shadow DOM
         this.shadow = this.attachShadow({ mode: "open" })
         this.shadow.appendChild(template.content.cloneNode(true))
+    }
+
+    static get observedAttributes() {
+        return ["autoplay", "controls", "indicator"]
     }
 
     connectedCallback() {
@@ -148,7 +149,7 @@ export default class Carousel extends HTMLElement {
         slot.addEventListener("slotchange", () => {
             this.numberSlides = Array.from(slot.assignedElements()).length
 
-            let tabs = []         
+            let tabs = []
             for (let i = 0; i < this.numberSlides; i++) {
                 const tab = tabTemplate.cloneNode(true)
                 tabs.push(tab)
@@ -182,7 +183,7 @@ export default class Carousel extends HTMLElement {
             if (newValue != null) {
                 this.autoplayInterval = setInterval(() => {
                     const n = this.numberSlides
-                    this.currentSlide = ((this.currentSlide + 1) % n + n) % n  
+                    this.currentSlide = ((this.currentSlide + 1) % n + n) % n
                     this.updateDOM()
                 }, parseInt(newValue) || 3000)
             } else {
