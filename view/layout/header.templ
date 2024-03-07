@@ -1,7 +1,7 @@
 package layout
 
 templ Header() {
-	<header class="sticky top-0 z-50 text-livid shadow-md bg-white">
+	<header class="sticky top-0 z-50 shadow-md bg-white">
 		<div class="flex items-center px-4 py-4 max-w-7xl mx-auto lg:py-9">
 			<!-- Navigation button -->
 			<script>
@@ -14,7 +14,7 @@ templ Header() {
                     }
                 }
             </script>
-			<button class="group peer flex items-center justify-center w-8 h-8 lg:hidden" onclick="handleNavbarDisplay(event)" type="button">
+			<button class="group peer flex items-center justify-center w-8 h-8 text-livid lg:hidden" onclick="handleNavbarDisplay(event)" type="button">
 				<svg class="w-4 h-4 group-data-[open]:hidden" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 4 15">
 					<path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"></path>
 				</svg>
@@ -23,7 +23,7 @@ templ Header() {
 				</svg>
 			</button>
 			<!-- Navigation bar (mobiles) -->
-			<nav class="hidden absolute top-full inset-x-0 bg-chalky shadow-md peer-data-[open]:block lg:!hidden">
+			<nav class="hidden absolute top-full inset-x-0 bg-chalky text-livid shadow-md peer-data-[open]:block lg:!hidden">
 				<ul class="flex flex-col divide-y">
 					<li><a class="flex justify-center items-center h-12" href="/#servicios">Servicios</a></li>
 					<li><a class="flex justify-center items-center h-12" href="/#nosotros">Nosotros</a></li>
@@ -38,7 +38,7 @@ templ Header() {
 				<img class="w-44 lg:w-[210px]" src="/static/img/logo1.png" alt="Team Support Services"/>
 			</a>
 			<!-- Navigation bar -->
-			<nav class="hidden grow ml-16 font-semibold text-sm lg:block">
+			<nav class="hidden grow ml-16 font-semibold text-sm text-livid lg:block">
 				<ul class="flex justify-between">
 					<li><a href="/#servicios">Servicios</a></li>
 					<li><a href="/#nosotros">Nosotros</a></li>
@@ -48,35 +48,157 @@ templ Header() {
 					<li><a href="/#contacto">Contáctenos</a></li>
 				</ul>
 			</nav>
-			<!-- Shopping cart -->
-			<button id="cart-applet" class="group relative flex items-center justify-center w-8 h-8 ml-auto lg:ml-16">
-				<svg class="w-6 h-6 lg:w-8 lg:h-8 group-data-[active]:text-chalky" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
-					<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0h8m-8 0-1-4m9 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-9-4h10l2-7H3m2 7L3 4m0 0-.792-3H1"></path>
-				</svg>
-				<div class="counter absolute text-sm font-bold text-azure -top-4 -right-2 lg:-top-7 lg:-right-4 lg:text-lg"></div>
-				<div class="hidden absolute -inset-y-[0.1rem] aspect-square rounded-full -z-10 bg-azure lg:-inset-y-2 group-data-[active]:block"></div>
-				<dialog class="fixed inset-0 left-auto w-[min(20rem,100vw-2rem)] h-full min-w-48">
-					Hi
+			<!-- Shopping cart applet-->
+			<div id="cart-applet" class="group ml-auto lg:ml-16">
+				<!-- Applet button -->
+				<button class="open relative flex items-center justify-center w-8 h-8 text-livid" type="button">
+					<svg class="relative w-6 h-6 z-10 lg:w-8 lg:h-8 group-data-[active]:text-chalky" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0h8m-8 0-1-4m9 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-9-4h10l2-7H3m2 7L3 4m0 0-.792-3H1"></path>
+					</svg>
+					<div class="hidden absolute -inset-y-[0.1rem] aspect-square rounded-full bg-azure lg:-inset-y-2 group-data-[active]:block"></div>
+					<div class="counter absolute text-sm font-bold text-azure -top-4 -right-2 lg:-top-7 lg:-right-4 lg:text-lg"></div>
+				</button>
+				<!-- Applet dialog -->
+				<dialog id="cart-dialog" class="fixed inset-0 left-auto w-[min(20rem,100vw-2rem)] h-full max-h-[unset] min-w-48 p-4 overflow-y-scroll">
+					<!-- Close button -->
+					<form class="flex justify-end" method="dialog">
+						<button class="flex items-center justify-center w-8 h-8" type="submit">
+							<svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
+							</svg>
+						</button>
+					</form>
+					<h2 class="font-bold text-2xl text-navy">Tu carrito de compras</h2>
+					<!-- Cart items -->
+					<div class="items space-y-3 mt-5">
+						<template>
+							<div class="grid grid-cols-7 gap-x-3 p-2 border">
+								<div class="flex justify-end col-span-7">
+									<!-- Remove button -->
+									<button class="remove relative flex items-center justify-center">
+										<svg class="w-4 h-4 z-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+											<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
+										</svg>
+										<div class="absolute -inset-y-[0.1rem] aspect-square rounded-full bg-gray-300"></div>
+									</button>
+								</div>
+								<div class="col-span-2">
+									<img class="item:img w-full aspect-square object-cover" src="" alt=""/>
+								</div>
+								<div class="col-span-5">
+									<div class="leading-none">
+										<a class="item:name font-bold text-sm hover:text-livid"></a>
+									</div>
+									<div class="text-sm text-livid">
+										<span class="font-bold">Precio:</span>
+										<span class="item:price"></span>
+									</div>
+									<div class="text-sm text-livid">
+										<span class="font-bold">Cantidad:</span>
+										<span class="item:quantity"></span>
+									</div>
+									<div class="text-sm text-navy">
+										<span class="font-bold">Subtotal:</span>
+										<span class="item:subtotal"></span>
+									</div>
+								</div>
+							</div>
+						</template>
+					</div>
+					<hr class="mt-3"/>
+					<!-- Cart information -->
+					<div class="summary mt-3">
+						<div class="text-2xl">
+							<span class="font-bold">Total:</span>
+							<span class="summary:total"></span>
+						</div>
+					</div>
+					<!-- Cart buttons -->
+					<div class="grid grid-cols-2 gap-3 mt-3">
+						<a class="block col-span-1 p-2 border border-azure rounded-3xl font-semibold text-center text-azure" href="/cart">
+							Ver carrito
+						</a>
+						<a class="block col-span-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-center text-chalky" href="#">
+							Checkout
+						</a>
+						<a class="col-span-2 text-center text-azure" href="/store">
+							<span>Ir a la tienda</span>
+							<svg class="inline w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="m9 5 7 7-7 7"></path>
+							</svg>
+						</a>
+					</div>
 				</dialog>
-			</button>
+			</div>
 			<script>
 (() => {
+	const toPEN = n => "S/. " + (n / 100).toFixed(2).toString();
+
 	const cartApplet = document.querySelector("#cart-applet");
+	const openButton = cartApplet.querySelector("button.open");
+	const cartDialog = cartApplet.querySelector("#cart-dialog");
+	const counterShow = cartApplet.querySelector(".counter");
+	const itemsShow = cartDialog.querySelector(".items");
+	const itemTemplate = itemsShow.querySelector("template").cloneNode(true);
+	const summaryShow = cartApplet.querySelector(".summary");
 	cartApplet.addEventListener("UPDATE", e => {
-		const counter = cartApplet.querySelector(".counter");
 		const newItems = e.detail();
+		// Set items counter
 		const n = newItems.reduce(
 			(acc, val) => acc + val.quantity,
 			0
 		);
 		if (n === 0) {
-			counter.textContent = "";
+			counterShow.textContent = "";
 			delete cartApplet.dataset.active;
 		} else {
-			counter.textContent = n.toString();
+			counterShow.textContent = n.toString();
 			cartApplet.dataset.active = "";
 		}
+		// Print each item in the cart dialog
+		const newItemsShow = newItems.map(item => {
+			const itemShow = itemTemplate.content.cloneNode(true);
+			itemShow.querySelector(".item\\:name").textContent = item.name;
+			itemShow.querySelector(".item\\:name").setAttribute("href", `/store/${item.slug}`);
+			itemShow.querySelector(".item\\:img").setAttribute("src", item.img);
+			itemShow.querySelector(".item\\:img").setAttribute("alt", item.slug);
+			itemShow.querySelector(".item\\:price").textContent =  toPEN(item.price);
+			itemShow.querySelector(".item\\:quantity").textContent = item.quantity.toString();
+			itemShow.querySelector(".item\\:subtotal").textContent = toPEN(item.price * item.quantity);
+			itemShow.querySelector("button.remove").addEventListener("click", e => {
+				const removeItem = items => items.filter(i => i.uuid !== item.uuid);
+				(async () => {
+					const cart = document.querySelector("#shopping-cart");
+					await customElements.whenDefined(cart.localName);
+					cart.dispatchEvent(new CustomEvent("UPDATE", { detail: removeItem }));
+				})();
+			});
+			return itemShow;
+		});
+		itemsShow.replaceChildren(...newItemsShow);
+		// Generate summary
+		const total = newItems.reduce(
+			(acc, val) => acc + (val.price * val.quantity),
+			0
+		)
+		summaryShow.querySelector(".summary\\:total").textContent = toPEN(total)
 	});
+	// Dialog logic
+	openButton.addEventListener("click", e => {
+		cartDialog.showModal();
+	});
+	cartDialog.addEventListener("click", e => {
+		const dimensions = cartDialog.getBoundingClientRect();
+		if (
+			e.clientX < dimensions.left ||
+			e.clientX > dimensions.right ||
+			e.clientY < dimensions.top ||
+			e.clientY > dimensions.bottom
+		) {
+			cartDialog.close();
+		}
+	});
+	// Subscribe the cart applet
 	(async () => {
 		const cart = document.querySelector("#shopping-cart");
 		await customElements.whenDefined(cart.localName);
@@ -85,7 +207,7 @@ templ Header() {
 })()
 			</script>
 			<!-- User profile -->
-			<a class="flex items-center justify-center w-8 h-8 ml-3 lg:ml-16" href="/signup">
+			<a class="flex items-center justify-center w-8 h-8 ml-3 text-livid lg:ml-16" href="/signup">
 				<svg class="w-6 h-6 lg:w-8 lg:h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
 					<path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"></path>
 				</svg>

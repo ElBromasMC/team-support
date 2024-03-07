@@ -33,42 +33,7 @@ templ ShowItem(item model.StoreItem) {
 						<li>Precio no incluye flete por envío</li>
 					</ul>
 					<!-- Formulario de compra -->
-					<script>
-						function handleItemSubmit(e) {
-							e.preventDefault()
-							const formData = new FormData(e.target)
-							const quantity = parseInt(formData.get("quantity"))
-							const newItem = {
-								...JSON.parse(e.currentTarget.dataset.item),
-								quantity
-							}
-							const action = e.submitter.dataset.action
-							if (action === "addToCart") {
-								const cart = document.querySelector("#shopping-cart")
-								const addItem = items => {
-									let found = false
-									const newItems = items.map(item => {
-										if (item.uuid === newItem.uuid) {
-											found = true
-											return {
-												...newItem,
-												quantity: item.quantity + newItem.quantity
-											}
-										} else {
-											return item
-										}
-									})
-									if (!found) {
-										newItems.push(newItem)
-									}
-									return newItems
-								}
-								cart.dispatchEvent(new CustomEvent("UPDATE", { detail: addItem }))
-							} else if (action === "buyNow") {
-							}
-						}
-					</script>
-					<form class="space-y-4" data-item={ item.ToJSON() } onsubmit="handleItemSubmit(event)">
+					<form id="item-form" class="space-y-4" data-item={ item.ToJSON() } autocomplete="off">
 						<div>
 							<label class="block my-2 font-bold text-lg text-navy" for="quantity">Cantidad:</label>
 							<input class="p-2 w-16 border border-navy rounded-xl bg-chalky text-livid" type="number" id="quantity" name="quantity" min="1" value="1" required/>
@@ -78,6 +43,50 @@ templ ShowItem(item model.StoreItem) {
 							<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit" data-action="buyNow">Comprar ahora</button>
 						</div>
 					</form>
+					<script>
+(() => {
+	const itemForm = document.querySelector("#item-form");
+	itemForm.addEventListener("submit", e => {
+		e.preventDefault();
+		const formData = new FormData(e.target);
+		const quantity = parseInt(formData.get("quantity"));
+		const cartDialog = document.querySelector("#cart-dialog"); // From header
+		const newItem = {
+			...JSON.parse(e.currentTarget.dataset.item),
+			quantity,
+		};
+		const action = e.submitter.dataset.action;
+		if (action === "addToCart") {
+			const addItem = items => {
+				let found = false;
+				const newItems = items.map(item => {
+					if (item.uuid === newItem.uuid) {
+						found = true;
+						return {
+							...newItem,
+							quantity: item.quantity + newItem.quantity,
+						};
+					} else {
+						return item;
+					}
+				});
+				if (!found) {
+					newItems.push(newItem);
+				}
+				return newItems;
+			};
+			(async () => {
+				const cart = document.querySelector("#shopping-cart");
+				await customElements.whenDefined(cart.localName);
+				cart.dispatchEvent(new CustomEvent("UPDATE", { detail: addItem }));
+				cartDialog.showModal();
+			})();
+		} else if (action === "buyNow") {
+		}
+		e.currentTarget.reset();
+	});
+})()
+					</script>
 				</div>
 				<!-- Descripcion del producto -->
 				<div class="rounded-3xl shadow-[rgba(0,0,0,0.24)_0px_3px_8px] overflow-hidden lg:col-span-1">
