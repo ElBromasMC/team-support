@@ -7,7 +7,13 @@ templ Servicios() {
 			<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-16 lg:text-5xl lg:font-semibold">Nuestros servicios</h2>
 			<div id="servicios-items" class="group flex flex-col items-center justify-center gap-6 lg:flex-row lg:gap-14">
 				<!-- SOPORTE -->
-				<section class="relative py-1 w-full rounded-3xl shadow bg-chalky lg:max-w-72 lg:h-[30rem] lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white group-data-[current='SOPORTE']:bg-azure" data-name="SOPORTE">
+				<section
+					class="
+						group/item relative py-1 w-full rounded-3xl shadow bg-chalky lg:max-w-72 lg:h-[30rem] lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white group-data-[current='SOPORTE']:bg-azure
+						transition ease-in-out delay-100 lg:hover:-translate-y-1 lg:hover:scale-110 duration-300
+					"
+					data-name="SOPORTE"
+				>
 					<!-- Title -->
 					<h3 class="px-12 text-xl text-center font-bold lg:p-0 lg:mb-6 lg:text-left lg:font-bold lg:text-2xl">
 						Soporte para hardware
@@ -27,7 +33,7 @@ templ Servicios() {
 							<p>Importación de repuestos</p>
 							<p>Disponibilidad y stock de respuestos ASUS</p>
 						</div>
-						<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure group-hover/item:text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"></path>
 						</svg>
 					</div>
@@ -42,13 +48,19 @@ templ Servicios() {
 								<li>Gestión y desarrollo de proyectos.</li>
 							</ul>
 						</div>
-						<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block group-hover/item:text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v13m0-13 4 4m-4-4-4 4"></path>
 						</svg>
 					</div>
 				</section>
 				<!-- RENTING -->
-				<section class="relative py-1 w-full rounded-3xl shadow bg-chalky lg:max-w-72 lg:h-[30rem] lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white group-data-[current='RENTING']:bg-azure" data-name="RENTING">
+				<section
+					class="
+						group/item relative py-1 w-full rounded-3xl shadow bg-chalky lg:max-w-72 lg:h-[30rem] lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white group-data-[current='RENTING']:bg-azure
+						transition ease-in-out delay-100 lg:hover:-translate-y-1 lg:hover:scale-110 duration-300
+					"
+					data-name="RENTING"
+				>
 					<!-- Title -->
 					<h3 class="px-12 text-xl text-center font-bold lg:p-0 lg:mb-6 lg:text-left lg:font-bold lg:text-2xl">
 						Renting y Leasing de equipos
@@ -66,7 +78,7 @@ templ Servicios() {
 						<p>
 							Alquiler de laptops y PC para el sector empresarial
 						</p>
-						<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure group-hover/item:text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"></path>
 						</svg>
 					</div>
@@ -78,13 +90,19 @@ templ Servicios() {
 							<p>Arrendamiento desde 12,24 y 36 meses</p>
 							<p>Soporte técnico permanente presencial y remoto.</p>
 						</div>
-						<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block group-hover/item:text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v13m0-13 4 4m-4-4-4 4"></path>
 						</svg>
 					</div>
 				</section>
 				<!-- PROYECTOS -->
-				<section class="relative py-1 w-full rounded-3xl shadow bg-chalky lg:max-w-72 lg:h-[30rem] lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white group-data-[current='PROYECTOS']:bg-azure" data-name="PROYECTOS">
+				<section
+					class="
+						group/item relative py-1 w-full rounded-3xl shadow bg-chalky lg:max-w-72 lg:h-[30rem] lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white group-data-[current='PROYECTOS']:bg-azure
+						transition ease-in-out delay-100 lg:hover:-translate-y-1 lg:hover:scale-110 duration-300
+					"
+					data-name="PROYECTOS"
+				>
 					<!-- Title -->
 					<h3 class="px-12 text-xl text-center font-bold lg:p-0 lg:mb-6 lg:text-left lg:font-bold lg:text-2xl">
 						Proyectos de T.I
@@ -103,7 +121,7 @@ templ Servicios() {
 							<p>Ayudamos a las compañias a enfrentar los desafios de la tecnología actual</p>
 							<p>Ponemos a su disposición nuestro conocimiento, recursos técnicos y humanos</p>
 						</div>
-						<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure group-hover/item:text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"></path>
 						</svg>
 					</div>
@@ -119,13 +137,19 @@ templ Servicios() {
 								<li>Implementar servicios de tecnologías de la información</li>
 							</ul>
 						</div>
-						<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block group-hover/item:text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v13m0-13 4 4m-4-4-4 4"></path>
 						</svg>
 					</div>
 				</section>
 				<!-- GARANTIA -->
-				<section class="relative py-1 w-full rounded-3xl shadow bg-chalky lg:max-w-72 lg:h-[30rem] lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white group-data-[current='GARANTIA']:bg-azure" data-name="GARANTIA">
+				<section
+					class="
+						group/item relative py-1 w-full rounded-3xl shadow bg-chalky lg:max-w-72 lg:h-[30rem] lg:px-7 lg:py-12 lg:rounded-none lg:shadow-[rgba(0,0,0,0.24)_0px_3px_8px] lg:bg-white group-data-[current='GARANTIA']:bg-azure
+						transition ease-in-out delay-100 lg:hover:-translate-y-1 lg:hover:scale-110 duration-300
+					"
+					data-name="GARANTIA"
+				>
 					<!-- Title -->
 					<h3 class="px-12 text-xl text-center font-bold lg:p-0 lg:mb-6 lg:text-left lg:font-bold lg:text-2xl">
 						Garantía
@@ -143,7 +167,7 @@ templ Servicios() {
 						<p>
 							Somos centro autrizado de servicios - CAS de las marcas Asus y Viewsonic
 						</p>
-						<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<svg class="absolute w-14 h-14 bottom-12 right-7 text-azure group-hover/item:text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"></path>
 						</svg>
 					</div>
@@ -153,7 +177,7 @@ templ Servicios() {
 							<p>Contamos con un equipo altamente experimentado en el sector</p>
 							<p>Atendemos casos de garantía en modalidad Onsite y Carry in para el sector coorporativo y usuarios finales a lo largo del territorio nacional del Perú</p>
 						</div>
-						<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<svg class="hidden absolute w-14 h-14 bottom-12 right-7 lg:block group-hover/item:text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
 							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v13m0-13 4 4m-4-4-4 4"></path>
 						</svg>
 					</div>

@@ -41,41 +41,103 @@ templ Index() {
 			<!-- Nosotros -->
 			<section>
 				<div id="nosotros" class="relative bottom-16 lg:bottom-24"></div>
-				<div class="flex flex-col gap-6 bg-azure lg:flex-row">
-					<div class="flex items-center grow basis-0 text-chalky bg-navy">
-						<div class="px-4 py-12 max-w-lg mx-auto">
-							<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-12 lg:text-left lg:text-4xl lg:font-semibold">Nosotros</h2>
-							<p class="mb-2">Somos una empresa relacionada al rubro de la tecnología, con el respaldo de COMPUCARE contamos con 26 años de experiencia.</p>
-							<p class="mb-10">Tenemos alianza con dos grandes marcas reconocidas internacionalmente en el área de garantía.</p>
-							<div class="flex flex-col gap-6 items-center lg:flex-row">
-								<img src="/static/img/viewsonic.png" alt="viewsonic"/>
-								<img src="/static/img/asus.png" alt="asus"/>
+				<my-carousel-mod class="h-[55rem] lg:h-auto" controls>
+					<div class="flex flex-col gap-6 bg-azure lg:flex-row">
+						<div class="flex items-center grow-[2] basis-0 bg-navy lg:grow">
+							<div class="px-4 py-12 max-w-lg mx-auto">
+								<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-12 lg:text-left lg:text-4xl lg:font-semibold">¿Quiénes somos?</h2>
+								<div class="space-y-2 text-chalky">
+									<p>TEAM SUPPORT somos una empresa joven que cuenta con un equipo altamente experimentado en el sector, enriquecido por la amplia experiencia adquirida en COMPUCARE.</p>
+									<p>Especialista:</p>
+									<ul class="list-disc list-inside">
+										<li>En brindar servicios de gestión y desarrollo de proyectos.</li>
+										<li>En el área de Gestión de Garantía, al ser Centro Autorizado de Servicio (CAS) de las marcas Asus y Viewsonic.</li>
+										<li>Comercialización de equipos, repuestos y accesorios de equipos informáticos.</li>
+									</ul>
+								</div>
 							</div>
 						</div>
+						<div class="grow-[1] basis-0 lg:grow">
+							<img class="w-full h-full object-cover lg:aspect-[7/4]" src="/static/img/nosotros1.jpg" alt="nosotros"/>
+						</div>
 					</div>
-					<div class="grow basis-0">
-						<img class="object-cover w-full h-full" src="/static/img/nosotros1.jpg" alt="nosotros"/>
+					<div class="flex flex-col gap-6 bg-azure lg:flex-row">
+						<div class="flex items-center grow-[2] basis-0 bg-navy lg:grow">
+							<div class="px-4 py-12 max-w-lg mx-auto">
+								<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-12 lg:text-left lg:text-4xl lg:font-semibold">Valores</h2>
+								<div class="space-y-2 text-chalky">
+									<p>Como empresa nos preocupa brindar un servicio de calidad, es por eso que nos regimos de los siguientes valores.</p>
+									<ul class="list-disc list-inside">
+										<li>Transparencia al mostrar todos nuestros procesos</li>
+										<li>Responsabilidad con nuestro trabajo</li>
+										<li>Resolución al brindarte las mejores opciones para tu caso o equipo</li>
+										<li>Claridad en la atención al cliente</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<div class="grow-[1] basis-0 lg:grow">
+							<img class="w-full h-full object-cover lg:aspect-[7/4]" src="/static/img/nosotros2.jpg" alt="nosotros"/>
+						</div>
 					</div>
-				</div>
+					<div class="flex flex-col gap-6 bg-azure lg:flex-row">
+						<div class="flex items-center grow-[2] basis-0 bg-navy lg:grow">
+							<div class="px-4 py-12 max-w-lg mx-auto">
+								<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-12 lg:text-left lg:text-4xl lg:font-semibold">Misión</h2>
+								<div class="space-y-2 text-chalky">
+									<p>
+										Proveer servicios de calidad que tengan como resultado la satisfacción del
+										cliente, así como cumplir con los estándares de las marcas tecnológicas y
+										socios que representamos, contribuyendo así al mejoramiento de la imagen
+										en conjunto.
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="grow-[1] basis-0 lg:grow">
+							<img class="w-full h-full object-cover lg:aspect-[7/4]" src="/static/img/nosotros3.jpg" alt="nosotros"/>
+						</div>
+					</div>
+					<div class="flex flex-col gap-6 bg-azure lg:flex-row">
+						<div class="flex items-center grow-[2] basis-0 bg-navy lg:grow">
+							<div class="px-4 py-12 max-w-lg mx-auto">
+								<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-12 lg:text-left lg:text-4xl lg:font-semibold">Visión</h2>
+								<div class="space-y-2 text-chalky">
+									<p>
+										Lograr consolidarnos como una de las mejores empresas reconocidas por
+										brindar excelencia en el desarrollo de servicios informáticos a nivel nacional.
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="grow-[1] basis-0 lg:grow">
+							<img class="w-full h-full object-cover lg:aspect-[7/4]" src="/static/img/nosotros1.jpg" alt="nosotros"/>
+						</div>
+					</div>
+				</my-carousel-mod>
 			</section>
 			<!-- Clientes -->
 			<section>
-				<div class="px-4 py-16 space-y-8 max-w-3xl mx-auto text-center lg:pt-24">
-					<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-16 lg:text-5xl lg:font-semibold">Clientes</h2>
-					<h3 class="text-xl font-bold">Staff comercial</h3>
+				<div class="px-4 py-16 space-y-8 max-w-7xl mx-auto text-center lg:pt-24">
+					<h2 class="mb-8 text-center text-3xl font-bold text-azure lg:mb-16 lg:font-semibold">Clientes y marcas con las que trabajamos</h2>
 					<p>
-						Asesoramos en el diseño y ejecución de cada proyecto T.I. 
+						Contamos con una gran cartera de clientes, además de ser CAS de Asus y Viewsonic trabajamos 
 						<br/>
-						Nuestro personal comercial está conformado por ingenieros de sistemas, informáticos y electrónicos.
+						con empresas como SUNAT - BANBIF - WAVETEC
 					</p>
-					<h3 class="text-xl font-bold">Servicio de mesa de ayuda</h3>
-					<p>Contamos con nuestro propio Help Desk Cada proyecto es supervisado por un Ejecutivo Senior, que garantiza el cumplimiento de los plazos así como de la gestión inherente a cada atención.</p>
+					<p>
+						Nos preocupamos por ofrecer un servicio de calidad en todos los aspectos tanto técnico como de
+						<br/>
+						equipos, por eso trabajamos con las mejores marcas reconocidas mundialmente como
+						<br/>
+						LENOVO - DELL - SAMSUNG - HP
+					</p>
 				</div>
 				<!-- Logos -->
 				<div class="flex justify-center items-center gap-7 bg-navy py-6 mb-16 lg:gap-16 lg:mb-24">
+					<img class="w-16 lg:w-24" src="/static/img/sunat.png" alt="sunat"/>
+					<img class="w-16 lg:w-24" src="/static/img/banbif.png" alt="banbif"/>
 					<img class="w-16 lg:w-24" src="/static/img/lenovo.png" alt="lenovo"/>
-					<img class="w-16 lg:w-28" src="/static/img/sunat.png" alt="sunat"/>
-					<img class="w-24 lg:w-36" src="/static/img/interbank.png" alt="interbank"/>
 				</div>
 			</section>
 			<!-- Cobertura -->
