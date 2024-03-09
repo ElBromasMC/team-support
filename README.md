@@ -7,6 +7,7 @@ Team Support Peru webpage
 * PostgreSQL
 * [Air](https://github.com/cosmtrek/air#installation)
 * [Templ](https://templ.guide/quick-start/installation)
+* inotify-tools
 
 ### Initialize the required tables
 ```shell
@@ -26,5 +27,5 @@ $ npm install
 
 ### Live reload
 ```shell
-$ make live
+$ ENV=development make live
 ```
