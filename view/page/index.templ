@@ -8,7 +8,7 @@ templ Index() {
 	@layout.BasePage("Team Support Services") {
 		<main>
 			<!-- Carousel -->
-			<my-carousel class="h-[36rem]" controls indicator>
+			<my-carousel class="h-[36rem]">
 				<div>
 					<img class="relative object-cover w-full h-full" src="/static/img/background1.jpg" alt=""/>
 					<section class="absolute flex flex-col items-center inset-x-0 inset-y-0 pb-9 text-chalky lg:flex-row-reverse lg:justify-evenly">
@@ -18,21 +18,9 @@ templ Index() {
 							<h2 class="my-3 text-2xl font-semibold text-center lg:my-9 lg:text-6xl lg:text-left">Empieza bien el año <br/> protege tu equipo</h2>
 							<div class="flex flex-col gap-5 items-center lg:flex-row lg:gap-12">
 								<img src="/static/img/garantia.png" alt="garantia"/>
-								<a class="px-8 py-2 rounded-2xl font-semibold bg-azure" href="#">Consulte aquí</a>
+								<a class="px-8 py-2 rounded-2xl font-semibold bg-azure" href="/garantia">Consulte aquí</a>
 							</div>
 						</div>
-					</section>
-				</div>
-				<div>
-					<img class="object-cover w-full h-full" src="/static/img/image2.jpg" alt=""/>
-					<section class="absolute inset-x-[15%] bottom-9 py-5 text-center text-chalky">
-						<h1>Picture 2</h1>
-					</section>
-				</div>
-				<div>
-					<img class="object-cover w-full h-full" src="/static/img/image3.jpg" alt=""/>
-					<section class="absolute inset-x-[15%] bottom-9 py-5 text-center text-chalky">
-						<h1>Picture 3</h1>
 					</section>
 				</div>
 			</my-carousel>
@@ -152,21 +140,21 @@ templ Index() {
 						<div class="space-y-3">
 							<h3 class="text-2xl font-bold">Dirección</h3>
 							<p>Santiago de Surco <span class="text-azure">(Principal)</span><br/> Av. Monte de los Olivos 993</p>
-							<iframe class="w-[100%] h-52 border-0" loading="lazy" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d298.40382121917594!2d-76.98894103753177!3d-12.144075965868417!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c797432f8065%3A0xaa8db0df8e2a74d0!2sCompucare%20SA!5e0!3m2!1ses-419!2spe!4v1706234045904!5m2!1ses-419!2spe" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"></iframe>
+							<iframe class="w-[100%] h-52 border-0" loading="lazy" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d243.78325246162137!2d-76.98872528847686!3d-12.144137801052675!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105b94aef91f5fd%3A0xb8e1571454613b38!2sTeam%20Support%20Services!5e0!3m2!1ses-419!2spe!4v1710132384110!5m2!1ses-419!2spe" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"></iframe>
 						</div>
 						<!-- Telefonos -->
 						<div class="space-y-3">
 							<h3 class="text-2xl font-bold">Teléfonos</h3>
 							<p>Atención telefónica y mensajería de lunes a viernes 9am a 6pm</p>
 							<h4 class="text-2xl font-bold">Central telefónica</h4>
-							<a class="block ml-9 hover:text-livid" href="#">
+							<a class="block ml-9 hover:text-livid" href="tel:017433030">
 								<svg class="inline w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
 									<path d="M8 4a2.6 2.6 0 0 0-2 .9 6.2 6.2 0 0 0-1.8 6 12 12 0 0 0 3.4 5.5 12 12 0 0 0 5.6 3.4 6.2 6.2 0 0 0 6.6-2.7 2.6 2.6 0 0 0-.7-3L18 12.9a2.7 2.7 0 0 0-3.8 0l-.6.6a.8.8 0 0 1-1.1 0l-1.9-1.8a.8.8 0 0 1 0-1.2l.6-.6a2.7 2.7 0 0 0 0-3.8L10 4.9A2.6 2.6 0 0 0 8 4Z"></path>
 								</svg>
 								(01) 743-3030
 							</a>
 							<h4 class="text-2xl font-bold">Mensajería WhatsApp</h4>
-							<a class="block ml-9 hover:text-livid" href="#">
+							<a class="block ml-9 hover:text-livid" href="https://api.whatsapp.com/send?phone=+51989311876&text=Quiero%20más%20información" target="_blank">
 								<svg class="inline w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 32 32">
 									<path d="M19.11 17.205c-.372 0-1.088 1.39-1.518 1.39a.63.63 0 0 1-.315-.1c-.802-.402-1.504-.817-2.163-1.447-.545-.516-1.146-1.29-1.46-1.963a.426.426 0 0 1-.073-.215c0-.33.99-.945.99-1.49 0-.143-.73-2.09-.832-2.335-.143-.372-.214-.487-.6-.487-.187 0-.36-.043-.53-.043-.302 0-.53.115-.746.315-.688.645-1.032 1.318-1.06 2.264v.114c-.015.99.472 1.977 1.017 2.78 1.23 1.82 2.506 3.41 4.554 4.34.616.287 2.035.888 2.722.888.817 0 2.15-.515 2.478-1.318.13-.33.244-.73.244-1.088 0-.058 0-.144-.03-.215-.1-.172-2.434-1.39-2.678-1.39zm-2.908 7.593c-1.747 0-3.48-.53-4.942-1.49L7.793 24.41l1.132-3.337a8.955 8.955 0 0 1-1.72-5.272c0-4.955 4.04-8.995 8.997-8.995S25.2 10.845 25.2 15.8c0 4.958-4.04 8.998-8.998 8.998zm0-19.798c-5.96 0-10.8 4.842-10.8 10.8 0 1.964.53 3.898 1.546 5.574L5 27.176l5.974-1.92a10.807 10.807 0 0 0 16.03-9.455c0-5.958-4.842-10.8-10.802-10.8z" fill-rule="evenodd"></path>
 								</svg>
@@ -178,22 +166,22 @@ templ Index() {
 							<h3 class="text-2xl font-bold">Correos</h3>
 							<div>
 								<p>Cualquier consulta acerca de nuestros servicios para ventas, escríbenos a:</p>
-								<a class="ml-9 hover:text-livid" href="mailto:ventas@compucareperu.com">
+								<a class="ml-9 hover:text-livid" href="mailto:ventas@teamsupportperu.com">
 									<svg class="inline w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
 										<path d="M2 5.6V18c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V5.6l-.9.7-7.9 6a2 2 0 0 1-2.4 0l-8-6-.8-.7Z"></path>
 										<path d="M20.7 4.1A2 2 0 0 0 20 4H4a2 2 0 0 0-.6.1l.7.6 7.9 6 7.9-6 .8-.6Z"></path>
 									</svg>
-									ventas@compucareperu.com
+									ventas@teamsupportperu.com
 								</a>
 							</div>
 							<div>
 								<p>Para cualquier otra consulta o sugerencia:</p>
-								<a class="ml-9 hover:text-livid" href="mailto:sugerencias@compucareperu.com">
+								<a class="ml-9 hover:text-livid" href="mailto:sugerencias@teamsupportperu.com">
 									<svg class="inline w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
 										<path d="M2 5.6V18c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V5.6l-.9.7-7.9 6a2 2 0 0 1-2.4 0l-8-6-.8-.7Z"></path>
 										<path d="M20.7 4.1A2 2 0 0 0 20 4H4a2 2 0 0 0-.6.1l.7.6 7.9 6 7.9-6 .8-.6Z"></path>
 									</svg>
-									sugerencias@compucareperu.com
+									sugerencias@teamsupportperu.com
 								</a>
 							</div>
 						</div>

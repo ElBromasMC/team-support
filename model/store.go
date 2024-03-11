@@ -6,11 +6,19 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
+type StoreSubCategory struct {
+	Name        string
+	Description string
+	Img         string
+	Slug        string
+}
+
 type StoreItem struct {
 	Uuid             uuid.UUID `json:"uuid"`
 	Name             string    `json:"name"`
 	Category         string    `json:"category"`
-	Price            int       `json:"price"` // Stored in PEN centimos
+	SubCategory      string    `json:"subcategory"`
+	Price            int       `json:"price"` // Stored in USD cents
 	BriefDescription string    `json:"briefDescription"`
 	Description      string    `json:"-"`
 	Slug             string    `json:"slug"`

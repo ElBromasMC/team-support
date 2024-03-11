@@ -50,7 +50,7 @@ func main() {
 	e.GET("/ticket", h.HandleTicketShow)
 
 	e.GET("/garantia", h.HandleGarantiaShow)
-	e.GET("/garantia/:slug", h.HandleGarantiaItemShow)
+	e.GET("/garantia/:slug", h.HandleGarantiaCategoryShow)
 
 	e.GET("/store", h.HandleStoreShow)
 	e.GET("/store/:slug", h.HandleStoreItemShow)
