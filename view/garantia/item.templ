@@ -25,13 +25,13 @@ templ ShowItem(item model.StoreItem) {
 					</div>
 					<div class="lg:hidden">
 						<h2 class="my-9 text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>
-						<p class="text-3xl font-semibold text-navy">{ fmt.Sprintf("S/. %.2f", float64(item.Price)/100.0) }</p>
+						<p class="text-3xl font-semibold text-navy">{ fmt.Sprintf("$%.2f", float64(item.Price)/100.0) }</p>
 					</div>
-					<form class="flex flex-col gap-4 my-6">
+					<form id="item-form" class="flex flex-col gap-4 my-6" data-item={ item.ToJSON() } autocomplete="off">
 						<div>
 							<label class="block my-2 font-bold text-lg text-navy" for="serialnumber">Número serial del equipo a proteger:</label>
 							<input class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" type="text" id="serialnumber" name="serialnumber" placeholder="Números y letras entre 12 y 15 caracteres" pattern="[A-Za-z0-9]{12,15}" required/>
-							<div class="mt-2 font-semibold text-azure"><a href="#">¿Dónde encontrar el número de serie?</a></div>
+							<div class="mt-2 font-semibold text-azure"><a href="https://www.asus.com/latin/support/article/566/" target="_blank">¿Dónde encontrar el número de serie?</a></div>
 						</div>
 						<div>
 							<label class="block my-2 font-bold text-lg text-navy" for="duration">Duración:</label>
@@ -45,16 +45,60 @@ templ ShowItem(item model.StoreItem) {
 							<input class="block p-2 w-16 border border-navy rounded-xl bg-chalky text-livid" type="number" id="quantity" name="quantity" min="1" value="1" required/>
 						</div>
 						<div class="flex gap-6">
-							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="button">Agregar al carrito</button>
-							<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit">Comprar ahora</button>
+							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="submit" data-action="addToCart">Agregar al carrito</button>
+							<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit" data-action="buyNow">Comprar ahora</button>
 						</div>
 					</form>
+					<script>
+(() => {
+	const itemForm = document.querySelector("#item-form");
+	itemForm.addEventListener("submit", e => {
+		e.preventDefault();
+		const formData = new FormData(e.target);
+		const quantity = parseInt(formData.get("quantity"));
+		const cartDialog = document.querySelector("#cart-dialog"); // From header
+		const newItem = {
+			...JSON.parse(e.currentTarget.dataset.item),
+			quantity,
+		};
+		const action = e.submitter.dataset.action;
+		if (action === "addToCart") {
+			const addItem = items => {
+				let found = false;
+				const newItems = items.map(item => {
+					if (item.uuid === newItem.uuid) {
+						found = true;
+						return {
+							...newItem,
+							quantity: item.quantity + newItem.quantity,
+						};
+					} else {
+						return item;
+					}
+				});
+				if (!found) {
+					newItems.push(newItem);
+				}
+				return newItems;
+			};
+			(async () => {
+				const cart = document.querySelector("#shopping-cart");
+				await customElements.whenDefined(cart.localName);
+				cart.dispatchEvent(new CustomEvent("UPDATE", { detail: addItem }));
+				cartDialog.showModal();
+			})();
+		} else if (action === "buyNow") {
+		}
+		e.currentTarget.reset();
+	});
+})()
+					</script>
 				</div>
 				<!-- Requisitos -->
 				<div class="lg:order-1 lg:col-span-3">
 					<div class="hidden lg:block">
 						<h2 class="text-3xl font-bold text-azure">{ item.Name }</h2>
-						<p class="my-9 text-3xl font-semibold text-navy">{ fmt.Sprintf("S/. %.2f", float64(item.Price)/100.0) }</p>
+						<p class="my-9 text-3xl font-semibold text-navy">{ fmt.Sprintf("$%.2f", float64(item.Price)/100.0) }</p>
 					</div>
 					<h4 class="mb-3 text-2xl font-bold text-navy">Requisitos:</h4>
 					<ul class="list-disc list-inside font-semibold text-lg text-navy">

@@ -115,7 +115,7 @@ templ Header() {
 					</div>
 					<!-- Cart buttons -->
 					<div class="grid grid-cols-2 gap-3 mt-3">
-						<a class="block col-span-1 p-2 border border-azure rounded-3xl font-semibold text-center text-azure" href="/cart">
+						<a class="block col-span-1 p-2 border border-azure rounded-3xl font-semibold text-center text-azure" href="#">
 							Ver carrito
 						</a>
 						<a class="block col-span-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-center text-chalky" href="#">
@@ -132,7 +132,7 @@ templ Header() {
 			</div>
 			<script>
 (() => {
-	const toPEN = n => "S/. " + (n / 100).toFixed(2).toString();
+	const toUSD = n => "$" + (n / 100).toFixed(2).toString();
 
 	const cartApplet = document.querySelector("#cart-applet");
 	const openButton = cartApplet.querySelector("button.open");
@@ -162,9 +162,9 @@ templ Header() {
 			itemShow.querySelector(".item\\:name").setAttribute("href", `/store/${item.slug}`);
 			itemShow.querySelector(".item\\:img").setAttribute("src", item.img);
 			itemShow.querySelector(".item\\:img").setAttribute("alt", item.slug);
-			itemShow.querySelector(".item\\:price").textContent =  toPEN(item.price);
+			itemShow.querySelector(".item\\:price").textContent =  toUSD(item.price);
 			itemShow.querySelector(".item\\:quantity").textContent = item.quantity.toString();
-			itemShow.querySelector(".item\\:subtotal").textContent = toPEN(item.price * item.quantity);
+			itemShow.querySelector(".item\\:subtotal").textContent = toUSD(item.price * item.quantity);
 			itemShow.querySelector("button.remove").addEventListener("click", e => {
 				const removeItem = items => items.filter(i => i.uuid !== item.uuid);
 				(async () => {
@@ -181,7 +181,7 @@ templ Header() {
 			(acc, val) => acc + (val.price * val.quantity),
 			0
 		)
-		summaryShow.querySelector(".summary\\:total").textContent = toPEN(total)
+		summaryShow.querySelector(".summary\\:total").textContent = toUSD(total)
 	});
 	// Dialog logic
 	openButton.addEventListener("click", e => {

@@ -43,6 +43,9 @@ func main() {
 	// Middleware
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level: 5,
+	}))
 	e.Use(middle.Auth(dbpool))
 
 	// Routes
@@ -51,6 +54,7 @@ func main() {
 
 	e.GET("/garantia", h.HandleGarantiaShow)
 	e.GET("/garantia/:slug", h.HandleGarantiaCategoryShow)
+	e.GET("/garantia/:categorySlug/:itemSlug", h.HandleGarantiaItemShow)
 
 	e.GET("/store", h.HandleStoreShow)
 	e.GET("/store/:slug", h.HandleStoreItemShow)
