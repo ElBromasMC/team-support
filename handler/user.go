@@ -63,7 +63,7 @@ VALUES ($1, $2, $3)`, tname, temail, string(hpass)); err != nil {
 
 // Login
 func (h *Handler) HandleLoginShow(c echo.Context) error {
-	return render(c, http.StatusOK, user.LoginShow())
+	return render(c, http.StatusOK, user.LoginShow(c.QueryParam("to")))
 }
 
 func (h *Handler) HandleLogin(c echo.Context) error {
@@ -107,9 +107,13 @@ VALUES ($1) RETURNING session_id`, userid).Scan(&session); err != nil {
 	cookie.SameSite = http.SameSiteStrictMode
 	c.SetCookie(cookie)
 
+	if to := c.QueryParam("to"); len(to) > 0 {
+		return c.Redirect(http.StatusFound, to)
+	}
 	return c.Redirect(http.StatusFound, "/")
 }
 
+// Logout
 func (h *Handler) HandleLogout(c echo.Context) error {
 	defer RemoveCookie(c, "session")
 	user, ok := c.Request().Context().Value("user").(model.User)

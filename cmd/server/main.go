@@ -37,39 +37,46 @@ func main() {
 		DB: dbpool,
 	}
 
+	// Middleware
+	//e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
+	authMiddleware := middle.Auth(dbpool)
+
 	// Static files
 	static(e)
 
-	// Middleware
-	// e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
-		Level: 5,
-	}))
-	e.Use(middle.Auth(dbpool))
-
 	// Page routes
-	e.GET("/", h.HandleIndexShow)
-	e.GET("/ticket", h.HandleTicketShow)
+	e.GET("/", h.HandleIndexShow, authMiddleware)
+	e.GET("/ticket", h.HandleTicketShow, authMiddleware)
 
 	// Garantia routes
-	e.GET("/garantia", h.HandleGarantiaShow)
-	e.GET("/garantia/:slug", h.HandleGarantiaCategoryShow)
-	e.GET("/garantia/:categorySlug/:itemSlug", h.HandleGarantiaItemShow)
+	g1 := e.Group("/garantia")
+	g1.Use(authMiddleware)
+	g1.GET("", h.HandleGarantiaShow)
+	g1.GET(":slug", h.HandleGarantiaCategoryShow)
+	g1.GET(":categorySlug/:itemSlug", h.HandleGarantiaItemShow)
 
 	// Store routes
-	e.GET("/store", h.HandleStoreShow)
-	e.GET("/store/:slug", h.HandleStoreItemShow)
+	g2 := e.Group("/store")
+	g2.Use(authMiddleware)
+	g2.GET("", h.HandleStoreShow)
+	g2.GET(":slug", h.HandleStoreItemShow)
 
 	// Cart routes
-	e.GET("/cart", h.HandleCartShow)
+	e.GET("/cart", h.HandleCartShow, authMiddleware)
 
 	// User routes
 	e.GET("/login", h.HandleLoginShow)
 	e.GET("/signup", h.HandleSignupShow)
 	e.POST("/login", h.HandleLogin)
 	e.POST("/signup", h.HandleSignup)
-	e.GET("/logout", h.HandleLogout)
+	e.GET("/logout", h.HandleLogout, authMiddleware)
+
+	// Admin group
+	g3 := e.Group("/admin")
+	g3.Use(authMiddleware, middle.Admin)
+	g3.GET("", h.HandleAdminShow)
 
 	// Start server
 	port := os.Getenv("PORT")

@@ -4,6 +4,7 @@ import (
 	"alc/handler"
 	"alc/model"
 	"context"
+	"net/http"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -35,5 +36,18 @@ WHERE s.session_id = $1`, session).Scan(&user.Name, &user.Email, &user.Role); er
 			c.SetRequest(c.Request().WithContext(ctx))
 			return next(c)
 		}
+	}
+}
+
+func Admin(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user, ok := c.Request().Context().Value("user").(model.User)
+		if !ok {
+			return c.Redirect(http.StatusFound, "/login?to=/admin")
+		}
+		if user.Role != model.AdminRole {
+			return c.Redirect(http.StatusFound, "/login?to=/admin")
+		}
+		return next(c)
 	}
 }
