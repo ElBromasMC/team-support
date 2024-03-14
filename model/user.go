@@ -1,7 +1,18 @@
 package model
 
+import "github.com/gofrs/uuid/v5"
+
+type UserRole string
+
+const (
+	AdminRole  UserRole = "ADMIN"
+	NormalRole UserRole = "NORMAL"
+)
+
 type User struct {
-	Email    string `json:"email" form:"email"`
-	Password string `json:"password,omitempty" form:"password"`
-	Name     string `json:"name,omitempty" form:"name"`
+	Name     string    `form:"name"`
+	Email    string    `form:"email"`
+	Password string    `form:"password"`
+	Role     UserRole  `form:"-"`
+	Session  uuid.UUID `form:"-"`
 }

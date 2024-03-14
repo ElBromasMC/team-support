@@ -48,23 +48,28 @@ func main() {
 	}))
 	e.Use(middle.Auth(dbpool))
 
-	// Routes
+	// Page routes
 	e.GET("/", h.HandleIndexShow)
 	e.GET("/ticket", h.HandleTicketShow)
 
+	// Garantia routes
 	e.GET("/garantia", h.HandleGarantiaShow)
 	e.GET("/garantia/:slug", h.HandleGarantiaCategoryShow)
 	e.GET("/garantia/:categorySlug/:itemSlug", h.HandleGarantiaItemShow)
 
+	// Store routes
 	e.GET("/store", h.HandleStoreShow)
 	e.GET("/store/:slug", h.HandleStoreItemShow)
 
+	// Cart routes
 	e.GET("/cart", h.HandleCartShow)
 
-	e.GET("/signup", h.HandleSignupShow)
+	// User routes
 	e.GET("/login", h.HandleLoginShow)
-	e.POST("/signup", h.HandleSignup)
+	e.GET("/signup", h.HandleSignupShow)
 	e.POST("/login", h.HandleLogin)
+	e.POST("/signup", h.HandleSignup)
+	e.GET("/logout", h.HandleLogout)
 
 	// Start server
 	port := os.Getenv("PORT")

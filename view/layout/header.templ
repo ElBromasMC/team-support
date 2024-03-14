@@ -1,5 +1,9 @@
 package layout
 
+import (
+	"alc/model"
+)
+
 templ Header() {
 	<header class="sticky top-0 z-50 shadow-md bg-white">
 		<div class="flex items-center px-4 py-4 max-w-7xl mx-auto lg:py-9">
@@ -68,66 +72,68 @@ templ Header() {
 							</svg>
 						</button>
 					</form>
-					<h2 class="font-bold text-2xl text-navy">Tu carrito de compras</h2>
-					<!-- Cart items -->
-					<div class="items space-y-3 mt-5">
-						<template>
-							<div class="grid grid-cols-7 gap-x-3 p-2 border">
-								<div class="flex justify-end col-span-7">
-									<!-- Remove button -->
-									<button class="remove relative flex items-center justify-center">
-										<svg class="w-4 h-4 z-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-											<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
-										</svg>
-										<div class="absolute -inset-y-[0.1rem] aspect-square rounded-full bg-gray-300"></div>
-									</button>
+					<section>
+						<h2 class="font-bold text-2xl text-navy">Tu carrito de compras</h2>
+						<!-- Cart items -->
+						<div class="items space-y-3 mt-6">
+							<template>
+								<div class="grid grid-cols-7 gap-x-3 p-2 border">
+									<div class="flex justify-end col-span-7">
+										<!-- Remove button -->
+										<button class="remove relative flex items-center justify-center">
+											<svg class="w-4 h-4 z-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+												<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
+											</svg>
+											<div class="absolute -inset-y-[0.1rem] aspect-square rounded-full bg-gray-300"></div>
+										</button>
+									</div>
+									<div class="col-span-2">
+										<img class="item:img w-full aspect-square object-cover" src="" alt=""/>
+									</div>
+									<div class="col-span-5">
+										<div class="leading-none">
+											<a class="item:name font-bold text-sm hover:text-livid"></a>
+										</div>
+										<div class="text-sm text-livid">
+											<span class="font-bold">Precio:</span>
+											<span class="item:price"></span>
+										</div>
+										<div class="text-sm text-livid">
+											<span class="font-bold">Cantidad:</span>
+											<span class="item:quantity"></span>
+										</div>
+										<div class="text-sm text-navy">
+											<span class="font-bold">Subtotal:</span>
+											<span class="item:subtotal"></span>
+										</div>
+									</div>
 								</div>
-								<div class="col-span-2">
-									<img class="item:img w-full aspect-square object-cover" src="" alt=""/>
-								</div>
-								<div class="col-span-5">
-									<div class="leading-none">
-										<a class="item:name font-bold text-sm hover:text-livid"></a>
-									</div>
-									<div class="text-sm text-livid">
-										<span class="font-bold">Precio:</span>
-										<span class="item:price"></span>
-									</div>
-									<div class="text-sm text-livid">
-										<span class="font-bold">Cantidad:</span>
-										<span class="item:quantity"></span>
-									</div>
-									<div class="text-sm text-navy">
-										<span class="font-bold">Subtotal:</span>
-										<span class="item:subtotal"></span>
-									</div>
-								</div>
-							</div>
-						</template>
-					</div>
-					<hr class="mt-3"/>
-					<!-- Cart information -->
-					<div class="summary mt-3">
-						<div class="text-2xl">
-							<span class="font-bold">Total:</span>
-							<span class="summary:total"></span>
+							</template>
 						</div>
-					</div>
-					<!-- Cart buttons -->
-					<div class="grid grid-cols-2 gap-3 mt-3">
-						<a class="block col-span-1 p-2 border border-azure rounded-3xl font-semibold text-center text-azure" href="#">
-							Ver carrito
-						</a>
-						<a class="block col-span-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-center text-chalky" href="#">
-							Checkout
-						</a>
-						<a class="col-span-2 text-center text-azure" href="/store">
-							<span>Ir a la tienda</span>
-							<svg class="inline w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="m9 5 7 7-7 7"></path>
-							</svg>
-						</a>
-					</div>
+						<hr class="mt-3"/>
+						<!-- Cart information -->
+						<div class="summary mt-3">
+							<div class="text-2xl">
+								<span class="font-bold">Total:</span>
+								<span class="summary:total"></span>
+							</div>
+						</div>
+						<!-- Cart buttons -->
+						<div class="grid grid-cols-2 gap-3 mt-3">
+							<a class="block col-span-1 p-2 border border-azure rounded-3xl font-semibold text-center text-azure" href="#">
+								Ver carrito
+							</a>
+							<a class="block col-span-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-center text-chalky" href="#">
+								Checkout
+							</a>
+							<a class="col-span-2 text-center text-azure" href="/store">
+								<span>Ir a la tienda</span>
+								<svg class="inline w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="m9 5 7 7-7 7"></path>
+								</svg>
+							</a>
+						</div>
+					</section>
 				</dialog>
 			</div>
 			<script>
@@ -206,12 +212,77 @@ templ Header() {
 	})();
 })()
 			</script>
-			<!-- User profile -->
-			<a class="flex items-center justify-center w-8 h-8 ml-3 text-livid lg:ml-16" href="#">
-				<svg class="w-6 h-6 lg:w-8 lg:h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-					<path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"></path>
-				</svg>
-			</a>
+			if user, ok := ctx.Value("user").(model.User); !ok {
+				<a class="flex items-center justify-center w-8 h-8 ml-3 text-livid lg:ml-16" href="/login">
+					<svg class="w-6 h-6 lg:w-8 lg:h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+						<path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"></path>
+					</svg>
+				</a>
+			} else {
+				<!-- User applet-->
+				<div id="user-applet" class="group ml-3 lg:ml-16">
+					<!-- Applet button -->
+					<button class="open flex items-center justify-center w-8 h-8 text-livid" type="button">
+						<svg class="w-6 h-6 lg:w-8 lg:h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+							<path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"></path>
+						</svg>
+					</button>
+					<!-- Applet dialog -->
+					<dialog class="fixed inset-0 left-auto w-[min(20rem,100vw-2rem)] h-full max-h-[unset] min-w-48 p-4 overflow-y-scroll">
+						<!-- Close button -->
+						<form class="flex justify-end" method="dialog">
+							<button class="flex items-center justify-center w-8 h-8" type="submit">
+								<svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
+								</svg>
+							</button>
+						</form>
+						<section>
+							<h2 class="font-bold text-2xl text-navy">Tu usuario</h2>
+							<!-- Cart items -->
+							<div class="space-y-3 mt-6">
+								<div>
+									<h3 class="font-semibold">Nombre:</h3>
+									<p>{ user.Name }</p>
+								</div>
+								<div>
+									<h3 class="font-semibold">Correo:</h3>
+									<p>{ user.Email }</p>
+								</div>
+							</div>
+							<!-- Cart buttons -->
+							<div class="grid grid-cols-2 mt-6">
+								<a class="block col-span-1 p-2 border border-azure rounded-3xl font-semibold text-center text-azure" href="/logout">
+									Cerrar sesión
+								</a>
+							</div>
+						</section>
+					</dialog>
+				</div>
+				<script>
+(() => {
+	const userApplet = document.querySelector("#user-applet");
+	const openButton = userApplet.querySelector("button.open");
+	const userDialog = userApplet.querySelector("dialog");
+
+	// Dialog logic
+	openButton.addEventListener("click", e => {
+		userDialog.showModal();
+	});
+	userDialog.addEventListener("click", e => {
+		const dimensions = userDialog.getBoundingClientRect();
+		if (
+			e.clientX < dimensions.left ||
+			e.clientX > dimensions.right ||
+			e.clientY < dimensions.top ||
+			e.clientY > dimensions.bottom
+		) {
+			userDialog.close();
+		}
+	});
+})()
+				</script>
+			}
 		</div>
 	</header>
 }

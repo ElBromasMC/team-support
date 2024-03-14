@@ -4,24 +4,24 @@ import "alc/view/layout"
 
 templ SignupShow() {
 	@layout.Base("Registro") {
-		<main class="flex justify-center items-center">
-			<section>
-				<h2>Registrate!</h2>
-				<form action="/signup" method="post">
+		<main class="flex justify-center items-center py-12 min-h-dvh bg-sky-100 sm:px-4">
+			<section class="px-9 py-16 w-full space-y-9 bg-white sm:max-w-xl sm:rounded-3xl">
+				<h2 class="font-semibold text-4xl">Regístrate!</h2>
+				<form class="space-y-6" action="/signup" method="post">
 					<div>
-						<label for="name">Name:</label>
-						<input type="text" name="name" required/>
+						<label class="block text-lg" for="name">Nombre:</label>
+						<input id="name" class="block p-2 w-full border rounded-lg border-slate-500" type="text" name="name" required/>
 					</div>
 					<div>
-						<label for="email">Email:</label>
-						<input type="email" name="email" required/>
+						<label class="block text-lg" for="email">Correo:</label>
+						<input id="email" class="block p-2 w-full border rounded-lg border-slate-500" type="email" name="email" required/>
 					</div>
 					<div>
-						<label for="password">Password:</label>
-						<input type="password" name="password" required minlength="8"/>
+						<label class="block text-lg" for="password">Contraseña:</label>
+						<input id="password" class="block p-2 w-full border rounded-lg border-slate-500" type="password" name="password" required minlength="8"/>
 					</div>
 					<div>
-						<button type="submit">Signup</button>
+						<button class="w-full mt-3 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit">Registrarse</button>
 					</div>
 				</form>
 			</section>

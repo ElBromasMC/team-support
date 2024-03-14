@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/http"
 	"net/mail"
+	"os"
 	"strings"
 	"time"
 
@@ -35,7 +36,7 @@ func (h *Handler) HandleSignup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid email")
 	}
 
-	if !(6 <= len(u.Password) && len(u.Password) <= 30) {
+	if !(8 <= len(u.Password) && len(u.Password) <= 30) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid password")
 	}
 
@@ -44,14 +45,14 @@ func (h *Handler) HandleSignup(c echo.Context) error {
 	}
 
 	// Hash password
-	var hpass []byte
-	var err error
-	if hpass, err = bcrypt.GenerateFromPassword([]byte(u.Password), 14); err != nil {
+	hpass, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
+	if err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	// Save user
-	if _, err := h.DB.Exec(context.Background(), "INSERT INTO users (name, email, hashed_password, session) VALUES ($1, $2, $3, ARRAY[]::UUID[])", tname, temail, string(hpass)); err != nil {
+	if _, err := h.DB.Exec(context.Background(), `INSERT INTO users (name, email, hashed_password)
+VALUES ($1, $2, $3)`, tname, temail, string(hpass)); err != nil {
 		// ToDo: Test and handle unique email condition
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -76,8 +77,10 @@ func (h *Handler) HandleLogin(c echo.Context) error {
 	temail := strings.TrimSpace(u.Email)
 
 	// Verify credentials
+	var userid uuid.UUID
 	var hpass string
-	if err := h.DB.QueryRow(context.Background(), "SELECT hashed_password FROM users WHERE email = $1", temail).Scan(&hpass); err != nil {
+	if err := h.DB.QueryRow(context.Background(), `SELECT user_id, hashed_password
+FROM users WHERE email = $1`, temail).Scan(&userid, &hpass); err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Email not found")
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(hpass), []byte(u.Password)); err != nil {
@@ -86,7 +89,8 @@ func (h *Handler) HandleLogin(c echo.Context) error {
 
 	// Start new session
 	var session uuid.UUID
-	if err := h.DB.QueryRow(context.Background(), "UPDATE users SET session = array_append(session, uuid_generate_v4()) WHERE email = $1 RETURNING session[array_length(session, 1)]", temail).Scan(&session); err != nil {
+	if err := h.DB.QueryRow(context.Background(), `INSERT INTO sessions (user_id)
+VALUES ($1) RETURNING session_id`, userid).Scan(&session); err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -95,10 +99,26 @@ func (h *Handler) HandleLogin(c echo.Context) error {
 	cookie := new(http.Cookie)
 	cookie.Name = "session"
 	cookie.Value = session.String()
-	cookie.Expires = time.Now().Add(24 * time.Hour)
-	// cookie.Secure = true
+	cookie.Expires = time.Now().AddDate(0, 1, 0)
+	if os.Getenv("HTTPS") == "true" {
+		cookie.Secure = true
+	}
 	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteStrictMode
 	c.SetCookie(cookie)
 
+	return c.Redirect(http.StatusFound, "/")
+}
+
+func (h *Handler) HandleLogout(c echo.Context) error {
+	defer RemoveCookie(c, "session")
+	user, ok := c.Request().Context().Value("user").(model.User)
+	if !ok {
+		return c.Redirect(http.StatusFound, "/")
+	}
+	if _, err := h.DB.Exec(context.Background(), `DELETE FROM sessions
+WHERE session_id = $1`, user.Session); err != nil {
+		return c.Redirect(http.StatusFound, "/")
+	}
 	return c.Redirect(http.StatusFound, "/")
 }
