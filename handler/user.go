@@ -6,7 +6,6 @@ import (
 	"context"
 	"net/http"
 	"net/mail"
-	"os"
 	"strings"
 	"time"
 
@@ -100,9 +99,7 @@ VALUES ($1) RETURNING session_id`, userid).Scan(&session); err != nil {
 	cookie.Name = "session"
 	cookie.Value = session.String()
 	cookie.Expires = time.Now().AddDate(0, 1, 0)
-	if os.Getenv("HTTPS") == "true" {
-		cookie.Secure = true
-	}
+	cookie.Secure = true
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteStrictMode
 	c.SetCookie(cookie)

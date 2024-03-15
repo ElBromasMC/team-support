@@ -38,7 +38,7 @@ func main() {
 	}
 
 	// Middleware
-	//e.Use(middleware.Logger())
+	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
 	authMiddleware := middle.Auth(dbpool)
