@@ -1,11 +1,13 @@
 package store
 
 import (
-	"encoding/json"
 	"time"
-
-	"github.com/gofrs/uuid/v5"
 )
+
+type Image struct {
+	Id       int    `json:"id"`
+	Filename string `json:"filename"`
+}
 
 type Type string
 
@@ -15,55 +17,49 @@ const (
 )
 
 type Category struct {
-	Uuid        uuid.UUID `json:"uuid"`
-	Name        string    `json:"name"`
-	Type        Type      `json:"type"`
-	Description string    `json:"description"`
-	Img         string    `json:"img"`
-	Slug        string    `json:"slug"`
+	Id          int    `json:"id"`
+	Type        Type   `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Img         Image  `json:"img"`
+	Slug        string `json:"slug"`
 }
 
 type Item struct {
-	Uuid            uuid.UUID `json:"uuid"`
-	Name            string    `json:"name"`
-	Category        Category  `json:"category"`
-	Description     string    `json:"description"`
-	LongDescription string    `json:"-"`
-	Slug            string    `json:"slug"`
-	Img             string    `json:"img"`
-	LargeImg        string    `json:"-"`
+	Id              int      `json:"id"`
+	Category        Category `json:"category"`
+	Name            string   `json:"name"`
+	Description     string   `json:"description"`
+	LongDescription string   `json:"longDescription"`
+	Img             Image    `json:"img"`
+	LargeImg        Image    `json:"largeImg"`
+	Slug            string   `json:"slug"`
 }
 
 type Product struct {
-	Uuid  uuid.UUID `json:"uuid"`
-	Name  string    `json:"name"`
-	Item  Item      `json:"item"`
-	Price int       `json:"price"` // Stored in USD cents
+	Id      int               `json:"id"`
+	Item    Item              `json:"item"`
+	Name    string            `json:"name"`
+	Price   int               `json:"price"` // Stored in USD cents
+	Details map[string]string `json:"details"`
 }
 
 type Order struct {
-	Uuid    uuid.UUID `json:"uuid"`
-	Email   string    `json:"email"`
-	Address string    `json:"address"`
-	// Status    string    `json:"status"` // "Pending", "Shipped", "Delivered"
-	CreatedAt time.Time `json:"createdAt"`
+	PurchaseOrder int       `json:"purchaseOrder"`
+	Name          string    `json:"name"`
+	Email         string    `json:"email"`
+	Address       string    `json:"address"`
+	PhoneNumber   string    `json:"phoneNumber"`
+	CreatedAt     time.Time `json:"createdAt"`
 }
 
-type OrderProduct struct {
-	ProductID uuid.UUID         `json:"productID"`
-	Quantity  int               `json:"quantity"`
-	Details   map[string]string `json:"details"`
+type ProductRequest struct {
+	Id       int               `json:"id"`
+	Quantity int               `json:"quantity"`
+	Details  map[string]string `json:"details"`
 }
 
 type PurchaseRequest struct {
-	Order         Order          `json:"order"`
-	OrderProducts []OrderProduct `json:"orderProducts"`
-}
-
-func (i Product) ToJSON() string {
-	bytes, err := json.Marshal(i)
-	if err != nil {
-		return "{}"
-	}
-	return string(bytes)
+	Order    Order            `json:"order"`
+	Products []ProductRequest `json:"products"`
 }

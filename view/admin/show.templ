@@ -5,7 +5,17 @@ import (
 )
 
 templ Show() {
-	@layout.Base("Admin") {
-		<h1>Hello from admin!</h1>
+	@layout.BaseAdmin("Administración") {
+		<main>
+			<h1 class="font-bold text-3xl">Administración</h1>
+			<ul class="mt-6 space-y-2">
+				<li>
+					<a class="font-semibold text-azure" href="/admin/garantia">Garantías</a>
+				</li>
+				<li>
+					<a class="font-semibold text-azure" href="/admin/store">Tienda</a>
+				</li>
+			</ul>
+		</main>
 	}
 }

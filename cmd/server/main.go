@@ -5,6 +5,7 @@ import (
 	middle "alc/middleware"
 	"context"
 	"log"
+	"net/http"
 	"os"
 
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
@@ -40,6 +41,9 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
+		RedirectCode: http.StatusMovedPermanently,
+	}))
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
 	authMiddleware := middle.Auth(dbpool)
 
@@ -54,14 +58,20 @@ func main() {
 	g1 := e.Group("/garantia")
 	g1.Use(authMiddleware)
 	g1.GET("", h.HandleGarantiaShow)
-	g1.GET(":slug", h.HandleGarantiaCategoryShow)
-	g1.GET(":categorySlug/:itemSlug", h.HandleGarantiaItemShow)
+	g1.GET("/:slug", h.HandleGarantiaCategoryShow)
+	g1.GET("/:categorySlug/:itemSlug", h.HandleGarantiaItemShow)
 
 	// Store routes
 	g2 := e.Group("/store")
 	g2.Use(authMiddleware)
-	g2.GET("", h.HandleStoreShow)
-	g2.GET(":slug", h.HandleStoreItemShow)
+	g2.GET("", func(c echo.Context) error {
+		return c.Redirect(http.StatusPermanentRedirect, "/store/all")
+	})
+	g2.GET("/all", h.HandleStoreAllShow)
+	g2.GET("/:slug", h.HandleStoreCategoryShow)
+	g2.POST("/all", h.HandleStoreAllItemsShow)
+	g2.POST("/:slug", h.HandleStoreCategoryItemsShow)
+	g2.GET("/:categorySlug/:itemSlug", h.HandleStoreItemShow)
 
 	// Cart routes
 	e.GET("/cart", h.HandleCartShow, authMiddleware)
@@ -77,6 +87,8 @@ func main() {
 	g3 := e.Group("/admin")
 	g3.Use(authMiddleware, middle.Admin)
 	g3.GET("", h.HandleAdminShow)
+	g3.GET("/garantia", h.HandleAdminGarantiaShow)
+	g3.GET("/store", h.HandleAdminStoreShow)
 
 	// Start server
 	port := os.Getenv("PORT")

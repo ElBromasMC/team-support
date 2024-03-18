@@ -1,0 +1,17 @@
+package admin
+
+import (
+	"alc/view/layout"
+)
+
+templ Store() {
+	@layout.BaseAdmin("Tienda") {
+		<div>
+			<span>
+				<a href="/admin">Administración</a>
+			</span>
+			<span>></span>
+			<span>Tienda</span>
+		</div>
+	}
+}

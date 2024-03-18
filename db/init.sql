@@ -21,52 +21,71 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+-- Image administrarion
+CREATE TABLE images (
+    id SERIAL PRIMARY KEY,
+    filename VARCHAR(25) UNIQUE NOT NULL
+);
+
 -- Store administration
 CREATE TYPE store_type AS ENUM ('STORE', 'GARANTIA');
 
 CREATE TABLE IF NOT EXISTS store_categories (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(255) NOT NULL,
+    id SERIAL PRIMARY KEY,
     type store_type NOT NULL,
-    description TEXT,
-    img TEXT,
-    slug VARCHAR(255) UNIQUE NOT NULL
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    img_id INT,
+    slug VARCHAR(255) NOT NULL,
+    UNIQUE(type, slug),
+    FOREIGN KEY (img_id) REFERENCES images(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS store_items (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
+    category_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    category_id UUID NOT NULL,
-    description TEXT,
-    long_description TEXT,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    img TEXT,
-    large_img TEXT,
-    FOREIGN KEY (category_id) REFERENCES store_categories(uuid) ON DELETE RESTRICT
+    description TEXT NOT NULL DEFAULT '',
+    long_description TEXT NOT NULL DEFAULT '',
+    img_id INT,
+    largeimg_id INT,
+    slug VARCHAR(255) NOT NULL,
+    UNIQUE(category_id, slug),
+    FOREIGN KEY (category_id) REFERENCES store_categories(id) ON DELETE RESTRICT,
+    FOREIGN KEY (img_id) REFERENCES images(id) ON DELETE SET NULL,
+    FOREIGN KEY (largeimg_id) REFERENCES images(id) ON DELETE SET NULL
 );
 CREATE INDEX idx_items_name ON store_items USING gin (name gin_trgm_ops);
 
 CREATE TABLE store_products (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
+    item_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    item_id UUID NOT NULL,
     price INT NOT NULL,
-    FOREIGN KEY (item_id) REFERENCES store_items(uuid) ON DELETE CASCADE
+    details HSTORE NOT NULL DEFAULT ''::hstore,
+    FOREIGN KEY (item_id) REFERENCES store_items(id) ON DELETE CASCADE
 );
 
+CREATE SEQUENCE purchase_order_seq AS INT START WITH 100000;
 CREATE TABLE store_orders (
-    uuid UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    purchase_order INT PRIMARY KEY DEFAULT nextval('purchase_order_seq'),
+    name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    address TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    address TEXT NOT NULL DEFAULT '',
+    phone_number VARCHAR(25) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE order_products (
-    order_id UUID NOT NULL,
-    product_id UUID NOT NULL,
+    id SERIAL PRIMARY KEY,
+    order_id INT NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
-    details HSTORE,
-    PRIMARY KEY (order_id, product_id),
-    FOREIGN KEY (order_id) REFERENCES store_orders(uuid) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES store_products(uuid) ON DELETE CASCADE
+    details HSTORE NOT NULL DEFAULT ''::hstore,
+    product_type store_type NOT NULL,
+    product_category VARCHAR(255) NOT NULL,
+    product_item VARCHAR(255) NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    product_price INT NOT NULL,
+    product_details HSTORE NOT NULL DEFAULT ''::hstore,
+    FOREIGN KEY (order_id) REFERENCES store_orders(purchase_order) ON DELETE CASCADE
 );

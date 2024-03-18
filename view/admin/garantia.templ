@@ -1,0 +1,89 @@
+package admin
+
+import (
+	"fmt"
+	"alc/view/layout"
+	"alc/model/store"
+)
+
+script handleNewFormShow() {
+	const newItemApplet = document.querySelector("#new-item-applet");
+	const openButton = newItemApplet.querySelector("button.open");
+	const newItemDialog = newItemApplet.querySelector("dialog");
+
+	openButton.addEventListener("click", e => {
+		newItemDialog.showModal();
+	});
+}
+
+templ Garantia(cats []store.Category) {
+	@layout.BaseAdmin("Garantías") {
+		<main>
+			<div>
+				<span class="font-semibold text-azure">
+					<a href="/admin">Administración</a>
+				</span>
+				<span>
+					<svg class="inline w-4 h-4 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+					</svg>
+				</span>
+				<span class="text-livid">Garantías</span>
+			</div>
+			<div id="new-item-applet">
+				<button class="open font-semibold text-azure">Nueva categoría</button>
+				<dialog
+					class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+					m-0 p-6 w-[90%] max-w-lg
+					border border-black bg-white"
+				>
+					<form class="flex justify-between" method="dialog">
+						<h2 class="font-bold text-2xl">Nueva categoría</h2>
+						<button class="font-bold text-azure" type="submit">Salir</button>
+					</form>
+					<form class="mt-3 space-y-2" action="/admin/garantia" method="post">
+						<div>
+							<label class="block" for="name">Nombre:</label>
+							<input class="block w-full border border-livid" type="text" id="name" name="name" required/>
+						</div>
+						<div>
+							<label class="block" for="description">Descripción:</label>
+							<input class="block w-full border border-livid" type="text" id="description" name="description" required/>
+						</div>
+						<div>
+							<label class="block" for="slug">Slug:</label>
+							<input class="block w-full border border-livid" type="text" id="slug" name="slug" required/>
+						</div>
+						<div class="flex gap-6 !mt-3">
+							<button class="font-bold text-azure" type="submit">Guardar</button>
+							<button class="font-bold text-azure" type="reset">Reiniciar</button>
+						</div>
+					</form>
+				</dialog>
+			</div>
+			@handleNewFormShow()
+			<table class="table-auto w-full">
+				<thead>
+					<tr>
+						<th scope="col">ID</th>
+						<th scope="col">Nombre</th>
+						<th scope="col">Descripción</th>
+						<th scope="col">Slug</th>
+						<th scope="col">Imagen</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, c := range cats {
+						<tr>
+							<th scope="row">{ fmt.Sprintf("%d", c.Id) }</th>
+							<td>{ c.Name }</td>
+							<td>{ c.Description }</td>
+							<td>{ c.Slug }</td>
+							<td>TODO</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</main>
+	}
+}

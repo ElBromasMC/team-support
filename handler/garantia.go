@@ -1,122 +1,116 @@
 package handler
 
 import (
-	"alc/model"
+	"alc/model/store"
 	"alc/view/garantia"
+	"context"
 	"net/http"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
-var garantiaSubCategories []model.StoreSubCategory
-var garantiaItems []model.StoreItem
-
-func init() {
-	// garantiaSubCategories = []model.StoreSubCategory{
-	// 	{Name: "NB (Escritorio)", Description: "ZenBook - VivoBook - AsusLaptop", Img: "/static/img/NB.png", Slug: "nb"},
-	// 	{Name: "NR (Gamer)", Description: "TUF - ROG", Img: "/static/img/NR.png", Slug: "nr"},
-	// 	{Name: "PT (All in one)", Description: "All in one", Img: "/static/img/PT.png", Slug: "pt"},
-	// }
-
-	// newUuid0, _ := uuid.NewV4()
-	// newUuid1, _ := uuid.NewV4()
-	// newUuid2, _ := uuid.NewV4()
-	// item0 := model.StoreItem{
-	// 	Uuid:        newUuid0,
-	// 	Category:    "GARANTIA",
-	// 	SubCategory: "NB (Escritorio)",
-	// 	Name:        "Garantía + Daño Accidental + Bateria TUF",
-	// 	Price:       18000,
-	// 	Slug:        "garantia-accidental-bateria",
-	// 	Img:         "/static/img/garantia1.jpg",
-	// }
-	// item1 := model.StoreItem{
-	// 	Uuid:        newUuid1,
-	// 	Category:    "GARANTIA",
-	// 	SubCategory: "NR (Gamer)",
-	// 	Name:        "Protección contra daño accidental TUF",
-	// 	Price:       18000,
-	// 	Slug:        "accidental",
-	// 	Img:         "/static/img/garantia1.jpg",
-	// }
-	// item2 := model.StoreItem{
-	// 	Uuid:        newUuid2,
-	// 	Category:    "GARANTIA",
-	// 	SubCategory: "PT (All in one)",
-	// 	Name:        "Garantía Extendida + Domicilio TUF",
-	// 	Price:       18000,
-	// 	Slug:        "garantia-domicilio",
-	// 	Img:         "/static/img/garantia1.jpg",
-	// }
-	// garantiaItems = append(garantiaItems, item0, item0, item0, item0, item0, item0, item0, item0, item0, item1, item2)
-}
-
+// GET "/garantia"
 func (h *Handler) HandleGarantiaShow(c echo.Context) error {
-	return render(c, http.StatusOK, garantia.Show(garantiaSubCategories))
+	rows, err := h.DB.Query(context.Background(), `SELECT sc.name, sc.slug, img.filename
+FROM store_categories AS sc
+LEFT JOIN images AS img
+ON sc.img_id = img.id
+WHERE sc.type = $1`, store.GarantiaType)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer rows.Close()
+
+	cats, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Category, error) {
+		var cat store.Category
+		err := row.Scan(&cat.Name, &cat.Slug, &cat.Img.Filename)
+		cat.Type = store.GarantiaType
+		return cat, err
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return render(c, http.StatusOK, garantia.Show(cats))
 }
 
+// GET "/garantia/:slug"
 func (h *Handler) HandleGarantiaCategoryShow(c echo.Context) error {
-	// Category slug from path `/garantia/:slug`
 	slug := c.Param("slug")
 
-	found := false
-	var category model.StoreSubCategory
-	for _, i := range garantiaSubCategories {
-		if i.Slug == slug {
-			category = i
-			found = true
-			break
-		}
+	var cat store.Category
+	if err := h.DB.QueryRow(context.Background(), `SELECT id, name, description
+FROM store_categories
+WHERE type = $1 AND slug = $2`, store.GarantiaType, slug).Scan(&cat.Id, &cat.Name, &cat.Description); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Categoría no encontrada")
+	}
+	cat.Type = store.GarantiaType
+	cat.Slug = slug
+
+	rows, err := h.DB.Query(context.Background(), `SELECT si.name, si.slug, img.filename
+FROM store_items AS si
+LEFT JOIN images AS img
+ON si.img_id = img.id
+WHERE si.category_id = $1`, cat.Id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer rows.Close()
+
+	items, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Item, error) {
+		var item store.Item
+		err := row.Scan(&item.Name, &item.Slug, &item.Img.Filename)
+		return item, err
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	if !found {
-		return echo.NewHTTPError(http.StatusNotFound)
-	}
-
-	items := []model.StoreItem{}
-	for _, i := range garantiaItems {
-		if i.SubCategory == category.Name {
-			items = append(items, i)
-		}
-	}
-
-	return render(c, http.StatusOK, garantia.ShowCategory(category, items))
+	return render(c, http.StatusOK, garantia.ShowCategory(cat, items))
 }
 
+// GET "/garantia/:categorySlug/:itemSlug"
 func (h *Handler) HandleGarantiaItemShow(c echo.Context) error {
-	// Item slug from path `/garantia/:categorySlug/:itemSlug`
 	categorySlug := c.Param("categorySlug")
 	itemSlug := c.Param("itemSlug")
 
-	var found bool
-
-	found = false
-	var category model.StoreSubCategory
-	for _, i := range garantiaSubCategories {
-		if i.Slug == categorySlug {
-			category = i
-			found = true
-			break
-		}
-	}
-
-	if !found {
+	var cat store.Category
+	if err := h.DB.QueryRow(context.Background(), `SELECT id, name
+FROM store_categories
+WHERE type = $1 AND slug = $2`, store.GarantiaType, categorySlug).Scan(&cat.Id, &cat.Name); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
+	cat.Type = store.GarantiaType
+	cat.Slug = categorySlug
 
-	found = false
-	var item model.StoreItem
-	for _, i := range garantiaItems {
-		if i.SubCategory == category.Name && i.Slug == itemSlug {
-			item = i
-			found = true
-			break
-		}
-	}
-
-	if !found {
+	var item store.Item
+	if err := h.DB.QueryRow(context.Background(), `SELECT si.id, si.name, img.filename
+FROM store_items AS si
+LEFT JOIN images AS img
+ON si.img_id = img.id
+WHERE si.category_id = $1 AND si.slug = $2`, cat.Id, itemSlug).Scan(&item.Id, &item.Name, &item.Img.Filename); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
+	item.Slug = itemSlug
+	item.Category = cat
 
-	return render(c, http.StatusOK, garantia.ShowItem(item))
+	rows, err := h.DB.Query(context.Background(), `SELECT id, name, price, details
+FROM store_products
+WHERE item_id = $1`, item.Id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer rows.Close()
+
+	products, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Product, error) {
+		var product store.Product
+		err := row.Scan(&product.Id, &product.Name, &product.Price, &product.Details)
+		product.Item = item
+		return product, err
+	})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return render(c, http.StatusOK, garantia.ShowItem(item, products))
 }

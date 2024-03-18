@@ -1,48 +1,69 @@
 package garantia
 
 import (
-	"fmt"
-	"alc/model"
+	"path"
+	"encoding/json"
+	"alc/config"
+	"alc/model/store"
 	"alc/view/layout"
 )
 
-templ ShowItem(item model.StoreItem) {
+func productToJSON(p store.Product) string {
+	bytes, err := json.Marshal(p)
+	if err != nil {
+		return "{}"
+	}
+	return string(bytes)
+}
+
+templ ShowItem(item store.Item, products []store.Product) {
 	@layout.BasePage(item.Name) {
 		<main>
 			<div class="px-4 py-9 max-w-7xl mx-auto lg:grid lg:grid-cols-5 lg:gap-x-28">
 				<!-- Navegacion -->
 				<div class="mb-9 font-semibold lg:col-span-5">
-					<a class="text-navy" href="/garantia">Paquetes de garantía ASUS&nbsp;&nbsp;</a>
-					<svg class="inline w-3 h-3 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
-					</svg>
-					<span class="text-livid">&nbsp;&nbsp;{ item.Name }</span>
+					<span>
+						<a class="text-navy" href="/garantia">Paquetes de garantía ASUS</a>
+					</span>
+					<span>
+						<svg class="inline w-3 h-3 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+						</svg>
+					</span>
+					<span class="text-livid">
+						<a class="text-navy" href={ templ.URL(path.Join("/garantia", item.Category.Slug)) }>{ item.Category.Name }</a>
+					</span>
+					<span>
+						<svg class="inline w-3 h-3 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+						</svg>
+					</span>
+					<span class="text-livid">
+						{ item.Name }
+					</span>
 				</div>
 				<!-- Formulario -->
 				<div class="lg:order-2 lg:col-span-2">
 					<div>
-						<img class="w-full aspect-[5/3] object-cover rounded-3xl" src={ item.Img }/>
+						<img class="w-full aspect-[5/3] object-cover rounded-3xl" src={ path.Join(config.IMAGES_PATH, item.Img.Filename) } alt={ item.Slug }/>
 					</div>
 					<div class="lg:hidden">
 						<h2 class="my-9 text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>
-						<p class="text-3xl font-semibold text-navy">{ fmt.Sprintf("$%.2f", float64(item.Price)/100.0) }</p>
+						<p class="garantia:price text-3xl font-semibold text-navy"></p>
 					</div>
-					<form id="item-form" class="flex flex-col gap-4 my-6" data-item={ item.ToJSON() } autocomplete="off">
+					<form id="item-form" class="flex flex-col gap-4 my-6" autocomplete="off">
 						<div>
 							<label class="block my-2 font-bold text-lg text-navy" for="serialnumber">Número serial del equipo a proteger:</label>
 							<input class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" type="text" id="serialnumber" name="serialnumber" placeholder="Números y letras entre 12 y 15 caracteres" pattern="[A-Za-z0-9]{12,15}" required/>
 							<div class="mt-2 font-semibold text-azure"><a href="https://www.asus.com/latin/support/article/566/" target="_blank">¿Dónde encontrar el número de serie?</a></div>
 						</div>
 						<div>
-							<label class="block my-2 font-bold text-lg text-navy" for="duration">Duración:</label>
-							<select class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" id="duration" name="duration" required>
-								<option value="12">12 meses</option>
-								<option value="24">24 meses</option>
+							<label class="block my-2 font-bold text-lg text-navy" for="product">Opciones:</label>
+							<select class="product-select block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" id="product" name="product" required>
+								for _, p := range products {
+									<option value={ productToJSON(p) }>{ p.Name }</option>
+								}
 							</select>
-						</div>
-						<div>
-							<label class="block my-2 font-bold text-lg text-navy" for="quantity">Cantidad:</label>
-							<input class="block p-2 w-16 border border-navy rounded-xl bg-chalky text-livid" type="number" id="quantity" name="quantity" min="1" value="1" required/>
 						</div>
 						<div class="flex gap-6">
 							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="submit" data-action="addToCart">Agregar al carrito</button>
@@ -51,36 +72,31 @@ templ ShowItem(item model.StoreItem) {
 					</form>
 					<script>
 (() => {
+	const toUSD = n => "$" + (n / 100).toFixed(2).toString();
 	const itemForm = document.querySelector("#item-form");
+	const productSelect = itemForm.querySelector(".product-select");
+	productSelect.addEventListener("change", e => {
+		const priceShow = Array.from(document.querySelectorAll(".garantia\\:price"));
+		priceShow.forEach(e => {
+			e.textContent = toUSD(parseInt(JSON.parse(e.target.value).price));
+		});
+	});
 	itemForm.addEventListener("submit", e => {
 		e.preventDefault();
 		const formData = new FormData(e.target);
-		const quantity = parseInt(formData.get("quantity"));
+		const serialnumber = formData.get("serialnumber");
+		const product = formData.get("product");
 		const cartDialog = document.querySelector("#cart-dialog"); // From header
 		const newItem = {
-			...JSON.parse(e.currentTarget.dataset.item),
-			quantity,
+			product: JSON.parse(product),
+			quantity: 1,
+			details: {
+				serial: serialnumber,
+			},
 		};
 		const action = e.submitter.dataset.action;
 		if (action === "addToCart") {
-			const addItem = items => {
-				let found = false;
-				const newItems = items.map(item => {
-					if (item.uuid === newItem.uuid) {
-						found = true;
-						return {
-							...newItem,
-							quantity: item.quantity + newItem.quantity,
-						};
-					} else {
-						return item;
-					}
-				});
-				if (!found) {
-					newItems.push(newItem);
-				}
-				return newItems;
-			};
+			const addItem = items => [...items, newItem];
 			(async () => {
 				const cart = document.querySelector("#shopping-cart");
 				await customElements.whenDefined(cart.localName);
@@ -98,7 +114,7 @@ templ ShowItem(item model.StoreItem) {
 				<div class="lg:order-1 lg:col-span-3">
 					<div class="hidden lg:block">
 						<h2 class="text-3xl font-bold text-azure">{ item.Name }</h2>
-						<p class="my-9 text-3xl font-semibold text-navy">{ fmt.Sprintf("$%.2f", float64(item.Price)/100.0) }</p>
+						<p class="garantia:price my-9 text-3xl font-semibold text-navy"></p>
 					</div>
 					<h4 class="mb-3 text-2xl font-bold text-navy">Requisitos:</h4>
 					<ul class="list-disc list-inside font-semibold text-lg text-navy">

@@ -35,7 +35,7 @@ func (h *Handler) HandleSignup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid email")
 	}
 
-	if !(8 <= len(u.Password) && len(u.Password) <= 30) {
+	if !(8 <= len(u.Password) && len(u.Password) <= 72) {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid password")
 	}
 
