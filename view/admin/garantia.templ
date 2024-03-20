@@ -2,22 +2,126 @@ package admin
 
 import (
 	"fmt"
+	"path"
+	"alc/config"
 	"alc/view/layout"
 	"alc/model/store"
 )
 
 script handleNewFormShow() {
-	const newItemApplet = document.querySelector("#new-item-applet");
-	const openButton = newItemApplet.querySelector("button.open");
-	const newItemDialog = newItemApplet.querySelector("dialog");
-
-	openButton.addEventListener("click", e => {
-		newItemDialog.showModal();
-	});
+	const dialog = document.querySelector("#new-item-dialog");
+	const form = dialog.querySelector("form.new-item");
+	form.reset();
+	dialog.showModal();
 }
 
-templ Garantia(cats []store.Category) {
+script handleUpdateFormShow(c store.Category) {
+	const dialog = document.querySelector("#update-item-dialog");
+	const form = dialog.querySelector("form.update-item");
+	form.reset();
+	form.querySelector("#up-id").value = c.id;
+	form.querySelector("#up-name").value = c.name;
+	form.querySelector("#up-description").value = c.description;
+	form.querySelector("#up-slug").value = c.slug;
+	dialog.showModal();
+}
+
+templ CategoryTableShow(cats []store.Category) {
+	for _, c := range cats {
+		<tr class="border-b border-black">
+			<th class="text-left" scope="row">{ fmt.Sprintf("%d", c.Id) }</th>
+			<td>
+				<a class="font-semibold text-azure" href={ templ.URL("/admin/garantia/" + c.Slug) }>{ c.Name }</a>
+			</td>
+			<td>{ c.Description }</td>
+			<td>{ c.Slug }</td>
+			<td>
+				if len(c.Img.Filename) != 0 {
+					<a class="font-semibold text-azure" href={ templ.URL(path.Join(config.IMAGES_PATH, c.Img.Filename)) } target="_blank">{ c.Img.Filename }</a>
+				} else {
+					<span>No image</span>
+				}
+			</td>
+			<td class="flex gap-2">
+				<button class="font-semibold text-azure" onclick={ handleUpdateFormShow(c) }>Editar</button>
+			</td>
+		</tr>
+	}
+}
+
+templ CategoryShow(cats []store.Category) {
 	@layout.BaseAdmin("Garantías") {
+		<div>
+			<!-- New item dialog -->
+			<dialog
+				id="new-item-dialog"
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+				m-0 p-6 w-[90%] max-w-lg
+				border border-black bg-white"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Nueva categoría</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<form class="new-item mt-3 space-y-2" hx-post="/admin/garantia" hx-target="#table-items" enctype="multipart/form-data" autocomplete="off">
+					<div>
+						<label for="name">Nombre:</label>
+						<input class="block w-full border border-livid" type="text" id="name" name="name" required/>
+					</div>
+					<div>
+						<label for="description">Descripción:</label>
+						<input class="block w-full border border-livid" type="text" id="description" name="description"/>
+					</div>
+					<div>
+						<label for="slug">Slug:</label>
+						<input class="block w-full border border-livid" type="text" id="slug" name="slug" required/>
+					</div>
+					<div>
+						<label for="img">Imagen:</label>
+						<input class="block" type="file" id="img" name="img" accept="image/png, image/jpeg, image/webp"/>
+					</div>
+					<div class="flex gap-6 !mt-3">
+						<button class="font-bold text-azure" type="submit">Guardar</button>
+						<button class="font-bold text-azure" type="reset">Reiniciar</button>
+					</div>
+				</form>
+			</dialog>
+			<!-- Update item dialog -->
+			<dialog
+				id="update-item-dialog"
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+				m-0 p-6 w-[90%] max-w-lg
+				border border-black bg-white"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Editar categoría</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<form class="update-item mt-3 space-y-2" hx-put="/admin/garantia" hx-target="#table-items" enctype="multipart/form-data" autocomplete="off">
+					<input type="hidden" id="up-id" name="id" required/>
+					<div>
+						<label for="up-name">Nombre:</label>
+						<input class="block w-full border border-livid" type="text" id="up-name" name="name" required/>
+					</div>
+					<div>
+						<label for="up-description">Descripción:</label>
+						<input class="block w-full border border-livid" type="text" id="up-description" name="description"/>
+					</div>
+					<div>
+						<label for="up-slug">Slug:</label>
+						<input class="block w-full border border-livid" type="text" id="up-slug" name="slug" required/>
+					</div>
+					<div>
+						<label for="up-img">Imagen:</label>
+						<input class="block" type="file" id="up-img" name="img" accept="image/png, image/jpeg, image/webp"/>
+					</div>
+					<div class="flex gap-6 !mt-3">
+						<button class="font-bold text-azure" type="submit">Actualizar</button>
+						<button class="font-bold text-azure" type="reset">Reiniciar</button>
+					</div>
+				</form>
+			</dialog>
+		</div>
 		<main>
 			<div>
 				<span class="font-semibold text-azure">
@@ -30,58 +134,22 @@ templ Garantia(cats []store.Category) {
 				</span>
 				<span class="text-livid">Garantías</span>
 			</div>
-			<div id="new-item-applet">
-				<button class="open font-semibold text-azure">Nueva categoría</button>
-				<dialog
-					class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-					m-0 p-6 w-[90%] max-w-lg
-					border border-black bg-white"
-				>
-					<form class="flex justify-between" method="dialog">
-						<h2 class="font-bold text-2xl">Nueva categoría</h2>
-						<button class="font-bold text-azure" type="submit">Salir</button>
-					</form>
-					<form class="mt-3 space-y-2" action="/admin/garantia" method="post">
-						<div>
-							<label class="block" for="name">Nombre:</label>
-							<input class="block w-full border border-livid" type="text" id="name" name="name" required/>
-						</div>
-						<div>
-							<label class="block" for="description">Descripción:</label>
-							<input class="block w-full border border-livid" type="text" id="description" name="description" required/>
-						</div>
-						<div>
-							<label class="block" for="slug">Slug:</label>
-							<input class="block w-full border border-livid" type="text" id="slug" name="slug" required/>
-						</div>
-						<div class="flex gap-6 !mt-3">
-							<button class="font-bold text-azure" type="submit">Guardar</button>
-							<button class="font-bold text-azure" type="reset">Reiniciar</button>
-						</div>
-					</form>
-				</dialog>
+			<div>
+				<button class="open font-semibold text-azure" onclick={ handleNewFormShow() }>Nueva categoría</button>
 			</div>
-			@handleNewFormShow()
 			<table class="table-auto w-full">
 				<thead>
-					<tr>
+					<tr class="border-b border-black text-left">
 						<th scope="col">ID</th>
 						<th scope="col">Nombre</th>
-						<th scope="col">Descripción</th>
+						<th class="w-96" scope="col">Descripción</th>
 						<th scope="col">Slug</th>
 						<th scope="col">Imagen</th>
+						<th scope="col">Acciones</th>
 					</tr>
 				</thead>
-				<tbody>
-					for _, c := range cats {
-						<tr>
-							<th scope="row">{ fmt.Sprintf("%d", c.Id) }</th>
-							<td>{ c.Name }</td>
-							<td>{ c.Description }</td>
-							<td>{ c.Slug }</td>
-							<td>TODO</td>
-						</tr>
-					}
+				<tbody id="table-items">
+					@CategoryTableShow(cats)
 				</tbody>
 			</table>
 		</main>

@@ -50,6 +50,9 @@ func main() {
 	// Static files
 	static(e)
 
+	// Images routes
+	e.Static("/images", "images")
+
 	// Page routes
 	e.GET("/", h.HandleIndexShow, authMiddleware)
 	e.GET("/ticket", h.HandleTicketShow, authMiddleware)
@@ -88,6 +91,8 @@ func main() {
 	g3.Use(authMiddleware, middle.Admin)
 	g3.GET("", h.HandleAdminShow)
 	g3.GET("/garantia", h.HandleAdminGarantiaShow)
+	g3.POST("/garantia", h.HandleNewGarantia)
+	g3.PUT("/garantia", h.HandleUpdateGarantia)
 	g3.GET("/store", h.HandleAdminStoreShow)
 
 	// Start server

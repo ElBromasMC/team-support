@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"alc/config"
 	"alc/model/store"
 	"alc/view/admin"
 	"context"
 	"net/http"
+	"os"
+	"path"
+	"strconv"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,29 +20,96 @@ func (h *Handler) HandleAdminShow(c echo.Context) error {
 
 // GET "/admin/garantia"
 func (h *Handler) HandleAdminGarantiaShow(c echo.Context) error {
-	rows, err := h.DB.Query(context.Background(), `SELECT id, name, description, slug
-FROM store_categories
-WHERE type = $1`, store.GarantiaType)
+	cats, err := h.GetCategories(store.GarantiaType)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return err
 	}
-	defer rows.Close()
-
-	cats, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Category, error) {
-		var cat store.Category
-		err := row.Scan(&cat.Id, &cat.Name, &cat.Description, &cat.Slug)
-		cat.Type = store.GarantiaType
-		return cat, err
-	})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return render(c, http.StatusOK, admin.Garantia(cats))
+	return render(c, http.StatusOK, admin.CategoryShow(cats))
 }
 
 // POST "/admin/garantia"
-func (h *Handler) HandleAdminGarantia(c echo.Context) error {
-	return nil
+func (h *Handler) HandleNewGarantia(c echo.Context) error {
+	name := c.FormValue("name")
+	description := c.FormValue("description")
+	slug := c.FormValue("slug")
+
+	img, err := c.FormFile("img")
+	if err != nil {
+		if _, err := h.DB.Exec(context.Background(), `INSERT INTO store_categories (type, name, description, slug)
+VALUES ($1, $2, $3, $4)`, store.GarantiaType, name, description, slug); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new category into database")
+		}
+	} else {
+		imgId, err := h.InsertImage(img)
+		if err != nil {
+			return err
+		}
+
+		if _, err := h.DB.Exec(context.Background(), `INSERT INTO store_categories (type, name, description, img_id, slug)
+VALUES ($1, $2, $3, $4, $5)`, store.GarantiaType, name, description, imgId, slug); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new category into database")
+		}
+	}
+
+	cats, err := h.GetCategories(store.GarantiaType)
+	if err != nil {
+		return err
+	}
+	return render(c, http.StatusOK, admin.CategoryTableShow(cats))
+}
+
+// PUT "/admin/garantia"
+func (h *Handler) HandleUpdateGarantia(c echo.Context) error {
+	idStr := c.FormValue("id")
+	name := c.FormValue("name")
+	description := c.FormValue("description")
+	slug := c.FormValue("slug")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid id")
+	}
+
+	img, err := c.FormFile("img")
+	if err != nil {
+		if _, err := h.DB.Exec(context.Background(), `UPDATE store_categories
+SET name = $1, description = $2, slug = $3
+WHERE id = $4`, name, description, slug, id); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the category into database")
+		}
+	} else {
+		// Remove previous image if exists
+		var prevImgId *int
+		var prevImgFilename *string
+		if err := h.DB.QueryRow(context.Background(), `SELECT img.id, img.filename
+FROM store_categories AS sc
+LEFT JOIN images AS img
+ON sc.img_id = img.id
+WHERE sc.id = $1`, id).Scan(&prevImgId, &prevImgFilename); err == nil {
+			// Delete from filesystem
+			os.Remove(path.Join(config.IMAGES_SAVEDIR, *prevImgFilename))
+			// Delete from database
+			h.DB.Exec(context.Background(), `DELETE FROM images WHERE id = $1`, *prevImgId)
+		}
+
+		// Insert new image
+		imgId, err := h.InsertImage(img)
+		if err != nil {
+			return err
+		}
+
+		if _, err := h.DB.Exec(context.Background(), `UPDATE store_categories
+SET name = $1, description = $2, img_id = $3, slug = $4
+WHERE id = $5`, name, description, imgId, slug, id); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the category into database")
+		}
+	}
+
+	cats, err := h.GetCategories(store.GarantiaType)
+	if err != nil {
+		return err
+	}
+	return render(c, http.StatusOK, admin.CategoryTableShow(cats))
 }
 
 // GET "/admin/store"

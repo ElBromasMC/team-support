@@ -6,7 +6,6 @@ RUN apk add --no-cache \
     make \
     npm
 
-# Use npm to install building tools
 RUN go install github.com/a-h/templ/cmd/templ@latest
 
 # Use npm to install building tools
