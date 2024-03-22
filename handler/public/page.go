@@ -1,17 +1,17 @@
-package handler
+package public
 
 import (
+	"alc/handler/util"
+	"alc/view/page"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-
-	"alc/view/page"
 )
 
 func (h *Handler) HandleIndexShow(c echo.Context) error {
-	return render(c, http.StatusOK, page.Index())
+	return util.Render(c, http.StatusOK, page.Index())
 }
 
 func (h *Handler) HandleTicketShow(c echo.Context) error {
-	return render(c, http.StatusOK, page.Ticket())
+	return util.Render(c, http.StatusOK, page.Ticket())
 }

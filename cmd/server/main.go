@@ -1,7 +1,8 @@
 package main
 
 import (
-	"alc/handler"
+	"alc/handler/admin"
+	"alc/handler/public"
 	middle "alc/middleware"
 	"context"
 	"log"
@@ -17,6 +18,9 @@ import (
 
 func main() {
 	e := echo.New()
+	if os.Getenv("ENV") == "development" {
+		e.Debug = true
+	}
 
 	// Database connection
 	dbconfig, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
@@ -33,8 +37,12 @@ func main() {
 	}
 	defer dbpool.Close()
 
-	// Initialize handler
-	h := handler.Handler{
+	// Initialize handlers
+	h := public.Handler{
+		DB: dbpool,
+	}
+
+	ah := admin.Handler{
 		DB: dbpool,
 	}
 
@@ -89,11 +97,14 @@ func main() {
 	// Admin group
 	g3 := e.Group("/admin")
 	g3.Use(authMiddleware, middle.Admin)
-	g3.GET("", h.HandleAdminShow)
-	g3.GET("/garantia", h.HandleAdminGarantiaShow)
-	g3.POST("/garantia", h.HandleNewGarantia)
-	g3.PUT("/garantia", h.HandleUpdateGarantia)
-	g3.GET("/store", h.HandleAdminStoreShow)
+	g3.GET("", ah.HandleIndexShow)
+	g3.GET("/garantia", ah.HandleGarantiaShow)
+	g3.POST("/garantia", ah.HandleNewGarantiaCategory)
+	g3.PUT("/garantia", ah.HandleUpdateGarantiaCategory)
+	g3.GET("/garantia/:slug", ah.HandleGarantiaCategoryShow)
+	g3.POST("/garantia/:slug", ah.HandleNewGarantiaItem)
+	g3.PUT("/garantia/:slug", ah.HandleUpdateGarantiaItem)
+	g3.GET("/store", ah.HandleStoreShow)
 
 	// Start server
 	port := os.Getenv("PORT")

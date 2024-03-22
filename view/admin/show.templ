@@ -4,6 +4,15 @@ import (
 	"alc/view/layout"
 )
 
+script HandleImageShow(name string, path string) {
+	const dialog = document.querySelector("#show-image-dialog");
+	dialog.querySelector("h2.image\\:name").textContent = name;
+	const img = new Image();
+	img.src = path;
+	dialog.querySelector(".image\\:img").replaceChildren(img);
+	dialog.showModal();
+}
+
 templ Show() {
 	@layout.BaseAdmin("Administración") {
 		<main>

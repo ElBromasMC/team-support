@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"alc/handler"
+	"alc/handler/util"
 	"alc/model"
 	"context"
 	"net/http"
@@ -20,7 +20,7 @@ func Auth(db *pgxpool.Pool) echo.MiddlewareFunc {
 			}
 			session, err := uuid.FromString(cookie.Value)
 			if err != nil {
-				handler.RemoveCookie(c, "session")
+				util.RemoveCookie(c, "session")
 				return next(c)
 			}
 			var user model.User
@@ -28,7 +28,7 @@ func Auth(db *pgxpool.Pool) echo.MiddlewareFunc {
 FROM users u
 JOIN sessions s ON u.user_id = s.user_id
 WHERE s.session_id = $1`, session).Scan(&user.Name, &user.Email, &user.Role); err != nil {
-				handler.RemoveCookie(c, "session")
+				util.RemoveCookie(c, "session")
 				return next(c)
 			}
 			user.Session = session

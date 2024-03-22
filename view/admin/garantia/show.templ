@@ -1,10 +1,10 @@
-package admin
+package garantia
 
 import (
-	"fmt"
 	"path"
 	"alc/config"
 	"alc/view/layout"
+	"alc/view/admin"
 	"alc/model/store"
 )
 
@@ -22,14 +22,12 @@ script handleUpdateFormShow(c store.Category) {
 	form.querySelector("#up-id").value = c.id;
 	form.querySelector("#up-name").value = c.name;
 	form.querySelector("#up-description").value = c.description;
-	form.querySelector("#up-slug").value = c.slug;
 	dialog.showModal();
 }
 
 templ CategoryTableShow(cats []store.Category) {
 	for _, c := range cats {
 		<tr class="border-b border-black">
-			<th class="text-left" scope="row">{ fmt.Sprintf("%d", c.Id) }</th>
 			<td>
 				<a class="font-semibold text-azure" href={ templ.URL("/admin/garantia/" + c.Slug) }>{ c.Name }</a>
 			</td>
@@ -37,20 +35,24 @@ templ CategoryTableShow(cats []store.Category) {
 			<td>{ c.Slug }</td>
 			<td>
 				if len(c.Img.Filename) != 0 {
-					<a class="font-semibold text-azure" href={ templ.URL(path.Join(config.IMAGES_PATH, c.Img.Filename)) } target="_blank">{ c.Img.Filename }</a>
+					<button
+						class="block font-semibold text-azure"
+						onclick={ admin.HandleImageShow(c.Img.Filename, path.Join(config.IMAGES_PATH, c.Img.Filename)) }
+					>{ c.Img.Filename }</button>
 				} else {
 					<span>No image</span>
 				}
 			</td>
-			<td class="flex gap-2">
-				<button class="font-semibold text-azure" onclick={ handleUpdateFormShow(c) }>Editar</button>
+			<td>
+				<button class="block font-semibold text-azure" onclick={ handleUpdateFormShow(c) }>Editar</button>
 			</td>
 		</tr>
 	}
 }
 
-templ CategoryShow(cats []store.Category) {
+templ Show(cats []store.Category) {
 	@layout.BaseAdmin("Garantías") {
+		<!-- Forms -->
 		<div>
 			<!-- New item dialog -->
 			<dialog
@@ -63,7 +65,14 @@ templ CategoryShow(cats []store.Category) {
 					<h2 class="font-bold text-2xl">Nueva categoría</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
-				<form class="new-item mt-3 space-y-2" hx-post="/admin/garantia" hx-target="#table-items" enctype="multipart/form-data" autocomplete="off">
+				<form
+					class="new-item mt-3 space-y-2"
+					hx-post="/admin/garantia"
+					hx-target="#table-items"
+					hx-on::after-request="document.querySelector('#new-item-dialog').close()"
+					enctype="multipart/form-data"
+					autocomplete="off"
+				>
 					<div>
 						<label for="name">Nombre:</label>
 						<input class="block w-full border border-livid" type="text" id="name" name="name" required/>
@@ -71,10 +80,6 @@ templ CategoryShow(cats []store.Category) {
 					<div>
 						<label for="description">Descripción:</label>
 						<input class="block w-full border border-livid" type="text" id="description" name="description"/>
-					</div>
-					<div>
-						<label for="slug">Slug:</label>
-						<input class="block w-full border border-livid" type="text" id="slug" name="slug" required/>
 					</div>
 					<div>
 						<label for="img">Imagen:</label>
@@ -97,7 +102,14 @@ templ CategoryShow(cats []store.Category) {
 					<h2 class="font-bold text-2xl">Editar categoría</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
-				<form class="update-item mt-3 space-y-2" hx-put="/admin/garantia" hx-target="#table-items" enctype="multipart/form-data" autocomplete="off">
+				<form
+					class="update-item mt-3 space-y-2"
+					hx-put="/admin/garantia"
+					hx-target="#table-items"
+					hx-on::after-request="document.querySelector('#update-item-dialog').close()"
+					enctype="multipart/form-data"
+					autocomplete="off"
+				>
 					<input type="hidden" id="up-id" name="id" required/>
 					<div>
 						<label for="up-name">Nombre:</label>
@@ -106,10 +118,6 @@ templ CategoryShow(cats []store.Category) {
 					<div>
 						<label for="up-description">Descripción:</label>
 						<input class="block w-full border border-livid" type="text" id="up-description" name="description"/>
-					</div>
-					<div>
-						<label for="up-slug">Slug:</label>
-						<input class="block w-full border border-livid" type="text" id="up-slug" name="slug" required/>
 					</div>
 					<div>
 						<label for="up-img">Imagen:</label>
@@ -123,6 +131,7 @@ templ CategoryShow(cats []store.Category) {
 			</dialog>
 		</div>
 		<main>
+			<!-- Navigation -->
 			<div>
 				<span class="font-semibold text-azure">
 					<a href="/admin">Administración</a>
@@ -135,14 +144,13 @@ templ CategoryShow(cats []store.Category) {
 				<span class="text-livid">Garantías</span>
 			</div>
 			<div>
-				<button class="open font-semibold text-azure" onclick={ handleNewFormShow() }>Nueva categoría</button>
+				<button class="font-semibold text-azure" onclick={ handleNewFormShow() }>Nueva categoría</button>
 			</div>
 			<table class="table-auto w-full">
 				<thead>
 					<tr class="border-b border-black text-left">
-						<th scope="col">ID</th>
 						<th scope="col">Nombre</th>
-						<th class="w-96" scope="col">Descripción</th>
+						<th class="w-72" scope="col">Descripción</th>
 						<th scope="col">Slug</th>
 						<th scope="col">Imagen</th>
 						<th scope="col">Acciones</th>

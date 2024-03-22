@@ -1,6 +1,7 @@
-package handler
+package public
 
 import (
+	"alc/handler/util"
 	"alc/model/store"
 	"alc/view/garantia"
 	"context"
@@ -12,26 +13,11 @@ import (
 
 // GET "/garantia"
 func (h *Handler) HandleGarantiaShow(c echo.Context) error {
-	rows, err := h.DB.Query(context.Background(), `SELECT sc.name, sc.slug, img.filename
-FROM store_categories AS sc
-LEFT JOIN images AS img
-ON sc.img_id = img.id
-WHERE sc.type = $1`, store.GarantiaType)
+	cats, err := h.GetCategories(store.GarantiaType)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return err
 	}
-	defer rows.Close()
-
-	cats, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Category, error) {
-		var cat store.Category
-		err := row.Scan(&cat.Name, &cat.Slug, &cat.Img.Filename)
-		cat.Type = store.GarantiaType
-		return cat, err
-	})
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return render(c, http.StatusOK, garantia.Show(cats))
+	return util.Render(c, http.StatusOK, garantia.Show(cats))
 }
 
 // GET "/garantia/:slug"
@@ -66,7 +52,7 @@ WHERE si.category_id = $1`, cat.Id)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return render(c, http.StatusOK, garantia.ShowCategory(cat, items))
+	return util.Render(c, http.StatusOK, garantia.ShowCategory(cat, items))
 }
 
 // GET "/garantia/:categorySlug/:itemSlug"
@@ -112,5 +98,5 @@ WHERE item_id = $1`, item.Id)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return render(c, http.StatusOK, garantia.ShowItem(item, products))
+	return util.Render(c, http.StatusOK, garantia.ShowItem(item, products))
 }

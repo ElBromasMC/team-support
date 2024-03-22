@@ -1,6 +1,7 @@
-package handler
+package public
 
 import (
+	"alc/handler/util"
 	"alc/model"
 	"alc/view/user"
 	"context"
@@ -16,7 +17,7 @@ import (
 
 // Signup
 func (h *Handler) HandleSignupShow(c echo.Context) error {
-	return render(c, http.StatusOK, user.SignupShow())
+	return util.Render(c, http.StatusOK, user.SignupShow())
 }
 
 func (h *Handler) HandleSignup(c echo.Context) error {
@@ -62,7 +63,7 @@ VALUES ($1, $2, $3)`, tname, temail, string(hpass)); err != nil {
 
 // Login
 func (h *Handler) HandleLoginShow(c echo.Context) error {
-	return render(c, http.StatusOK, user.LoginShow(c.QueryParam("to")))
+	return util.Render(c, http.StatusOK, user.LoginShow(c.QueryParam("to")))
 }
 
 func (h *Handler) HandleLogin(c echo.Context) error {
@@ -112,7 +113,7 @@ VALUES ($1) RETURNING session_id`, userid).Scan(&session); err != nil {
 
 // Logout
 func (h *Handler) HandleLogout(c echo.Context) error {
-	defer RemoveCookie(c, "session")
+	defer util.RemoveCookie(c, "session")
 	user, ok := c.Request().Context().Value("user").(model.User)
 	if !ok {
 		return c.Redirect(http.StatusFound, "/")

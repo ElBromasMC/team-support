@@ -1,6 +1,7 @@
-package handler
+package public
 
 import (
+	"alc/handler/util"
 	"alc/view/cart"
 	"net/http"
 
@@ -8,5 +9,5 @@ import (
 )
 
 func (h *Handler) HandleCartShow(c echo.Context) error {
-	return render(c, http.StatusOK, cart.Show())
+	return util.Render(c, http.StatusOK, cart.Show())
 }

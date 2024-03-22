@@ -1,6 +1,7 @@
-package handler
+package public
 
 import (
+	"alc/handler/util"
 	"alc/model/store"
 	view "alc/view/store"
 	"context"
@@ -31,7 +32,7 @@ WHERE type = $1`, store.StoreType)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return render(c, http.StatusOK, view.Show(cats, "all"))
+	return util.Render(c, http.StatusOK, view.Show(cats, "all"))
 }
 
 // GET "/store/:slug"
@@ -64,7 +65,7 @@ WHERE sc.type = $1`, store.StoreType)
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	return render(c, http.StatusOK, view.Show(cats, slug))
+	return util.Render(c, http.StatusOK, view.Show(cats, slug))
 }
 
 // POST "/store/all"
@@ -101,7 +102,7 @@ LIMIT 10 OFFSET ($3 - 1) * 9`, store.StoreType, like, page)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return render(c, http.StatusOK, view.ShowItems(items))
+	return util.Render(c, http.StatusOK, view.ShowItems(items))
 }
 
 // POST "/store/:slug"
@@ -139,7 +140,7 @@ LIMIT 10 OFFSET ($4 - 1) * 9`, store.StoreType, slug, like, page)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return render(c, http.StatusOK, view.ShowItems(items))
+	return util.Render(c, http.StatusOK, view.ShowItems(items))
 }
 
 // GET "/store/:categorySlug/:itemSlug"
@@ -186,5 +187,5 @@ WHERE item_id = $1`, item.Id)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return render(c, http.StatusOK, view.ShowItem(item, products))
+	return util.Render(c, http.StatusOK, view.ShowItem(item, products))
 }
