@@ -13,7 +13,7 @@ import (
 
 // GET "/garantia"
 func (h *Handler) HandleGarantiaShow(c echo.Context) error {
-	cats, err := h.GetCategories(store.GarantiaType)
+	cats, err := h.PublicService.GetCategories(store.GarantiaType)
 	if err != nil {
 		return err
 	}
@@ -24,32 +24,14 @@ func (h *Handler) HandleGarantiaShow(c echo.Context) error {
 func (h *Handler) HandleGarantiaCategoryShow(c echo.Context) error {
 	slug := c.Param("slug")
 
-	var cat store.Category
-	if err := h.DB.QueryRow(context.Background(), `SELECT id, name, description
-FROM store_categories
-WHERE type = $1 AND slug = $2`, store.GarantiaType, slug).Scan(&cat.Id, &cat.Name, &cat.Description); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "Categoría no encontrada")
-	}
-	cat.Type = store.GarantiaType
-	cat.Slug = slug
-
-	rows, err := h.DB.Query(context.Background(), `SELECT si.name, si.slug, img.filename
-FROM store_items AS si
-LEFT JOIN images AS img
-ON si.img_id = img.id
-WHERE si.category_id = $1`, cat.Id)
+	cat, err := h.PublicService.GetCategory(store.GarantiaType, slug)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return err
 	}
-	defer rows.Close()
 
-	items, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Item, error) {
-		var item store.Item
-		err := row.Scan(&item.Name, &item.Slug, &item.Img.Filename)
-		return item, err
-	})
+	items, err := h.PublicService.GetItems(cat)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return err
 	}
 
 	return util.Render(c, http.StatusOK, garantia.ShowCategory(cat, items))
@@ -60,17 +42,13 @@ func (h *Handler) HandleGarantiaItemShow(c echo.Context) error {
 	categorySlug := c.Param("categorySlug")
 	itemSlug := c.Param("itemSlug")
 
-	var cat store.Category
-	if err := h.DB.QueryRow(context.Background(), `SELECT id, name
-FROM store_categories
-WHERE type = $1 AND slug = $2`, store.GarantiaType, categorySlug).Scan(&cat.Id, &cat.Name); err != nil {
-		return echo.NewHTTPError(http.StatusNotFound)
+	cat, err := h.PublicService.GetCategory(store.GarantiaType, categorySlug)
+	if err != nil {
+		return err
 	}
-	cat.Type = store.GarantiaType
-	cat.Slug = categorySlug
 
 	var item store.Item
-	if err := h.DB.QueryRow(context.Background(), `SELECT si.id, si.name, img.filename
+	if err := h.PublicService.DB.QueryRow(context.Background(), `SELECT si.id, si.name, img.filename
 FROM store_items AS si
 LEFT JOIN images AS img
 ON si.img_id = img.id
@@ -80,7 +58,7 @@ WHERE si.category_id = $1 AND si.slug = $2`, cat.Id, itemSlug).Scan(&item.Id, &i
 	item.Slug = itemSlug
 	item.Category = cat
 
-	rows, err := h.DB.Query(context.Background(), `SELECT id, name, price, details
+	rows, err := h.PublicService.DB.Query(context.Background(), `SELECT id, name, price, details
 FROM store_products
 WHERE item_id = $1`, item.Id)
 	if err != nil {

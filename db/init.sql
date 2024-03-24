@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS store_items (
     largeimg_id INT,
     slug VARCHAR(255) NOT NULL,
     UNIQUE(category_id, slug),
-    FOREIGN KEY (category_id) REFERENCES store_categories(id) ON DELETE RESTRICT,
+    FOREIGN KEY (category_id) REFERENCES store_categories(id) ON DELETE CASCADE,
     FOREIGN KEY (img_id) REFERENCES images(id) ON DELETE SET NULL,
     FOREIGN KEY (largeimg_id) REFERENCES images(id) ON DELETE SET NULL
 );

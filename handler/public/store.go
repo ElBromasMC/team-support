@@ -14,7 +14,7 @@ import (
 
 // GET "/store/all"
 func (h *Handler) HandleStoreAllShow(c echo.Context) error {
-	rows, err := h.DB.Query(context.Background(), `SELECT name, slug
+	rows, err := h.PublicService.DB.Query(context.Background(), `SELECT name, slug
 FROM store_categories
 WHERE type = $1`, store.StoreType)
 	if err != nil {
@@ -39,7 +39,7 @@ WHERE type = $1`, store.StoreType)
 func (h *Handler) HandleStoreCategoryShow(c echo.Context) error {
 	slug := c.Param("slug")
 
-	rows, err := h.DB.Query(context.Background(), `SELECT name, slug
+	rows, err := h.PublicService.DB.Query(context.Background(), `SELECT name, slug
 FROM store_categories
 WHERE sc.type = $1`, store.StoreType)
 	if err != nil {
@@ -78,7 +78,7 @@ func (h *Handler) HandleStoreAllItemsShow(c echo.Context) error {
 		page = 1
 	}
 
-	rows, err := h.DB.Query(context.Background(), `SELECT si.name, si.slug, sc.slug, img.filename
+	rows, err := h.PublicService.DB.Query(context.Background(), `SELECT si.name, si.slug, sc.slug, img.filename
 FROM store_items AS si
 JOIN store_categories AS sc
 ON si.category_id = sc.id
@@ -116,7 +116,7 @@ func (h *Handler) HandleStoreCategoryItemsShow(c echo.Context) error {
 		page = 1
 	}
 
-	rows, err := h.DB.Query(context.Background(), `SELECT si.name, si.slug, sc.slug, img.filename
+	rows, err := h.PublicService.DB.Query(context.Background(), `SELECT si.name, si.slug, sc.slug, img.filename
 FROM store_items AS si
 JOIN store_categories AS sc
 ON si.category_id = sc.id
@@ -149,7 +149,7 @@ func (h *Handler) HandleStoreItemShow(c echo.Context) error {
 	itemSlug := c.Param("itemSlug")
 
 	var cat store.Category
-	if err := h.DB.QueryRow(context.Background(), `SELECT id, name
+	if err := h.PublicService.DB.QueryRow(context.Background(), `SELECT id, name
 FROM store_categories
 WHERE type = $1 AND slug = $2`, store.StoreType, categorySlug).Scan(&cat.Id, &cat.Name); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound)
@@ -158,7 +158,7 @@ WHERE type = $1 AND slug = $2`, store.StoreType, categorySlug).Scan(&cat.Id, &ca
 	cat.Slug = categorySlug
 
 	var item store.Item
-	if err := h.DB.QueryRow(context.Background(), `SELECT si.id, si.name, si.description, si.long_description, largeimg.filename
+	if err := h.PublicService.DB.QueryRow(context.Background(), `SELECT si.id, si.name, si.description, si.long_description, largeimg.filename
 FROM store_items AS si
 LEFT JOIN images AS largeimg
 ON si.largeimg_id = largeimg.id
@@ -169,7 +169,7 @@ AND si.slug = $2`, cat.Id, itemSlug).Scan(&item.Id, &item.Name, &item.Descriptio
 	item.Slug = itemSlug
 	item.Category = cat
 
-	rows, err := h.DB.Query(context.Background(), `SELECT id, name, price, details
+	rows, err := h.PublicService.DB.Query(context.Background(), `SELECT id, name, price, details
 FROM store_products
 WHERE item_id = $1`, item.Id)
 	if err != nil {

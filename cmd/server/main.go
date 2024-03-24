@@ -4,6 +4,7 @@ import (
 	"alc/handler/admin"
 	"alc/handler/public"
 	middle "alc/middleware"
+	"alc/service"
 	"context"
 	"log"
 	"net/http"
@@ -37,13 +38,21 @@ func main() {
 	}
 	defer dbpool.Close()
 
-	// Initialize handlers
-	h := public.Handler{
+	// Initialize services
+	ps := service.Public{
 		DB: dbpool,
+	}
+	as := service.Admin{
+		Public: ps,
+	}
+
+	// Initialize handlers
+	ph := public.Handler{
+		PublicService: ps,
 	}
 
 	ah := admin.Handler{
-		DB: dbpool,
+		AdminService: as,
 	}
 
 	// Middleware
@@ -62,15 +71,15 @@ func main() {
 	e.Static("/images", "images")
 
 	// Page routes
-	e.GET("/", h.HandleIndexShow, authMiddleware)
-	e.GET("/ticket", h.HandleTicketShow, authMiddleware)
+	e.GET("/", ph.HandleIndexShow, authMiddleware)
+	e.GET("/ticket", ph.HandleTicketShow, authMiddleware)
 
 	// Garantia routes
 	g1 := e.Group("/garantia")
 	g1.Use(authMiddleware)
-	g1.GET("", h.HandleGarantiaShow)
-	g1.GET("/:slug", h.HandleGarantiaCategoryShow)
-	g1.GET("/:categorySlug/:itemSlug", h.HandleGarantiaItemShow)
+	g1.GET("", ph.HandleGarantiaShow)
+	g1.GET("/:slug", ph.HandleGarantiaCategoryShow)
+	g1.GET("/:categorySlug/:itemSlug", ph.HandleGarantiaItemShow)
 
 	// Store routes
 	g2 := e.Group("/store")
@@ -78,32 +87,41 @@ func main() {
 	g2.GET("", func(c echo.Context) error {
 		return c.Redirect(http.StatusPermanentRedirect, "/store/all")
 	})
-	g2.GET("/all", h.HandleStoreAllShow)
-	g2.GET("/:slug", h.HandleStoreCategoryShow)
-	g2.POST("/all", h.HandleStoreAllItemsShow)
-	g2.POST("/:slug", h.HandleStoreCategoryItemsShow)
-	g2.GET("/:categorySlug/:itemSlug", h.HandleStoreItemShow)
+	g2.GET("/all", ph.HandleStoreAllShow)
+	g2.GET("/:slug", ph.HandleStoreCategoryShow)
+	g2.POST("/all", ph.HandleStoreAllItemsShow)
+	g2.POST("/:slug", ph.HandleStoreCategoryItemsShow)
+	g2.GET("/:categorySlug/:itemSlug", ph.HandleStoreItemShow)
 
 	// Cart routes
-	e.GET("/cart", h.HandleCartShow, authMiddleware)
+	e.GET("/cart", ph.HandleCartShow, authMiddleware)
 
 	// User routes
-	e.GET("/login", h.HandleLoginShow)
-	e.GET("/signup", h.HandleSignupShow)
-	e.POST("/login", h.HandleLogin)
-	e.POST("/signup", h.HandleSignup)
-	e.GET("/logout", h.HandleLogout, authMiddleware)
+	e.GET("/login", ph.HandleLoginShow)
+	e.GET("/signup", ph.HandleSignupShow)
+	e.POST("/login", ph.HandleLogin)
+	e.POST("/signup", ph.HandleSignup)
+	e.GET("/logout", ph.HandleLogout, authMiddleware)
 
 	// Admin group
 	g3 := e.Group("/admin")
 	g3.Use(authMiddleware, middle.Admin)
 	g3.GET("", ah.HandleIndexShow)
+
 	g3.GET("/garantia", ah.HandleGarantiaShow)
 	g3.POST("/garantia", ah.HandleNewGarantiaCategory)
 	g3.PUT("/garantia", ah.HandleUpdateGarantiaCategory)
+
 	g3.GET("/garantia/:slug", ah.HandleGarantiaCategoryShow)
 	g3.POST("/garantia/:slug", ah.HandleNewGarantiaItem)
 	g3.PUT("/garantia/:slug", ah.HandleUpdateGarantiaItem)
+	g3.DELETE("/garantia/:slug", ah.HandleRemoveGarantiaItem)
+
+	g3.GET("/garantia/:categorySlug/:itemSlug", ah.HandleGarantiaItemShow)
+	g3.POST("/garantia/:categorySlug/:itemSlug", ah.HandleNewGarantiaProduct)
+	g3.PUT("/garantia/:categorySlug/:itemSlug", ah.HandleUpdateGarantiaProduct)
+	g3.DELETE("/garantia/:categorySlug/:itemSlug", ah.HandleRemoveGarantiaProduct)
+
 	g3.GET("/store", ah.HandleStoreShow)
 
 	// Start server

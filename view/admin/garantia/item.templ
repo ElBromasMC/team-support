@@ -1,67 +1,58 @@
 package garantia
 
 import (
+	"fmt"
 	"path"
-	"alc/config"
-	"alc/view/admin"
 	"alc/model/store"
 	"alc/view/layout"
 )
 
-script handleNewItemFormShow() {
+script handleNewProductFormShow() {
 	const dialog = document.querySelector("#new-item-dialog");
 	const form = dialog.querySelector("form.new-item");
 	form.reset();
 	dialog.showModal();
 }
 
-script handleUpdateItemFormShow(i store.Item) {
+script handleUpdateProductFormShow(p store.Product) {
 	const dialog = document.querySelector("#update-item-dialog");
 	const form = dialog.querySelector("form.update-item");
 	form.reset();
-	form.querySelector("#up-id").value = i.id;
-	form.querySelector("#up-name").value = i.name;
-	form.querySelector("#up-description").value = i.description;
+	form.querySelector("#up-id").value = p.id;
+	form.querySelector("#up-name").value = p.name;
+	form.querySelector("#up-price").value = (p.price / 100).toFixed(2);
 	dialog.showModal();
 }
 
-script handleDeleteItemFormShow(i store.Item) {
+script handleDeleteProductFormShow(p store.Product) {
 	const dialog = document.querySelector("#delete-item-dialog");
 	const form = dialog.querySelector("form.delete-item");
 	form.reset();
-	form.querySelector("#de-id").value = i.id;
-	form.querySelector("#de-name").value = i.name;
+	form.querySelector("#de-id").value = p.id;
+	form.querySelector("#de-name").value = p.name;
 	dialog.showModal();
 }
 
-templ ItemTableShow(items []store.Item) {
-	for _, i := range items {
+templ ProductTableShow(products []store.Product) {
+	for _, p := range products {
 		<tr class="border-b border-black">
+			<td>{ p.Name }</td>
+			<td>{ fmt.Sprintf("US$%.2f", float64(p.Price)/100.0) }</td>
 			<td>
-				<a class="font-semibold text-azure" href={ templ.URL(path.Join("/admin/garantia", i.Category.Slug, i.Slug)) }>{ i.Name }</a>
-			</td>
-			<td>{ i.Description }</td>
-			<td>{ i.Slug }</td>
-			<td>
-				if len(i.Img.Filename) != 0 {
-					<button
-						class="block font-semibold text-azure"
-						onclick={ admin.HandleImageShow(i.Img.Filename, path.Join(config.IMAGES_PATH, i.Img.Filename)) }
-					>{ i.Img.Filename }</button>
-				} else {
-					<span>No image</span>
+				for key, value := range p.Details {
+					<div>{ fmt.Sprintf("%s: %s", key, value) }</div>
 				}
 			</td>
 			<td>
-				<button class="block font-semibold text-azure" onclick={ handleUpdateItemFormShow(i) }>Editar</button>
-				<button class="block font-semibold text-azure" onclick={ handleDeleteItemFormShow(i) }>Borrar</button>
+				<button class="block font-semibold text-azure" onclick={ handleUpdateProductFormShow(p) }>Editar</button>
+				<button class="block font-semibold text-azure" onclick={ handleDeleteProductFormShow(p) }>Borrar</button>
 			</td>
 		</tr>
 	}
 }
 
-templ CategoryShow(cat store.Category, items []store.Item) {
-	@layout.BaseAdmin(cat.Name) {
+templ ItemShow(item store.Item, products []store.Product) {
+	@layout.BaseAdmin(item.Name) {
 		<!-- Forms -->
 		<div>
 			<!-- New item dialog -->
@@ -72,28 +63,27 @@ templ CategoryShow(cat store.Category, items []store.Item) {
 				border border-black bg-white"
 			>
 				<form class="flex justify-between" method="dialog">
-					<h2 class="font-bold text-2xl">Nuevo item</h2>
+					<!-- Title -->
+					<h2 class="font-bold text-2xl">Nuevo producto</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
+				<!-- hx-post, enctype -->
 				<form
 					class="new-item mt-3 space-y-2"
-					hx-post={ string(templ.URL("/admin/garantia/" + cat.Slug)) }
+					hx-post={ string(templ.URL(path.Join("/admin/garantia", item.Category.Slug, item.Slug))) }
 					hx-target="#table-items"
 					hx-on::after-request="document.querySelector('#new-item-dialog').close()"
-					enctype="multipart/form-data"
+					enctype="application/x-www-form-urlencoded"
 					autocomplete="off"
 				>
+					<!-- Fields -->
 					<div>
 						<label for="name">Nombre:</label>
 						<input class="block w-full border border-livid" type="text" id="name" name="name" required/>
 					</div>
 					<div>
-						<label for="description">Descripción:</label>
-						<input class="block w-full border border-livid" type="text" id="description" name="description"/>
-					</div>
-					<div>
-						<label for="img">Imagen:</label>
-						<input class="block" type="file" id="img" name="img" accept="image/png, image/jpeg, image/webp"/>
+						<label for="price">Precio:</label>
+						<input class="block w-full border border-livid" placeholder="US$" type="number" min="0" step="0.01" id="price" name="price" required/>
 					</div>
 					<div class="flex gap-6 !mt-3">
 						<button class="font-bold text-azure" type="submit">Guardar</button>
@@ -109,29 +99,28 @@ templ CategoryShow(cat store.Category, items []store.Item) {
 				border border-black bg-white"
 			>
 				<form class="flex justify-between" method="dialog">
-					<h2 class="font-bold text-2xl">Editar item</h2>
+					<!-- Title -->
+					<h2 class="font-bold text-2xl">Editar producto</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
+				<!-- hx-put, enctype -->
 				<form
 					class="update-item mt-3 space-y-2"
-					hx-put={ string(templ.URL("/admin/garantia/" + cat.Slug)) }
+					hx-put={ string(templ.URL(path.Join("/admin/garantia", item.Category.Slug, item.Slug))) }
 					hx-target="#table-items"
 					hx-on::after-request="document.querySelector('#update-item-dialog').close()"
-					enctype="multipart/form-data"
+					enctype="application/x-www-form-urlencoded"
 					autocomplete="off"
 				>
+					<!-- Fields -->
 					<input type="hidden" id="up-id" name="id" required/>
 					<div>
 						<label for="up-name">Nombre:</label>
 						<input class="block w-full border border-livid" type="text" id="up-name" name="name" required/>
 					</div>
 					<div>
-						<label for="up-description">Descripción:</label>
-						<input class="block w-full border border-livid" type="text" id="up-description" name="description"/>
-					</div>
-					<div>
-						<label for="up-img">Imagen:</label>
-						<input class="block" type="file" id="up-img" name="img" accept="image/png, image/jpeg, image/webp"/>
+						<label for="up-price">Precio:</label>
+						<input class="block w-full border border-livid" placeholder="US$" type="number" min="0" step="0.01" id="up-price" name="price" required/>
 					</div>
 					<div class="flex gap-6 !mt-3">
 						<button class="font-bold text-azure" type="submit">Actualizar</button>
@@ -147,17 +136,20 @@ templ CategoryShow(cat store.Category, items []store.Item) {
 				border border-black bg-white"
 			>
 				<form class="flex justify-between" method="dialog">
+					<!-- Title -->
 					<h2 class="font-bold text-2xl">¿Estás seguro?</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
+				<!-- hx-delete, enctype -->
 				<form
 					class="delete-item mt-3 space-y-2"
-					hx-delete={ string(templ.URL("/admin/garantia/" + cat.Slug)) }
+					hx-delete={ string(templ.URL(path.Join("/admin/garantia", item.Category.Slug, item.Slug))) }
 					hx-target="#table-items"
 					hx-on::after-request="document.querySelector('#delete-item-dialog').close()"
 					enctype="multipart/form-data"
 					autocomplete="off"
 				>
+					<!-- Fields -->
 					<input type="hidden" id="de-id" name="id" required/>
 					<div>
 						<label for="de-name">Nombre:</label>
@@ -188,23 +180,31 @@ templ CategoryShow(cat store.Category, items []store.Item) {
 						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
 					</svg>
 				</span>
-				<span class="text-livid">{ cat.Name }</span>
+				<span class="font-semibold text-azure">
+					<a href={ templ.URL("/admin/garantia/" + item.Category.Slug) }>{ item.Category.Name }</a>
+				</span>
+				<span>
+					<svg class="inline w-4 h-4 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+					</svg>
+				</span>
+				<span class="text-livid">{ item.Name }</span>
 			</div>
 			<div>
-				<button class="font-semibold text-azure" onclick={ handleNewItemFormShow() }>Nuevo item</button>
+				<!-- New item button -->
+				<button class="font-semibold text-azure" onclick={ handleNewProductFormShow() }>Nuevo producto</button>
 			</div>
 			<table class="table-auto w-full">
 				<thead>
 					<tr class="border-b border-black text-left">
 						<th scope="col">Nombre</th>
-						<th class="w-72" scope="col">Descripción</th>
-						<th scope="col">Slug</th>
-						<th scope="col">Imagen</th>
+						<th scope="col">Precio</th>
+						<th scope="col">Detalles</th>
 						<th scope="col">Acciones</th>
 					</tr>
 				</thead>
 				<tbody id="table-items">
-					@ItemTableShow(items)
+					@ProductTableShow(products)
 				</tbody>
 			</table>
 		</main>

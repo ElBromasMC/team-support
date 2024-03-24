@@ -51,7 +51,7 @@ func (h *Handler) HandleSignup(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	// Save user
-	if _, err := h.DB.Exec(context.Background(), `INSERT INTO users (name, email, hashed_password)
+	if _, err := h.PublicService.DB.Exec(context.Background(), `INSERT INTO users (name, email, hashed_password)
 VALUES ($1, $2, $3)`, tname, temail, string(hpass)); err != nil {
 		// ToDo: Test and handle unique email condition
 		c.Logger().Error(err)
@@ -79,7 +79,7 @@ func (h *Handler) HandleLogin(c echo.Context) error {
 	// Verify credentials
 	var userid uuid.UUID
 	var hpass string
-	if err := h.DB.QueryRow(context.Background(), `SELECT user_id, hashed_password
+	if err := h.PublicService.DB.QueryRow(context.Background(), `SELECT user_id, hashed_password
 FROM users WHERE email = $1`, temail).Scan(&userid, &hpass); err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Email not found")
 	}
@@ -89,7 +89,7 @@ FROM users WHERE email = $1`, temail).Scan(&userid, &hpass); err != nil {
 
 	// Start new session
 	var session uuid.UUID
-	if err := h.DB.QueryRow(context.Background(), `INSERT INTO sessions (user_id)
+	if err := h.PublicService.DB.QueryRow(context.Background(), `INSERT INTO sessions (user_id)
 VALUES ($1) RETURNING session_id`, userid).Scan(&session); err != nil {
 		c.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -118,7 +118,7 @@ func (h *Handler) HandleLogout(c echo.Context) error {
 	if !ok {
 		return c.Redirect(http.StatusFound, "/")
 	}
-	if _, err := h.DB.Exec(context.Background(), `DELETE FROM sessions
+	if _, err := h.PublicService.DB.Exec(context.Background(), `DELETE FROM sessions
 WHERE session_id = $1`, user.Session); err != nil {
 		return c.Redirect(http.StatusFound, "/")
 	}

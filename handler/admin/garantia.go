@@ -4,7 +4,7 @@ import (
 	"alc/handler/util"
 	"alc/model/store"
 	"alc/view/admin/garantia"
-	"context"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -14,7 +14,7 @@ import (
 
 // GET "/admin/garantia"
 func (h *Handler) HandleGarantiaShow(c echo.Context) error {
-	cats, err := h.GetCategories(store.GarantiaType)
+	cats, err := h.AdminService.GetCategories(store.GarantiaType)
 	if err != nil {
 		return err
 	}
@@ -23,29 +23,33 @@ func (h *Handler) HandleGarantiaShow(c echo.Context) error {
 
 // POST "/admin/garantia"
 func (h *Handler) HandleNewGarantiaCategory(c echo.Context) error {
-	name := c.FormValue("name")
-	description := c.FormValue("description")
-	slug := slug.Make(name)
+	// Parsing request
+	var cat store.Category
+	cat.Type = store.GarantiaType
+	cat.Name = c.FormValue("name")
+	cat.Description = c.FormValue("description")
 
-	img, err := c.FormFile("img")
-	if err != nil {
-		if _, err := h.DB.Exec(context.Background(), `INSERT INTO store_categories (type, name, description, slug)
-VALUES ($1, $2, $3, $4)`, store.GarantiaType, name, description, slug); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new category into database")
-		}
-	} else {
-		imgId, err := h.InsertImage(img)
+	img, imgErr := c.FormFile("img")
+
+	// Generate slug from name
+	cat.Slug = slug.Make(cat.Name)
+
+	// Insert and attach image if present in request
+	if imgErr == nil {
+		newImg, err := h.AdminService.InsertImage(img)
 		if err != nil {
 			return err
 		}
-
-		if _, err := h.DB.Exec(context.Background(), `INSERT INTO store_categories (type, name, description, img_id, slug)
-VALUES ($1, $2, $3, $4, $5)`, store.GarantiaType, name, description, imgId, slug); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new category into database")
-		}
+		cat.Img = newImg
 	}
 
-	cats, err := h.GetCategories(store.GarantiaType)
+	// Insert it into database
+	if _, err := h.AdminService.InsertCategory(cat); err != nil {
+		return err
+	}
+
+	// Get updated categories
+	cats, err := h.AdminService.GetCategories(store.GarantiaType)
 	if err != nil {
 		return err
 	}
@@ -54,53 +58,38 @@ VALUES ($1, $2, $3, $4, $5)`, store.GarantiaType, name, description, imgId, slug
 
 // PUT "/admin/garantia"
 func (h *Handler) HandleUpdateGarantiaCategory(c echo.Context) error {
-	idStr := c.FormValue("id")
-
-	name := c.FormValue("name")
-	description := c.FormValue("description")
-	slug := slug.Make(name)
-	id, err := strconv.Atoi(idStr)
+	// Parsing request
+	id, err := strconv.Atoi(c.FormValue("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid id")
 	}
 
-	img, err := c.FormFile("img")
-	if err != nil {
-		if _, err := h.DB.Exec(context.Background(), `UPDATE store_categories
-SET name = $1, description = $2, slug = $3
-WHERE id = $4`, name, description, slug, id); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the category into database")
-		}
-	} else {
-		var prevImgId *int
-		var prevImgFilename *string
-		h.DB.QueryRow(context.Background(), `SELECT img.id, img.filename
-FROM store_categories AS sc
-LEFT JOIN images AS img
-ON sc.img_id = img.id
-WHERE sc.id = $1`, id).Scan(&prevImgId, &prevImgFilename)
-		// Remove previous image if exists
-		if prevImgId != nil && prevImgFilename != nil {
-			h.RemoveImage(store.Image{
-				Id:       *prevImgId,
-				Filename: *prevImgFilename,
-			})
-		}
+	var cat store.Category
+	cat.Type = store.GarantiaType
+	cat.Name = c.FormValue("name")
+	cat.Description = c.FormValue("description")
 
-		// Insert new image
-		imgId, err := h.InsertImage(img)
+	img, imgErr := c.FormFile("img")
+
+	// Generate slug from name
+	cat.Slug = slug.Make(cat.Name)
+
+	// Insert and attach image if present in request
+	if imgErr == nil {
+		newImg, err := h.AdminService.InsertImage(img)
 		if err != nil {
 			return err
 		}
-
-		if _, err := h.DB.Exec(context.Background(), `UPDATE store_categories
-SET name = $1, description = $2, img_id = $3, slug = $4
-WHERE id = $5`, name, description, imgId, slug, id); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the category into database")
-		}
+		cat.Img = newImg
 	}
 
-	cats, err := h.GetCategories(store.GarantiaType)
+	// Update category
+	if err := h.AdminService.UpdateCategory(id, cat); err != nil {
+		return err
+	}
+
+	// Get updated categories
+	cats, err := h.AdminService.GetCategories(store.GarantiaType)
 	if err != nil {
 		return err
 	}
@@ -109,13 +98,15 @@ WHERE id = $5`, name, description, imgId, slug, id); err != nil {
 
 // GET "/admin/garantia/:slug"
 func (h *Handler) HandleGarantiaCategoryShow(c echo.Context) error {
-	slug := c.Param("slug")
-	cat, err := h.GetCategory(store.GarantiaType, slug)
+	// Parsing request
+	catSlug := c.Param("slug")
+
+	cat, err := h.AdminService.GetCategory(store.GarantiaType, catSlug)
 	if err != nil {
 		return err
 	}
 
-	items, err := h.GetItems(cat)
+	items, err := h.AdminService.GetItems(cat)
 	if err != nil {
 		return err
 	}
@@ -124,35 +115,41 @@ func (h *Handler) HandleGarantiaCategoryShow(c echo.Context) error {
 
 // POST "/admin/garantia/:slug"
 func (h *Handler) HandleNewGarantiaItem(c echo.Context) error {
+	// Parsing request
 	catSlug := c.Param("slug")
-	name := c.FormValue("name")
-	description := c.FormValue("description")
-	slug := slug.Make(name)
 
-	cat, err := h.GetCategory(store.GarantiaType, catSlug)
+	var item store.Item
+	item.Name = c.FormValue("name")
+	item.Description = c.FormValue("description")
+
+	img, imgErr := c.FormFile("img")
+
+	// Query and attach category
+	cat, err := h.AdminService.GetCategory(store.GarantiaType, catSlug)
 	if err != nil {
 		return err
 	}
+	item.Category = cat
 
-	img, err := c.FormFile("img")
-	if err != nil {
-		if _, err := h.DB.Exec(context.Background(), `INSERT INTO store_items (category_id, name, description, slug)
-VALUES ($1, $2, $3, $4)`, cat.Id, name, description, slug); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new item into database")
-		}
-	} else {
-		imgId, err := h.InsertImage(img)
+	// Generate slug from name
+	item.Slug = slug.Make(item.Name)
+
+	// Insert and attach image if present in request
+	if imgErr == nil {
+		newImg, err := h.AdminService.InsertImage(img)
 		if err != nil {
 			return err
 		}
-
-		if _, err := h.DB.Exec(context.Background(), `INSERT INTO store_items (category_id, name, description, img_id, slug)
-VALUES ($1, $2, $3, $4, $5)`, cat.Id, name, description, imgId, slug); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new item into database")
-		}
+		item.Img = newImg
 	}
 
-	items, err := h.GetItems(cat)
+	// Insert it into database
+	if _, err := h.AdminService.InsertItem(item); err != nil {
+		return err
+	}
+
+	// Get updated items
+	items, err := h.AdminService.GetItems(cat)
 	if err != nil {
 		return err
 	}
@@ -161,61 +158,228 @@ VALUES ($1, $2, $3, $4, $5)`, cat.Id, name, description, imgId, slug); err != ni
 
 // PUT "/admin/garantia/:slug"
 func (h *Handler) HandleUpdateGarantiaItem(c echo.Context) error {
+	// Parsing request
 	catSlug := c.Param("slug")
-	idStr := c.FormValue("id")
 
-	name := c.FormValue("name")
-	description := c.FormValue("description")
-	slug := slug.Make(name)
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(c.FormValue("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid id")
 	}
 
-	img, err := c.FormFile("img")
-	if err != nil {
-		if _, err := h.DB.Exec(context.Background(), `UPDATE store_items
-SET name = $1, description = $2, slug = $3
-WHERE id = $4`, name, description, slug, id); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the item into database")
-		}
-	} else {
-		var prevImgId *int
-		var prevImgFilename *string
-		h.DB.QueryRow(context.Background(), `SELECT img.id, img.filename
-FROM store_items AS si
-LEFT JOIN images AS img
-ON si.img_id = img.id
-WHERE si.id = $1`, id).Scan(&prevImgId, &prevImgFilename)
-		// Remove previous image if exists
-		if prevImgId != nil && prevImgFilename != nil {
-			h.RemoveImage(store.Image{
-				Id:       *prevImgId,
-				Filename: *prevImgFilename,
-			})
-		}
+	var item store.Item
+	item.Name = c.FormValue("name")
+	item.Description = c.FormValue("description")
 
-		// Insert new image
-		imgId, err := h.InsertImage(img)
-		if err != nil {
-			return err
-		}
+	img, imgErr := c.FormFile("img")
 
-		if _, err := h.DB.Exec(context.Background(), `UPDATE store_items
-SET name = $1, description = $2, img_id = $3, slug = $4
-WHERE id = $5`, name, description, imgId, slug, id); err != nil {
-			return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the item into database")
-		}
-	}
+	// Generate slug from name
+	item.Slug = slug.Make(item.Name)
 
-	cat, err := h.GetCategory(store.GarantiaType, catSlug)
+	// Query and attach category
+	cat, err := h.AdminService.GetCategory(store.GarantiaType, catSlug)
 	if err != nil {
 		return err
 	}
+	item.Category = cat
 
-	items, err := h.GetItems(cat)
+	// Insert and attach image if present in request
+	if imgErr == nil {
+		newImg, err := h.AdminService.InsertImage(img)
+		if err != nil {
+			return err
+		}
+		item.Img = newImg
+	}
+
+	// Update item
+	if err := h.AdminService.UpdateItem(id, item); err != nil {
+		return err
+	}
+
+	// Get updated items
+	items, err := h.AdminService.GetItems(cat)
 	if err != nil {
 		return err
 	}
 	return util.Render(c, http.StatusOK, garantia.ItemTableShow(items))
+}
+
+// DELETE "/admin/garantia/:slug"
+func (h *Handler) HandleRemoveGarantiaItem(c echo.Context) error {
+	// Parsing request
+	catSlug := c.Param("slug")
+
+	id, err := strconv.Atoi(c.FormValue("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid id")
+	}
+
+	// Query category
+	cat, err := h.AdminService.GetCategory(store.GarantiaType, catSlug)
+	if err != nil {
+		return err
+	}
+
+	// Remove item
+	if err := h.AdminService.RemoveItem(id); err != nil {
+		return err
+	}
+
+	// Get updated items
+	items, err := h.AdminService.GetItems(cat)
+	if err != nil {
+		return err
+	}
+	return util.Render(c, http.StatusOK, garantia.ItemTableShow(items))
+}
+
+// GET "/admin/garantia/:categorySlug/:itemSlug"
+func (h *Handler) HandleGarantiaItemShow(c echo.Context) error {
+	// Parsing request
+	categorySlug := c.Param("categorySlug")
+	itemSlug := c.Param("itemSlug")
+
+	// Query category
+	category, err := h.AdminService.GetCategory(store.GarantiaType, categorySlug)
+	if err != nil {
+		return err
+	}
+
+	// Query item
+	item, err := h.AdminService.GetItem(category, itemSlug)
+	if err != nil {
+		return err
+	}
+
+	// Query products
+	products, err := h.AdminService.GetProducts(item)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, garantia.ItemShow(item, products))
+}
+
+// POST "/admin/garantia/:categorySlug/:itemSlug"
+func (h *Handler) HandleNewGarantiaProduct(c echo.Context) error {
+	// Parsing request
+	categorySlug := c.Param("categorySlug")
+	itemSlug := c.Param("itemSlug")
+
+	var product store.Product
+	product.Name = c.FormValue("name")
+	priceFloat, err := strconv.ParseFloat(c.FormValue("price"), 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid price")
+	}
+	product.Price = int(math.Round(priceFloat * 100))
+
+	// Query category
+	category, err := h.AdminService.GetCategory(store.GarantiaType, categorySlug)
+	if err != nil {
+		return err
+	}
+
+	// Query and attach item
+	item, err := h.AdminService.GetItem(category, itemSlug)
+	if err != nil {
+		return err
+	}
+	product.Item = item
+
+	// Insert product into database
+	if _, err := h.AdminService.InsertProduct(product); err != nil {
+		return err
+	}
+
+	// Get updated products
+	products, err := h.AdminService.GetProducts(item)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, garantia.ProductTableShow(products))
+}
+
+// PUT "/admin/garantia/:categorySlug/:itemSlug"
+func (h *Handler) HandleUpdateGarantiaProduct(c echo.Context) error {
+	// Parsing request
+	categorySlug := c.Param("categorySlug")
+	itemSlug := c.Param("itemSlug")
+
+	id, err := strconv.Atoi(c.FormValue("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid id")
+	}
+
+	var product store.Product
+	product.Name = c.FormValue("name")
+	priceFloat, err := strconv.ParseFloat(c.FormValue("price"), 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid price")
+	}
+	product.Price = int(math.Round(priceFloat * 100))
+
+	// Query category
+	category, err := h.AdminService.GetCategory(store.GarantiaType, categorySlug)
+	if err != nil {
+		return err
+	}
+
+	// Query and attach item
+	item, err := h.AdminService.GetItem(category, itemSlug)
+	if err != nil {
+		return err
+	}
+	product.Item = item
+
+	// Update product
+	if err := h.AdminService.UpdateProduct(id, product); err != nil {
+		return err
+	}
+
+	// Get updated products
+	products, err := h.AdminService.GetProducts(item)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, garantia.ProductTableShow(products))
+}
+
+// DELETE "/admin/garantia/:categorySlug/:itemSlug"
+func (h *Handler) HandleRemoveGarantiaProduct(c echo.Context) error {
+	// Parsing request
+	categorySlug := c.Param("categorySlug")
+	itemSlug := c.Param("itemSlug")
+
+	id, err := strconv.Atoi(c.FormValue("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	// Query category
+	category, err := h.AdminService.GetCategory(store.GarantiaType, categorySlug)
+	if err != nil {
+		return err
+	}
+
+	// Query item
+	item, err := h.AdminService.GetItem(category, itemSlug)
+	if err != nil {
+		return err
+	}
+
+	// Remove product
+	if err := h.AdminService.RemoveProduct(id); err != nil {
+		return err
+	}
+
+	// Get updated products
+	products, err := h.AdminService.GetProducts(item)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, garantia.ProductTableShow(products))
 }
