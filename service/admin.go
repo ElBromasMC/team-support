@@ -63,6 +63,42 @@ WHERE id = $5`, uptCat.Name, uptCat.Description, imgId, uptCat.Slug, id); err !=
 	return nil
 }
 
+func (as Admin) RemoveCategory(id int) error {
+	// Retrieve category
+	category, err := as.GetCategoryById(id)
+	if err != nil {
+		return err
+	}
+
+	// Remove image of category if exists
+	if category.Img.Id != 0 {
+		as.RemoveImage(category.Img.Id)
+	}
+
+	// Retrive asociated items
+	items, err := as.GetItems(category)
+	if err != nil {
+		return err
+	}
+
+	// Remove images of associated items if exists
+	for _, i := range items {
+		if i.Img.Id != 0 {
+			as.RemoveImage(i.Img.Id)
+		}
+		if i.LargeImg.Id != 0 {
+			as.RemoveImage(i.LargeImg.Id)
+		}
+	}
+
+	if _, err := as.DB.Exec(context.Background(), `DELETE FROM store_categories
+WHERE id = $1`, id); err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "Category not found")
+	}
+
+	return nil
+}
+
 func (as Admin) InsertItem(item store.Item) (int, error) {
 	var imgId *int
 	if item.Img.Id != 0 {

@@ -79,16 +79,17 @@ WHERE sc.id = $1`, id).Scan(&cat.Type, &cat.Name, &cat.Description, &cat.Slug, &
 	return cat, nil
 }
 
-// Check missing (Img.Id, LargeImg.Id)
+// Check
 func (ps Public) GetItems(cat store.Category) ([]store.Item, error) {
-	rows, err := ps.DB.Query(context.Background(), `SELECT si.id, si.name, si.description, si.long_description, si.slug, img.filename, largeimg.filename
+	rows, err := ps.DB.Query(context.Background(), `SELECT si.id, si.name, si.description, si.long_description, si.slug,
+img.id, img.filename, largeimg.id, largeimg.filename
 FROM store_items AS si
 LEFT JOIN images AS img
 ON si.img_id = img.id
-LEFT JOIN images as largeimg
+LEFT JOIN images AS largeimg
 ON si.largeimg_id = largeimg.id
 WHERE si.category_id = $1
-ORDER BY id DESC`, cat.Id)
+ORDER BY si.id DESC`, cat.Id)
 	if err != nil {
 		return []store.Item{}, echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -96,18 +97,19 @@ ORDER BY id DESC`, cat.Id)
 
 	items, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Item, error) {
 		var item store.Item
-		var img *string
-		var largeimg *string
-		err := row.Scan(&item.Id, &item.Name, &item.Description, &item.LongDescription, &item.Slug, &img, &largeimg)
-		if img != nil {
-			item.Img.Filename = *img
-		} else {
-			item.Img.Filename = ""
+		var imgId *int
+		var imgFilename *string
+		var largeimgId *int
+		var largeimgFilename *string
+		err := row.Scan(&item.Id, &item.Name, &item.Description, &item.LongDescription, &item.Slug,
+			&imgId, &imgFilename, &largeimgId, &largeimgFilename)
+		if imgId != nil {
+			item.Img.Id = *imgId
+			item.Img.Filename = *imgFilename
 		}
-		if largeimg != nil {
-			item.LargeImg.Filename = *largeimg
-		} else {
-			item.LargeImg.Filename = ""
+		if largeimgId != nil {
+			item.LargeImg.Id = *largeimgId
+			item.LargeImg.Filename = *largeimgFilename
 		}
 		item.Category = cat
 		return item, err
@@ -119,13 +121,31 @@ ORDER BY id DESC`, cat.Id)
 	return items, nil
 }
 
-// Check missing (Img, LargeImg)
+// Check
 func (ps Public) GetItem(cat store.Category, slug string) (store.Item, error) {
 	var item store.Item
-	if err := ps.DB.QueryRow(context.Background(), `SELECT id, name, description, long_description
-FROM store_items
-WHERE category_id = $1 AND slug = $2`, cat.Id, slug).Scan(&item.Id, &item.Name, &item.Description, &item.LongDescription); err != nil {
+	var imgId *int
+	var imgFilename *string
+	var largeimgId *int
+	var largeimgFilename *string
+	if err := ps.DB.QueryRow(context.Background(), `SELECT si.id, si.name, si.description, si.long_description,
+img.id, img.filename, largeimg.id, largeimg.filename
+FROM store_items AS si
+LEFT JOIN images AS img
+ON si.img_id = img.id
+LEFT JOIN images AS largeimg
+ON si.largeimg_id = largeimg.id
+WHERE si.category_id = $1 AND si.slug = $2`, cat.Id, slug).Scan(&item.Id, &item.Name, &item.Description, &item.LongDescription,
+		&imgId, &imgFilename, &largeimgId, &largeimgFilename); err != nil {
 		return store.Item{}, echo.NewHTTPError(http.StatusNotFound, "Item not found")
+	}
+	if imgId != nil {
+		item.Img.Id = *imgId
+		item.Img.Filename = *imgFilename
+	}
+	if largeimgId != nil {
+		item.LargeImg.Id = *largeimgId
+		item.LargeImg.Filename = *largeimgFilename
 	}
 	item.Category = cat
 	item.Slug = slug
@@ -173,7 +193,7 @@ func (ps Public) GetProducts(item store.Item) ([]store.Product, error) {
 	rows, err := ps.DB.Query(context.Background(), `SELECT id, name, price, details
 FROM store_products
 WHERE item_id = $1
-ORDER BY id DESC`, item.Id)
+ORDER BY id ASC`, item.Id)
 	if err != nil {
 		return []store.Product{}, echo.NewHTTPError(http.StatusInternalServerError)
 	}

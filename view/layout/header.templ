@@ -1,8 +1,111 @@
 package layout
 
 import (
+	"alc/config"
 	"alc/model"
 )
+
+script HandleCartAppletLogic(imagesPath string) {
+	const toUSD = n => "US$ " + (n / 100).toFixed(2).toString();
+
+	const cartApplet = document.querySelector("#cart-applet");
+	const openButton = cartApplet.querySelector("button.open");
+	const cartDialog = cartApplet.querySelector("#cart-dialog");
+	const counterShow = cartApplet.querySelector(".counter");
+	const itemsShow = cartDialog.querySelector(".items");
+	const itemTemplate = itemsShow.querySelector("template").cloneNode(true);
+	const summaryShow = cartApplet.querySelector(".summary");
+	cartApplet.addEventListener("UPDATE", e => {
+		const newItems = e.detail();
+		// Set items counter
+		const n = newItems.reduce(
+			(acc, val) => acc + val.quantity,
+			0
+		);
+		if (n === 0) {
+			counterShow.textContent = "";
+			delete cartApplet.dataset.active;
+		} else {
+			counterShow.textContent = n.toString();
+			cartApplet.dataset.active = "";
+		}
+		// Print each item in the cart dialog
+		const newItemsShow = newItems.map(item => {
+			const itemShow = itemTemplate.content.cloneNode(true);
+			const itemDetailsShow = itemShow.querySelector(".item\\:details");
+			const itemDetailTemplate = itemDetailsShow.querySelector("template").cloneNode(true);
+			// Get type
+			const itemType = item.product.item.category.type;
+			// Set name
+			itemShow.querySelector(".item\\:name").textContent = item.product.item.name + " - " + item.product.name;
+			if (itemType === "STORE") {
+				itemShow.querySelector(".item\\:name").setAttribute("href", `/store/${item.product.item.category.slug}/${item.product.item.slug}`);
+			} else if (itemType === "GARANTIA") {
+				itemShow.querySelector(".item\\:name").setAttribute("href", `/garantia/${item.product.item.category.slug}/${item.product.item.slug}`);
+			}
+			// Set img
+			if (item.product.item.img.id != 0) {
+				itemShow.querySelector(".item\\:img").setAttribute("src", `${imagesPath}/${item.product.item.img.filename}`);
+			} else {
+				itemShow.querySelector(".item\\:img").setAttribute("src", `/static/img/noimage.png`);
+			}
+			itemShow.querySelector(".item\\:img").setAttribute("alt", item.product.item.slug);
+			// Set price
+			itemShow.querySelector(".item\\:price").textContent =  toUSD(item.product.price);
+			// Set quantity
+			itemShow.querySelector(".item\\:quantity").textContent = item.quantity.toString();
+			// Set details
+			let newDetailsShow = []
+			for (let key in item.details) {
+				const itemDetailShow = itemDetailTemplate.content.cloneNode(true);
+				itemDetailShow.querySelector(".detail\\:key").textContent = key;
+				itemDetailShow.querySelector(".detail\\:value").textContent = item.details[key];
+				newDetailsShow.push(itemDetailShow);
+			}
+			itemDetailsShow.replaceChildren(...newDetailsShow);
+			// Set subtotal
+			itemShow.querySelector(".item\\:subtotal").textContent = toUSD(item.product.price * item.quantity);
+			// Remove button
+			itemShow.querySelector("button.remove").addEventListener("click", e => {
+				const removeItem = items => items.filter(i => (i.product.id !== item.product.id) || (i.details.Serie.toUpperCase() !== item.details.Serie.toUpperCase()));
+				(async () => {
+					const cart = document.querySelector("#shopping-cart");
+					await customElements.whenDefined(cart.localName);
+					cart.dispatchEvent(new CustomEvent("UPDATE", { detail: removeItem }));
+				})();
+			});
+			return itemShow;
+		});
+		itemsShow.replaceChildren(...newItemsShow);
+		// Generate summary
+		const total = newItems.reduce(
+			(acc, val) => acc + (val.product.price * val.quantity),
+			0
+		)
+		summaryShow.querySelector(".summary\\:total").textContent = toUSD(total)
+	});
+	// Dialog logic
+	openButton.addEventListener("click", e => {
+		cartDialog.showModal();
+	});
+	cartDialog.addEventListener("click", e => {
+		const dimensions = cartDialog.getBoundingClientRect();
+		if (
+			e.clientX < dimensions.left ||
+			e.clientX > dimensions.right ||
+			e.clientY < dimensions.top ||
+			e.clientY > dimensions.bottom
+		) {
+			cartDialog.close();
+		}
+	});
+	// Subscribe the cart applet
+	(async () => {
+		const cart = document.querySelector("#shopping-cart");
+		await customElements.whenDefined(cart.localName);
+		cart.dispatchEvent(new CustomEvent("NEWCLIENT", { detail: cartApplet }));
+	})();
+}
 
 templ Header() {
 	<header class="sticky top-0 z-50 shadow-md bg-white">
@@ -102,6 +205,17 @@ templ Header() {
 											<span class="font-bold">Cantidad:</span>
 											<span class="item:quantity"></span>
 										</div>
+										<div class="item:details">
+											<template>
+												<div class="text-sm text-livid">
+													<span class="font-bold">
+														<div class="detail:key inline"></div>
+														:
+													</span>
+													<span class="detail:value"></span>
+												</div>
+											</template>
+										</div>
 										<div class="text-sm text-navy">
 											<span class="font-bold">Subtotal:</span>
 											<span class="item:subtotal"></span>
@@ -136,82 +250,7 @@ templ Header() {
 					</section>
 				</dialog>
 			</div>
-			<script>
-(() => {
-	const toUSD = n => "$" + (n / 100).toFixed(2).toString();
-
-	const cartApplet = document.querySelector("#cart-applet");
-	const openButton = cartApplet.querySelector("button.open");
-	const cartDialog = cartApplet.querySelector("#cart-dialog");
-	const counterShow = cartApplet.querySelector(".counter");
-	const itemsShow = cartDialog.querySelector(".items");
-	const itemTemplate = itemsShow.querySelector("template").cloneNode(true);
-	const summaryShow = cartApplet.querySelector(".summary");
-	cartApplet.addEventListener("UPDATE", e => {
-		const newItems = e.detail();
-		// Set items counter
-		const n = newItems.reduce(
-			(acc, val) => acc + val.quantity,
-			0
-		);
-		if (n === 0) {
-			counterShow.textContent = "";
-			delete cartApplet.dataset.active;
-		} else {
-			counterShow.textContent = n.toString();
-			cartApplet.dataset.active = "";
-		}
-		// Print each item in the cart dialog
-		const newItemsShow = newItems.map(item => {
-			const itemShow = itemTemplate.content.cloneNode(true);
-			itemShow.querySelector(".item\\:name").textContent = item.name;
-			itemShow.querySelector(".item\\:name").setAttribute("href", `/store/${item.slug}`);
-			itemShow.querySelector(".item\\:img").setAttribute("src", item.img);
-			itemShow.querySelector(".item\\:img").setAttribute("alt", item.slug);
-			itemShow.querySelector(".item\\:price").textContent =  toUSD(item.price);
-			itemShow.querySelector(".item\\:quantity").textContent = item.quantity.toString();
-			itemShow.querySelector(".item\\:subtotal").textContent = toUSD(item.price * item.quantity);
-			itemShow.querySelector("button.remove").addEventListener("click", e => {
-				const removeItem = items => items.filter(i => i.uuid !== item.uuid);
-				(async () => {
-					const cart = document.querySelector("#shopping-cart");
-					await customElements.whenDefined(cart.localName);
-					cart.dispatchEvent(new CustomEvent("UPDATE", { detail: removeItem }));
-				})();
-			});
-			return itemShow;
-		});
-		itemsShow.replaceChildren(...newItemsShow);
-		// Generate summary
-		const total = newItems.reduce(
-			(acc, val) => acc + (val.price * val.quantity),
-			0
-		)
-		summaryShow.querySelector(".summary\\:total").textContent = toUSD(total)
-	});
-	// Dialog logic
-	openButton.addEventListener("click", e => {
-		cartDialog.showModal();
-	});
-	cartDialog.addEventListener("click", e => {
-		const dimensions = cartDialog.getBoundingClientRect();
-		if (
-			e.clientX < dimensions.left ||
-			e.clientX > dimensions.right ||
-			e.clientY < dimensions.top ||
-			e.clientY > dimensions.bottom
-		) {
-			cartDialog.close();
-		}
-	});
-	// Subscribe the cart applet
-	(async () => {
-		const cart = document.querySelector("#shopping-cart");
-		await customElements.whenDefined(cart.localName);
-		cart.dispatchEvent(new CustomEvent("NEWCLIENT", { detail: cartApplet }));
-	})();
-})()
-			</script>
+			@HandleCartAppletLogic(config.IMAGES_PATH)
 			if user, ok := ctx.Value("user").(model.User); !ok {
 				<a class="flex items-center justify-center w-8 h-8 ml-3 text-livid lg:ml-16" href="/login">
 					<svg class="w-6 h-6 lg:w-8 lg:h-8" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">

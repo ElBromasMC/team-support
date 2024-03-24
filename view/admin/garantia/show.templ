@@ -8,20 +8,29 @@ import (
 	"alc/model/store"
 )
 
-script handleNewFormShow() {
+script handleNewCategoryFormShow() {
 	const dialog = document.querySelector("#new-item-dialog");
 	const form = dialog.querySelector("form.new-item");
 	form.reset();
 	dialog.showModal();
 }
 
-script handleUpdateFormShow(c store.Category) {
+script handleUpdateCategoryFormShow(c store.Category) {
 	const dialog = document.querySelector("#update-item-dialog");
 	const form = dialog.querySelector("form.update-item");
 	form.reset();
 	form.querySelector("#up-id").value = c.id;
 	form.querySelector("#up-name").value = c.name;
 	form.querySelector("#up-description").value = c.description;
+	dialog.showModal();
+}
+
+script handleDeleteCategoryFormShow(c store.Category) {
+	const dialog = document.querySelector("#delete-item-dialog");
+	const form = dialog.querySelector("form.delete-item");
+	form.reset();
+	form.querySelector("#de-id").value = c.id;
+	form.querySelector("#de-name").value = c.name;
 	dialog.showModal();
 }
 
@@ -44,7 +53,8 @@ templ CategoryTableShow(cats []store.Category) {
 				}
 			</td>
 			<td>
-				<button class="block font-semibold text-azure" onclick={ handleUpdateFormShow(c) }>Editar</button>
+				<button class="block font-semibold text-azure" onclick={ handleUpdateCategoryFormShow(c) }>Editar</button>
+				<button class="block font-semibold text-azure" onclick={ handleDeleteCategoryFormShow(c) }>Borrar</button>
 			</td>
 		</tr>
 	}
@@ -129,6 +139,38 @@ templ Show(cats []store.Category) {
 					</div>
 				</form>
 			</dialog>
+			<!-- Delete item dialog -->
+			<dialog
+				id="delete-item-dialog"
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+				m-0 p-6 w-[90%] max-w-lg
+				border border-black bg-white"
+			>
+				<form class="flex justify-between" method="dialog">
+					<!-- Title -->
+					<h2 class="font-bold text-2xl">¿Estás seguro?</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<!-- hx-delete, enctype -->
+				<form
+					class="delete-item mt-3 space-y-2"
+					hx-delete="/admin/garantia"
+					hx-target="#table-items"
+					hx-on::after-request="document.querySelector('#delete-item-dialog').close()"
+					enctype="multipart/form-data"
+					autocomplete="off"
+				>
+					<!-- Fields -->
+					<input type="hidden" id="de-id" name="id" required/>
+					<div>
+						<label for="de-name">Nombre:</label>
+						<input class="block w-full border border-livid" type="text" id="de-name" disabled/>
+					</div>
+					<div class="flex gap-6 !mt-3">
+						<button class="font-bold text-azure" type="submit">Sí</button>
+					</div>
+				</form>
+			</dialog>
 		</div>
 		<main>
 			<!-- Navigation -->
@@ -144,7 +186,7 @@ templ Show(cats []store.Category) {
 				<span class="text-livid">Garantías</span>
 			</div>
 			<div>
-				<button class="font-semibold text-azure" onclick={ handleNewFormShow() }>Nueva categoría</button>
+				<button class="font-semibold text-azure" onclick={ handleNewCategoryFormShow() }>Nueva categoría</button>
 			</div>
 			<table class="table-auto w-full">
 				<thead>

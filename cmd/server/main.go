@@ -111,6 +111,7 @@ func main() {
 	g3.GET("/garantia", ah.HandleGarantiaShow)
 	g3.POST("/garantia", ah.HandleNewGarantiaCategory)
 	g3.PUT("/garantia", ah.HandleUpdateGarantiaCategory)
+	g3.DELETE("/garantia", ah.HandleRemoveGarantiaCategory)
 
 	g3.GET("/garantia/:slug", ah.HandleGarantiaCategoryShow)
 	g3.POST("/garantia/:slug", ah.HandleNewGarantiaItem)

@@ -16,11 +16,14 @@ templ Base(title string) {
 			if os.Getenv("ENV") == "development" {
 				<!-- Live reload -->
 				<script src="/static/js/live-reload.js"></script>
+				<script defer src={ fmt.Sprintf("/static/js/main.js?v=%s", time.Now().Format("20060102150405")) }></script>
+				<link href={ fmt.Sprintf("/static/css/tailwind.css?v=%s", time.Now().Format("20060102150405")) } rel="stylesheet"/>
+			} else {
+				<script defer src={ fmt.Sprintf("/static/js/main.js?v=%s", os.Getenv("REL")) }></script>
+				<link href={ fmt.Sprintf("/static/css/tailwind.css?v=%s", os.Getenv("REL")) } rel="stylesheet"/>
 			}
 			<!-- HTMX -->
 			<script defer src="/static/js/htmx.min.js"></script>
-			<script defer src={ fmt.Sprintf("/static/js/main.js?v=%s", time.Now().Format("20060102150405")) }></script>
-			<link href={ fmt.Sprintf("/static/css/tailwind.css?v=%s", time.Now().Format("20060102150405")) } rel="stylesheet"/>
 			<link rel="icon" href="/static/img/favicon.webp"/>
 		</head>
 		<body class="has-[dialog[open]]:overflow-hidden">

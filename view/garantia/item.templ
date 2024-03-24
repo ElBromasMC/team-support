@@ -1,6 +1,7 @@
 package garantia
 
 import (
+	"fmt"
 	"path"
 	"encoding/json"
 	"alc/config"
@@ -16,12 +17,62 @@ func productToJSON(p store.Product) string {
 	return string(bytes)
 }
 
+script HandleProductSelectChange() {
+	productSelect = document.querySelector("#product");
+	garantiaPriceShow = document.querySelector("#garantia\\:price");
+	productSelect.addEventListener("change", e => {
+		garantiaPriceShow.textContent = "US$ " + (JSON.parse(e.target.value).price / 100).toFixed(2).toString();
+	});
+}
+
+script HandleProductFormSubmit() {
+	const toUSD = n => "US$ " + (n / 100).toFixed(2).toString();
+	const productForm = document.querySelector("#product-form");
+	productForm.addEventListener("submit", e => {
+		e.preventDefault();
+		const formData = new FormData(e.target);
+		const serialnumber = formData.get("serialnumber").toUpperCase();
+		const product = JSON.parse(formData.get("product"));
+		const cartDialog = document.querySelector("#cart-dialog"); // From header
+		const newProduct = {
+			product,
+			quantity: 1,
+			details: {
+				Serie: serialnumber,
+			},
+		};
+		const action = e.submitter.dataset.action;
+		if (action === "addToCart") {
+			const addProduct = products => {
+				let found = false;
+				products.forEach(product => {
+					if (product.product.id === newProduct.product.id && product.details.Serie === newProduct.details.Serie) {
+						found = true;
+					}
+				});
+				if (!found) {
+					products.push(newProduct);
+				}
+				return products;
+			};
+			(async () => {
+				const cart = document.querySelector("#shopping-cart");
+				await customElements.whenDefined(cart.localName);
+				cart.dispatchEvent(new CustomEvent("UPDATE", { detail: addProduct }));
+				cartDialog.showModal();
+			})();
+		} else if (action === "buyNow") {
+		}
+		e.currentTarget.reset();
+	});
+}
+
 templ ShowItem(item store.Item, products []store.Product) {
 	@layout.BasePage(item.Name) {
 		<main>
-			<div class="px-4 py-9 max-w-7xl mx-auto lg:grid lg:grid-cols-5 lg:gap-x-28">
+			<div class="grid gap-9 px-4 py-9 max-w-7xl mx-auto lg:grid-cols-[3fr_2fr] lg:gap-12">
 				<!-- Navegacion -->
-				<div class="mb-9 font-semibold lg:col-span-5">
+				<div class="font-semibold lg:order-1 lg:col-span-2">
 					<span>
 						<a class="text-navy" href="/garantia">Paquetes de garantía ASUS</a>
 					</span>
@@ -42,89 +93,66 @@ templ ShowItem(item store.Item, products []store.Product) {
 						{ item.Name }
 					</span>
 				</div>
-				<!-- Formulario -->
-				<div class="lg:order-2 lg:col-span-2">
-					<div>
+				<!-- Imagen -->
+				<div class="lg:order-3 lg:row-span-2">
+					if item.Img.Id != 0 {
 						<img class="w-full aspect-[5/3] object-cover rounded-3xl" src={ path.Join(config.IMAGES_PATH, item.Img.Filename) } alt={ item.Slug }/>
-					</div>
-					<div class="lg:hidden">
-						<h2 class="my-9 text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>
-						<p class="garantia:price text-3xl font-semibold text-navy"></p>
-					</div>
-					<form id="item-form" class="flex flex-col gap-4 my-6" autocomplete="off">
-						<div>
-							<label class="block my-2 font-bold text-lg text-navy" for="serialnumber">Número serial del equipo a proteger:</label>
+					} else {
+						<img class="w-full aspect-[5/3] object-cover rounded-3xl" src="/static/img/noimage.png" alt="noimage"/>
+					}
+				</div>
+				<!-- Producto -->
+				<div class="space-y-9 lg:order-2">
+					<h2 class="text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>
+					<p id="garantia:price" class="text-3xl font-semibold text-navy">
+						if len(products) >= 1 {
+							{ fmt.Sprintf("US$ %.2f", float64(products[0].Price)/100.0) }
+						} else {
+							No disponible!
+						}
+					</p>
+				</div>
+				<!-- Formulario de compra -->
+				<div class="lg:order-5">
+					<form id="product-form" class="space-y-4" autocomplete="off">
+						<div class="space-y-2">
+							<label class="block font-bold text-lg text-navy" for="serialnumber">Número serial del equipo a proteger:</label>
 							<input class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" type="text" id="serialnumber" name="serialnumber" placeholder="Números y letras entre 12 y 15 caracteres" pattern="[A-Za-z0-9]{12,15}" required/>
-							<div class="mt-2 font-semibold text-azure"><a href="https://www.asus.com/latin/support/article/566/" target="_blank">¿Dónde encontrar el número de serie?</a></div>
+							<div class="font-semibold text-azure"><a href="https://www.asus.com/latin/support/article/566/" target="_blank">¿Dónde encontrar el número de serie?</a></div>
 						</div>
-						<div>
-							<label class="block my-2 font-bold text-lg text-navy" for="product">Opciones:</label>
-							<select class="product-select block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" id="product" name="product" required>
+						<div class="space-y-2">
+							<label class="block font-bold text-lg text-navy" for="product">Opciones:</label>
+							<!-- Product select -->
+							<select
+								class="product-select block p-2 w-full border border-navy rounded-xl bg-chalky text-livid"
+								id="product"
+								name="product"
+								required
+							>
 								for _, p := range products {
 									<option value={ productToJSON(p) }>{ p.Name }</option>
 								}
 							</select>
+							@HandleProductSelectChange()
 						</div>
 						<div class="flex gap-6">
 							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="submit" data-action="addToCart">Agregar al carrito</button>
 							<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit" data-action="buyNow">Comprar ahora</button>
 						</div>
 					</form>
-					<script>
-(() => {
-	const toUSD = n => "$" + (n / 100).toFixed(2).toString();
-	const itemForm = document.querySelector("#item-form");
-	const productSelect = itemForm.querySelector(".product-select");
-	productSelect.addEventListener("change", e => {
-		const priceShow = Array.from(document.querySelectorAll(".garantia\\:price"));
-		priceShow.forEach(e => {
-			e.textContent = toUSD(parseInt(JSON.parse(e.target.value).price));
-		});
-	});
-	itemForm.addEventListener("submit", e => {
-		e.preventDefault();
-		const formData = new FormData(e.target);
-		const serialnumber = formData.get("serialnumber");
-		const product = formData.get("product");
-		const cartDialog = document.querySelector("#cart-dialog"); // From header
-		const newItem = {
-			product: JSON.parse(product),
-			quantity: 1,
-			details: {
-				serial: serialnumber,
-			},
-		};
-		const action = e.submitter.dataset.action;
-		if (action === "addToCart") {
-			const addItem = items => [...items, newItem];
-			(async () => {
-				const cart = document.querySelector("#shopping-cart");
-				await customElements.whenDefined(cart.localName);
-				cart.dispatchEvent(new CustomEvent("UPDATE", { detail: addItem }));
-				cartDialog.showModal();
-			})();
-		} else if (action === "buyNow") {
-		}
-		e.currentTarget.reset();
-	});
-})()
-					</script>
+					@HandleProductFormSubmit()
 				</div>
 				<!-- Requisitos -->
-				<div class="lg:order-1 lg:col-span-3">
-					<div class="hidden lg:block">
-						<h2 class="text-3xl font-bold text-azure">{ item.Name }</h2>
-						<p class="garantia:price my-9 text-3xl font-semibold text-navy"></p>
-					</div>
-					<h4 class="mb-3 text-2xl font-bold text-navy">Requisitos:</h4>
+				<div class="space-y-3 lg:order-4 lg:row-span-2">
+					<h4 class="text-2xl font-bold text-navy">Requisitos:</h4>
 					<ul class="list-disc list-inside font-semibold text-lg text-navy">
 						<li>Tu equipo TUF ASUS debió ser comprado en Perú</li>
 						<li>Tu equipo TUF ASUS debe tener máximo 6 meses de haber sido adquirido</li>
 						<li>Tu equipo TUF ASUS debe tener la garantía estándar vigente</li>
 					</ul>
-					<p class="my-3 text-lg text-navy italic">No cumplir con estos requisitos impedirá que tu paquete de garantía extendida pueda ser activado.</p>
+					<p class="text-lg text-navy italic">No cumplir con estos requisitos impedirá que tu paquete de garantía extendida pueda ser activado.</p>
 					<p>Paquete de garantía extendida para equipos TUF con protección contra daño accidental y protección de batería. Agrega al carrito de compras el paquete de tiempo por el cual deseas proteger tu equipo y sus principales componentes.</p>
-					<p class="mt-3">Consulta términos y condiciones <a class="text-azure" href="#">aquí</a></p>
+					<p>Consulta términos y condiciones <a class="text-azure" href="#">aquí</a></p>
 				</div>
 			</div>
 		</main>
