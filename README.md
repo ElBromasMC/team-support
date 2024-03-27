@@ -9,6 +9,11 @@ Team Support Peru webpage
 * [Templ](https://templ.guide/quick-start/installation)
 * inotify-tools
 
+### Install build dependencies
+```shell
+$ npm install
+```
+
 ### Initialize the required tables
 ```shell
 $ psql -d <database_name> -U <username> -f ./db/init.sql
@@ -16,16 +21,19 @@ $ psql -d <database_name> -U <username> -f ./db/init.sql
 
 ### .env file example
 ```
-PORT=8080
+ENV=development
 DATABASE_URL=postgres://<username>:<password>@localhost:5432/<database_name>
+SESSION_KEY=mysecretkey
+PORT=8080
+REL=1
 ```
 
-### Then
+### Load env variables
 ```shell
-$ npm install
+$ export $(grep -v '^#' .env | xargs -d '\n')
 ```
 
 ### Live reload
 ```shell
-$ ENV=development make live
+$ make live
 ```
