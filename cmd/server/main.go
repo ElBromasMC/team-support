@@ -10,9 +10,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/sessions"
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -62,7 +64,13 @@ func main() {
 		RedirectCode: http.StatusMovedPermanently,
 	}))
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
+	key := os.Getenv("SESSION_KEY")
+	if key == "" {
+		log.Fatalln("Missing SESSION_KEY env variable")
+	}
+	e.Use(session.Middleware(sessions.NewCookieStore([]byte(key))))
 	authMiddleware := middle.Auth(dbpool)
+	cartMiddleware := middle.Cart(ps)
 
 	// Static files
 	static(e)
@@ -71,19 +79,19 @@ func main() {
 	e.Static("/images", "images")
 
 	// Page routes
-	e.GET("/", ph.HandleIndexShow, authMiddleware)
-	e.GET("/ticket", ph.HandleTicketShow, authMiddleware)
+	e.GET("/", ph.HandleIndexShow, authMiddleware, cartMiddleware)
+	e.GET("/ticket", ph.HandleTicketShow, authMiddleware, cartMiddleware)
 
 	// Garantia routes
 	g1 := e.Group("/garantia")
-	g1.Use(authMiddleware)
+	g1.Use(authMiddleware, cartMiddleware)
 	g1.GET("", ph.HandleGarantiaShow)
 	g1.GET("/:slug", ph.HandleGarantiaCategoryShow)
 	g1.GET("/:categorySlug/:itemSlug", ph.HandleGarantiaItemShow)
 
 	// Store routes
 	g2 := e.Group("/store")
-	g2.Use(authMiddleware)
+	g2.Use(authMiddleware, cartMiddleware)
 	g2.GET("", func(c echo.Context) error {
 		return c.Redirect(http.StatusPermanentRedirect, "/store/all")
 	})
@@ -92,9 +100,6 @@ func main() {
 	g2.POST("/all", ph.HandleStoreAllItemsShow)
 	g2.POST("/:slug", ph.HandleStoreCategoryItemsShow)
 	g2.GET("/:categorySlug/:itemSlug", ph.HandleStoreItemShow)
-
-	// Cart routes
-	e.GET("/cart", ph.HandleCartShow, authMiddleware)
 
 	// User routes
 	e.GET("/login", ph.HandleLoginShow)
@@ -124,6 +129,11 @@ func main() {
 	g3.DELETE("/garantia/:categorySlug/:itemSlug", ah.HandleRemoveGarantiaProduct)
 
 	g3.GET("/store", ah.HandleStoreShow)
+
+	// Cart group
+	g4 := e.Group("/cart")
+	g4.Use(authMiddleware, cartMiddleware)
+	g4.POST("", ph.HandleNewCartItem)
 
 	// Start server
 	port := os.Getenv("PORT")

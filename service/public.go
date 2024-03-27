@@ -152,7 +152,7 @@ WHERE si.category_id = $1 AND si.slug = $2`, cat.Id, slug).Scan(&item.Id, &item.
 	return item, nil
 }
 
-// Check missing (Category)
+// Check
 func (ps Public) GetItemById(id int) (store.Item, error) {
 	var item store.Item
 
@@ -162,15 +162,16 @@ func (ps Public) GetItemById(id int) (store.Item, error) {
 	var largeimgId *int
 	var largeimgFilename *string
 
+	var catId int
 	if err := ps.DB.QueryRow(context.Background(), `SELECT si.name, si.description, si.long_description, si.slug,
-img.id, img.filename, largeimg.id, largeimg.filename
+img.id, img.filename, largeimg.id, largeimg.filename, si.category_id
 FROM store_items AS si
 LEFT JOIN images AS img
 ON si.img_id = img.id
 LEFT JOIN images AS largeimg
 ON si.largeimg_id = largeimg.id
 WHERE si.id = $1`, id).Scan(&item.Name, &item.Description, &item.LongDescription, &item.Slug,
-		&imgId, &imgFilename, &largeimgId, &largeimgFilename); err != nil {
+		&imgId, &imgFilename, &largeimgId, &largeimgFilename, &catId); err != nil {
 		return store.Item{}, echo.NewHTTPError(http.StatusNotFound, "Item not found")
 	}
 
@@ -184,6 +185,10 @@ WHERE si.id = $1`, id).Scan(&item.Name, &item.Description, &item.LongDescription
 		item.LargeImg.Filename = *largeimgFilename
 	}
 	item.Id = id
+
+	// Query and attach category
+	cat, _ := ps.GetCategoryById(catId)
+	item.Category = cat
 
 	return item, nil
 }
@@ -214,7 +219,33 @@ ORDER BY id ASC`, item.Id)
 		return product, err
 	})
 	if err != nil {
-		return []store.Product{}, echo.NewHTTPError(http.StatusInternalServerError, err)
+		return []store.Product{}, echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	return products, nil
+}
+
+// Check
+func (ps Public) GetProductById(id int) (store.Product, error) {
+	var product store.Product
+	product.Details = make(map[string]string)
+
+	var itemId int
+	var detailsHstore pgtype.Hstore
+	if err := ps.DB.QueryRow(context.Background(), `SELECT item_id, name, price, details
+FROM store_products
+WHERE id = $1`, id).Scan(&itemId, &product.Name, &product.Price, &detailsHstore); err != nil {
+		return store.Product{}, echo.NewHTTPError(http.StatusNotFound, "Product not found")
+	}
+	for key, value := range detailsHstore {
+		if value != nil {
+			product.Details[key] = *value
+		}
+	}
+	product.Id = id
+
+	// Query and attach item
+	item, _ := ps.GetItemById(itemId)
+	product.Item = item
+
+	return product, nil
 }

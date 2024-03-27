@@ -3,69 +3,10 @@ package garantia
 import (
 	"fmt"
 	"path"
-	"encoding/json"
 	"alc/config"
 	"alc/model/store"
 	"alc/view/layout"
 )
-
-func productToJSON(p store.Product) string {
-	bytes, err := json.Marshal(p)
-	if err != nil {
-		return "{}"
-	}
-	return string(bytes)
-}
-
-script HandleProductSelectChange() {
-	productSelect = document.querySelector("#product");
-	garantiaPriceShow = document.querySelector("#garantia\\:price");
-	productSelect.addEventListener("change", e => {
-		garantiaPriceShow.textContent = "US$ " + (JSON.parse(e.target.value).price / 100).toFixed(2).toString();
-	});
-}
-
-script HandleProductFormSubmit() {
-	const toUSD = n => "US$ " + (n / 100).toFixed(2).toString();
-	const productForm = document.querySelector("#product-form");
-	productForm.addEventListener("submit", e => {
-		e.preventDefault();
-		const formData = new FormData(e.target);
-		const serialnumber = formData.get("serialnumber").toUpperCase();
-		const product = JSON.parse(formData.get("product"));
-		const cartDialog = document.querySelector("#cart-dialog"); // From header
-		const newProduct = {
-			product,
-			quantity: 1,
-			details: {
-				Serie: serialnumber,
-			},
-		};
-		const action = e.submitter.dataset.action;
-		if (action === "addToCart") {
-			const addProduct = products => {
-				let found = false;
-				products.forEach(product => {
-					if (product.product.id === newProduct.product.id && product.details.Serie === newProduct.details.Serie) {
-						found = true;
-					}
-				});
-				if (!found) {
-					products.push(newProduct);
-				}
-				return products;
-			};
-			(async () => {
-				const cart = document.querySelector("#shopping-cart");
-				await customElements.whenDefined(cart.localName);
-				cart.dispatchEvent(new CustomEvent("UPDATE", { detail: addProduct }));
-				cartDialog.showModal();
-			})();
-		} else if (action === "buyNow") {
-		}
-		e.currentTarget.reset();
-	});
-}
 
 templ ShowItem(item store.Item, products []store.Product) {
 	@layout.BasePage(item.Name) {
@@ -114,33 +55,39 @@ templ ShowItem(item store.Item, products []store.Product) {
 				</div>
 				<!-- Formulario de compra -->
 				<div class="lg:order-5">
-					<form id="product-form" class="space-y-4" autocomplete="off">
+					<form
+						class="space-y-4"
+						hx-post="/cart"
+						hx-target="#cart-applet"
+						hx-on::after-request="document.querySelector('#cart-dialog').showModal()"
+						enctype="application/x-www-form-urlencoded"
+						autocomplete="off"
+					>
+						<input type="hidden" name="Quantity" value="1" required/>
 						<div class="space-y-2">
 							<label class="block font-bold text-lg text-navy" for="serialnumber">Número serial del equipo a proteger:</label>
-							<input class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" type="text" id="serialnumber" name="serialnumber" placeholder="Números y letras entre 12 y 15 caracteres" pattern="[A-Za-z0-9]{12,15}" required/>
+							<input class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" type="text" id="serialnumber" name="Details[Serie]" placeholder="Números y letras entre 12 y 15 caracteres" pattern="[A-Za-z0-9]{12,15}" required/>
 							<div class="font-semibold text-azure"><a href="https://www.asus.com/latin/support/article/566/" target="_blank">¿Dónde encontrar el número de serie?</a></div>
 						</div>
 						<div class="space-y-2">
-							<label class="block font-bold text-lg text-navy" for="product">Opciones:</label>
+							<label class="block font-bold text-lg text-navy" for="product-id">Opciones:</label>
 							<!-- Product select -->
 							<select
 								class="product-select block p-2 w-full border border-navy rounded-xl bg-chalky text-livid"
-								id="product"
-								name="product"
+								id="product-id"
+								name="Id"
 								required
 							>
 								for _, p := range products {
-									<option value={ productToJSON(p) }>{ p.Name }</option>
+									<option value={ fmt.Sprintf("%d", p.Id) }>{ p.Name }</option>
 								}
 							</select>
-							@HandleProductSelectChange()
 						</div>
 						<div class="flex gap-6">
 							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="submit" data-action="addToCart">Agregar al carrito</button>
 							<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit" data-action="buyNow">Comprar ahora</button>
 						</div>
 					</form>
-					@HandleProductFormSubmit()
 				</div>
 				<!-- Requisitos -->
 				<div class="space-y-3 lg:order-4 lg:row-span-2">

@@ -18,5 +18,6 @@ func RemoveCookie(c echo.Context, name string) {
 	cookie.Name = name
 	cookie.Value = ""
 	cookie.MaxAge = -1
+	cookie.SameSite = http.SameSiteStrictMode
 	c.SetCookie(cookie)
 }

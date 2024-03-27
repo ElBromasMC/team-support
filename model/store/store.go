@@ -52,14 +52,3 @@ type Order struct {
 	PhoneNumber   string    `json:"phoneNumber"`
 	CreatedAt     time.Time `json:"createdAt"`
 }
-
-type ProductRequest struct {
-	Id       int               `json:"id"`
-	Quantity int               `json:"quantity"`
-	Details  map[string]string `json:"details"`
-}
-
-type PurchaseRequest struct {
-	Order    Order            `json:"order"`
-	Products []ProductRequest `json:"products"`
-}
