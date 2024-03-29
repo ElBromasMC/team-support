@@ -66,7 +66,10 @@ templ Show(items []cart.Item) {
 		</div>
 	</button>
 	<!-- Applet dialog -->
-	<dialog id="cart-dialog" class="fixed inset-0 left-auto w-[min(20rem,100vw-2rem)] h-full max-h-[unset] min-w-48 p-4 overflow-y-scroll">
+	<dialog
+		id="cart-dialog"
+		class="fixed inset-0 left-auto w-[min(20rem,100vw-2rem)] h-full max-h-[unset] min-w-48 p-4 overflow-y-scroll"
+	>
 		<!-- Close button -->
 		<form class="flex justify-end" method="dialog">
 			<button class="flex items-center justify-center w-8 h-8" type="submit">
@@ -79,20 +82,27 @@ templ Show(items []cart.Item) {
 			<h2 class="font-bold text-2xl text-navy">Tu carrito de compras</h2>
 			<!-- Cart items -->
 			<div class="space-y-3 mt-6">
-				for _, i := range items {
+				for n, i := range items {
 					<!-- Cart item -->
 					<div class="grid grid-cols-7 gap-x-3 p-2 border">
 						<div class="flex justify-end col-span-7">
 							<!-- Remove button -->
-							<button class="remove relative flex items-center justify-center">
-								<svg class="w-4 h-4 z-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
-								</svg>
-								<div class="absolute -inset-y-[0.1rem] aspect-square rounded-full bg-gray-300"></div>
-							</button>
+							<form
+								hx-delete="/cart"
+								hx-target="#cart-applet"
+								enctype="multipart/form-data"
+							>
+								<input type="hidden" name="Id" value={ fmt.Sprintf("%d", n) } required/>
+								<button class="remove relative flex items-center justify-center" type="submit">
+									<svg class="w-4 h-4 z-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
+									</svg>
+									<div class="absolute -inset-y-[0.1rem] aspect-square rounded-full bg-gray-300"></div>
+								</button>
+							</form>
 						</div>
 						<div class="col-span-2">
-							if i.Product.Item.Id != 0 {
+							if i.Product.Item.Img.Id != 0 {
 								<img
 									class="w-full aspect-square object-cover"
 									src={ path.Join(config.IMAGES_PATH, i.Product.Item.Img.Filename) }

@@ -8,6 +8,15 @@ import (
 	"alc/view/layout"
 )
 
+script HandleProductChange() {
+	const productSelect = document.querySelector("#product-id");
+	const priceShow = document.querySelector("#garantia\\:price");
+	productSelect.addEventListener("change", e => {
+		const price = productSelect.querySelector(`option[value='${e.target.value}']`).dataset.price;
+		priceShow.textContent = price;
+	});
+}
+
 templ ShowItem(item store.Item, products []store.Product) {
 	@layout.BasePage(item.Name) {
 		<main>
@@ -56,14 +65,15 @@ templ ShowItem(item store.Item, products []store.Product) {
 				<!-- Formulario de compra -->
 				<div class="lg:order-5">
 					<form
+						id="new-item-form"
 						class="space-y-4"
 						hx-post="/cart"
 						hx-target="#cart-applet"
-						hx-on::after-request="document.querySelector('#cart-dialog').showModal()"
+						hx-on::after-request="this.reset()"
 						enctype="application/x-www-form-urlencoded"
 						autocomplete="off"
 					>
-						<input type="hidden" name="Quantity" value="1" required/>
+						<input type="hidden" name="Quantity" value="1"/>
 						<div class="space-y-2">
 							<label class="block font-bold text-lg text-navy" for="serialnumber">Número serial del equipo a proteger:</label>
 							<input class="block p-2 w-full border border-navy rounded-xl bg-chalky text-livid" type="text" id="serialnumber" name="Details[Serie]" placeholder="Números y letras entre 12 y 15 caracteres" pattern="[A-Za-z0-9]{12,15}" required/>
@@ -79,9 +89,13 @@ templ ShowItem(item store.Item, products []store.Product) {
 								required
 							>
 								for _, p := range products {
-									<option value={ fmt.Sprintf("%d", p.Id) }>{ p.Name }</option>
+									<option
+										value={ fmt.Sprintf("%d", p.Id) }
+										data-price={ fmt.Sprintf("US$ %.2f", float64(p.Price)/100.0) }
+									>{ p.Name }</option>
 								}
 							</select>
+							@HandleProductChange()
 						</div>
 						<div class="flex gap-6">
 							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="submit" data-action="addToCart">Agregar al carrito</button>

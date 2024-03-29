@@ -55,7 +55,11 @@ templ Header() {
 				</ul>
 			</nav>
 			<!-- Shopping cart applet-->
-			<div id="cart-applet" class="ml-auto lg:ml-16">
+			<div
+				id="cart-applet"
+				class="ml-auto lg:ml-16"
+				hx-on::after-swap="this.querySelector('#cart-dialog').showModal()"
+			>
 				@view.Show(cart.GetItems(ctx))
 			</div>
 			if user, ok := ctx.Value("user").(model.User); !ok {

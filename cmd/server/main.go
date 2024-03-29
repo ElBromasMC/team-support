@@ -134,6 +134,7 @@ func main() {
 	g4 := e.Group("/cart")
 	g4.Use(authMiddleware, cartMiddleware)
 	g4.POST("", ph.HandleNewCartItem)
+	g4.DELETE("", ph.HandleRemoveCartItem)
 
 	// Start server
 	port := os.Getenv("PORT")

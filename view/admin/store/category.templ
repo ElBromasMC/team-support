@@ -1,0 +1,142 @@
+package garantia
+
+import (
+	"path"
+	"alc/config"
+	"alc/view/layout"
+	"alc/view/admin"
+	"alc/model/store"
+)
+
+func TypeShow(t store.Type) string {
+	if t == store.GarantiaType {
+		return "Garantías"
+	} else {
+		return "Tienda"
+	}
+}
+
+templ CategoryTableShow(t store.Type, cats []store.Category) {
+	<thead>
+		<tr class="border-b border-black text-left">
+			<th scope="col">Nombre</th>
+			<th class="w-72" scope="col">Descripción</th>
+			<th scope="col">Slug</th>
+			<th scope="col">Imagen</th>
+			<th scope="col">Acciones</th>
+		</tr>
+	</thead>
+	<tbody>
+		for _, c := range cats {
+			<tr class="border-b border-black">
+				<td>
+					<a
+						class="font-semibold text-azure"
+						if c.Type == store.GarantiaType {
+							href={ templ.URL("/admin/garantia/" + c.Slug) }
+						} else {
+							href={ templ.URL("/admin/store/" + c.Slug) }
+						}
+					>{ c.Name }</a>
+				</td>
+				<td>{ c.Description }</td>
+				<td>{ c.Slug }</td>
+				<td>
+					if c.Img.Id != 0 {
+						<button
+							class="block font-semibold text-azure"
+							onclick={ admin.HandleImageShow(c.Img.Filename, path.Join(config.IMAGES_PATH, c.Img.Filename)) }
+						>
+							{ c.Img.Filename }
+						</button>
+					} else {
+						<span>No image</span>
+					}
+				</td>
+				<td>
+					<!-- Control buttons -->
+					<button
+						class="block font-semibold text-azure"
+						hx-get="/admin/form/garantia"
+						hx-target="update-item-form"
+					>
+						Editar
+					</button>
+					<button
+						class="block font-semibold text-azure"
+						hx-get="/store/category/remove"
+						hx-target="remove-item-form"
+					>
+						Borrar
+					</button>
+				</td>
+			</tr>
+		}
+	</tbody>
+}
+
+templ Show(t store.Type, cats []store.Category) {
+	@layout.BaseAdmin(TypeShow(t)) {
+		<!-- Dialogs -->
+		<div>
+			<!-- New item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Nueva categoría</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="new-item-form"></div>
+			</dialog>
+			<!-- Update item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Editar categoría</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="update-item-form"></div>
+			</dialog>
+			<!-- Delete item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">¿Estás seguro?</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="remove-item-form"></div>
+			</dialog>
+		</div>
+		<main>
+			<!-- Navigation -->
+			<div>
+				<span class="font-semibold text-azure">
+					<a href="/admin">Administración</a>
+				</span>
+				<span>
+					<svg class="inline w-4 h-4 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+					</svg>
+				</span>
+				<span class="text-livid">{ TypeShow(t) }</span>
+			</div>
+			<!-- Control buttons -->
+			<div>
+				<button class="font-semibold text-azure">Nueva categoría</button>
+			</div>
+			<!-- Items show table -->
+			<table id="table-items" class="table-auto w-full">
+				@CategoryTableShow(t, cats)
+			</table>
+		</main>
+	}
+}
