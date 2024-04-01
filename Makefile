@@ -71,6 +71,7 @@ clean:
 		echo "Error: VIEW_DIR or BUILD_DIR is not set."; \
 		exit 1; \
 	fi
+	shopt -s globstar; \
 	rm -f "$(VIEW_DIR)"/**/*_templ.go
 	rm -f "$(TAILWINDCSS_OUT)" "$(MAINJS_OUT)"
 	rm -rf "$(BUILD_DIR)"

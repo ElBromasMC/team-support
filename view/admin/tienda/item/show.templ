@@ -1,0 +1,80 @@
+package item
+
+import (
+	"alc/model/store"
+	"alc/view/layout"
+)
+
+templ Show(cat store.Category, items []store.Item) {
+	@layout.BaseAdmin(cat.Name) {
+		<!-- Dialogs -->
+		<div>
+			<!-- New item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Nuevo item</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="new-item-form"></div>
+			</dialog>
+			<!-- Update item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Editar item</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="update-item-form"></div>
+			</dialog>
+			<!-- Delete item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">¿Estás seguro?</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="remove-item-form"></div>
+			</dialog>
+		</div>
+		<main>
+			<!-- Navigation -->
+			<div>
+				<span class="font-semibold text-azure">
+					<a href="/admin">Administración</a>
+				</span>
+				<span>
+					<svg class="inline w-4 h-4 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+					</svg>
+				</span>
+				<span class="font-semibold text-azure">
+					<a href="/admin/garantia">Garantías</a>
+				</span>
+				<span>
+					<svg class="inline w-4 h-4 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+					</svg>
+				</span>
+				<span class="text-livid">{ cat.Name }</span>
+			</div>
+			<!-- Control buttons -->
+			<div>
+				<button class="font-semibold text-azure">Nuevo item</button>
+			</div>
+			<!-- Items show table -->
+			<div id="table-items">
+				@Table(items)
+			</div>
+		</main>
+	}
+}

@@ -1,0 +1,36 @@
+package product 
+
+import (
+	"fmt"
+	"alc/model/store"
+)
+
+templ Table(products []store.Product) {
+	<table class="table-auto w-full">
+		<thead>
+			<tr class="border-b border-black text-left">
+				<th scope="col">Nombre</th>
+				<th scope="col">Precio</th>
+				<th scope="col">Detalles</th>
+				<th scope="col">Acciones</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, p := range products {
+				<tr class="border-b border-black">
+					<td>{ p.Name }</td>
+					<td>{ fmt.Sprintf("US$%.2f", float64(p.Price)/100.0) }</td>
+					<td>
+						for key, value := range p.Details {
+							<div>{ fmt.Sprintf("%s: %s", key, value) }</div>
+						}
+					</td>
+					<td>
+						<button class="block font-semibold text-azure">Editar</button>
+						<button class="block font-semibold text-azure">Borrar</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

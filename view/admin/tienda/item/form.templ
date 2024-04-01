@@ -1,19 +1,19 @@
-package form 
+package item
 
 import (
 	"alc/model/store"
 	"fmt"
 )
 
-templ NewCategory(t store.Type) {
+templ InsertionForm(cat store.Category) {
 	<form
 		class="mt-3 space-y-2"
 		enctype="multipart/form-data"
 		autocomplete="off"
-		if t == store.GarantiaType {
-			hx-post="/admin/garantia"
+		if cat.Type == store.GarantiaType {
+			hx-post={ string(templ.URL("/admin/garantia/" + cat.Slug)) }
 		} else {
-			hx-post="/admin/store"
+			hx-post={ string(templ.URL("/admin/store/" + cat.Slug)) }
 		}
 		hx-target="#table-items"
 		hx-encoding="multipart/form-data"
@@ -38,27 +38,27 @@ templ NewCategory(t store.Type) {
 	</form>
 }
 
-templ UpdateCategory(cat store.Category) {
+templ UpdateForm(item store.Item) {
 	<form
 		class="mt-3 space-y-2"
 		enctype="multipart/form-data"
 		autocomplete="off"
-		if cat.Type == store.GarantiaType {
-			hx-put="/admin/garantia"
+		if item.Category.Type == store.GarantiaType {
+			hx-put={ string(templ.URL("/admin/garantia/" + item.Category.Slug)) }
 		} else {
-			hx-put="/admin/store"
+			hx-put={ string(templ.URL("/admin/store/" + item.Category.Slug)) }
 		}
 		hx-target="#table-items"
 		hx-encoding="multipart/form-data"
 	>
-		<input type="hidden" name="id" value={ fmt.Sprintf("%d", cat.Id) }/>
+		<input type="hidden" name="id" value={ fmt.Sprintf("%d", item.Id) }/>
 		<div>
 			<label>Nombre:</label>
-			<input class="block w-full border border-livid" type="text" name="name" value={ cat.Name } required/>
+			<input class="block w-full border border-livid" type="text" name="name" value={ item.Name } required/>
 		</div>
 		<div>
 			<label>Descripción:</label>
-			<input class="block w-full border border-livid" type="text" name="description" value={ cat.Description }/>
+			<input class="block w-full border border-livid" type="text" name="description" value={ item.Description }/>
 		</div>
 		<div>
 			<label>Imagen:</label>
@@ -66,27 +66,28 @@ templ UpdateCategory(cat store.Category) {
 		</div>
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Actualizar</button>
+			<button class="font-bold text-azure" type="reset">Reiniciar</button>
 		</div>
 	</form>
 }
 
-templ RemoveCategory(cat store.Category) {
+templ DeletionForm(item store.Item) {
 	<form
 		class="mt-3 space-y-2"
 		enctype="multipart/form-data"
 		autocomplete="off"
-		if cat.Type == store.GarantiaType {
-			hx-delete="/admin/garantia"
+		if item.Category.Type == store.GarantiaType {
+			hx-delete={ string(templ.URL("/admin/garantia/" + item.Category.Slug)) }
 		} else {
-			hx-delete="/admin/store"
+			hx-delete={ string(templ.URL("/admin/store/" + item.Category.Slug)) }
 		}
 		hx-target="#table-items"
 		hx-encoding="multipart/form-data"
 	>
-		<input type="hidden" name="id" value={ fmt.Sprintf("%d", cat.Id) }/>
+		<input type="hidden" name="id" value={ fmt.Sprintf("%d", item.Id) }/>
 		<div>
 			<label>Nombre:</label>
-			<input class="block w-full border border-livid" type="text" value={ cat.Name } disabled/>
+			<input class="block w-full border border-livid" type="text" value={ item.Name } disabled/>
 		</div>
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Sí</button>

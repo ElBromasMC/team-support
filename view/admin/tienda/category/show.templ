@@ -1,82 +1,12 @@
-package garantia
+package category
 
 import (
-	"path"
-	"alc/config"
 	"alc/view/layout"
-	"alc/view/admin"
 	"alc/model/store"
 )
 
-func TypeShow(t store.Type) string {
-	if t == store.GarantiaType {
-		return "Garantías"
-	} else {
-		return "Tienda"
-	}
-}
-
-templ CategoryTableShow(t store.Type, cats []store.Category) {
-	<thead>
-		<tr class="border-b border-black text-left">
-			<th scope="col">Nombre</th>
-			<th class="w-72" scope="col">Descripción</th>
-			<th scope="col">Slug</th>
-			<th scope="col">Imagen</th>
-			<th scope="col">Acciones</th>
-		</tr>
-	</thead>
-	<tbody>
-		for _, c := range cats {
-			<tr class="border-b border-black">
-				<td>
-					<a
-						class="font-semibold text-azure"
-						if c.Type == store.GarantiaType {
-							href={ templ.URL("/admin/garantia/" + c.Slug) }
-						} else {
-							href={ templ.URL("/admin/store/" + c.Slug) }
-						}
-					>{ c.Name }</a>
-				</td>
-				<td>{ c.Description }</td>
-				<td>{ c.Slug }</td>
-				<td>
-					if c.Img.Id != 0 {
-						<button
-							class="block font-semibold text-azure"
-							onclick={ admin.HandleImageShow(c.Img.Filename, path.Join(config.IMAGES_PATH, c.Img.Filename)) }
-						>
-							{ c.Img.Filename }
-						</button>
-					} else {
-						<span>No image</span>
-					}
-				</td>
-				<td>
-					<!-- Control buttons -->
-					<button
-						class="block font-semibold text-azure"
-						hx-get="/admin/form/garantia"
-						hx-target="update-item-form"
-					>
-						Editar
-					</button>
-					<button
-						class="block font-semibold text-azure"
-						hx-get="/store/category/remove"
-						hx-target="remove-item-form"
-					>
-						Borrar
-					</button>
-				</td>
-			</tr>
-		}
-	</tbody>
-}
-
 templ Show(t store.Type, cats []store.Category) {
-	@layout.BaseAdmin(TypeShow(t)) {
+	@layout.BaseAdmin(type2Title(t)) {
 		<!-- Dialogs -->
 		<div>
 			<!-- New item dialog -->
@@ -127,16 +57,24 @@ templ Show(t store.Type, cats []store.Category) {
 						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
 					</svg>
 				</span>
-				<span class="text-livid">{ TypeShow(t) }</span>
+				<span class="text-livid">{ type2Title(t) }</span>
 			</div>
 			<!-- Control buttons -->
 			<div>
 				<button class="font-semibold text-azure">Nueva categoría</button>
 			</div>
 			<!-- Items show table -->
-			<table id="table-items" class="table-auto w-full">
-				@CategoryTableShow(t, cats)
-			</table>
+			<div id="table-items">
+				@Table(t, cats)
+			</div>
 		</main>
+	}
+}
+
+func type2Title(t store.Type) string {
+	if t == store.GarantiaType {
+		return "Garantías"
+	} else {
+		return "Tienda"
 	}
 }
