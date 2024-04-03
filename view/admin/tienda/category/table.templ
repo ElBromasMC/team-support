@@ -49,15 +49,15 @@ templ Table(t store.Type, cats []store.Category) {
 						<!-- Control buttons -->
 						<button
 							class="block font-semibold text-azure"
-							hx-get="/admin/form/garantia"
-							hx-target="update-item-form"
+							hx-get={ path.Join("/admin/tienda/type", c.Type.ToSlug(), "categories", c.Slug, "update") }
+							hx-target="#update-item-form"
 						>
 							Editar
 						</button>
 						<button
 							class="block font-semibold text-azure"
-							hx-get="/store/category/remove"
-							hx-target="remove-item-form"
+							hx-get={ path.Join("/admin/tienda/type", c.Type.ToSlug(), "categories", c.Slug, "delete") }
+							hx-target="#delete-item-form"
 						>
 							Borrar
 						</button>

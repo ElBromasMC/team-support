@@ -1,8 +1,8 @@
 package item
 
 import (
+	"path"
 	"alc/model/store"
-	"fmt"
 )
 
 templ InsertionForm(cat store.Category) {
@@ -10,11 +10,7 @@ templ InsertionForm(cat store.Category) {
 		class="mt-3 space-y-2"
 		enctype="multipart/form-data"
 		autocomplete="off"
-		if cat.Type == store.GarantiaType {
-			hx-post={ string(templ.URL("/admin/garantia/" + cat.Slug)) }
-		} else {
-			hx-post={ string(templ.URL("/admin/store/" + cat.Slug)) }
-		}
+		hx-post={ path.Join("/admin/tienda/type", cat.Type.ToSlug(), "categories", cat.Slug, "items") }
 		hx-target="#table-items"
 		hx-encoding="multipart/form-data"
 		hx-on::after-request="this.reset();"
@@ -43,15 +39,10 @@ templ UpdateForm(item store.Item) {
 		class="mt-3 space-y-2"
 		enctype="multipart/form-data"
 		autocomplete="off"
-		if item.Category.Type == store.GarantiaType {
-			hx-put={ string(templ.URL("/admin/garantia/" + item.Category.Slug)) }
-		} else {
-			hx-put={ string(templ.URL("/admin/store/" + item.Category.Slug)) }
-		}
+		hx-put={ path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories", item.Category.Slug, "items", item.Slug) }
 		hx-target="#table-items"
 		hx-encoding="multipart/form-data"
 	>
-		<input type="hidden" name="id" value={ fmt.Sprintf("%d", item.Id) }/>
 		<div>
 			<label>Nombre:</label>
 			<input class="block w-full border border-livid" type="text" name="name" value={ item.Name } required/>
@@ -76,15 +67,10 @@ templ DeletionForm(item store.Item) {
 		class="mt-3 space-y-2"
 		enctype="multipart/form-data"
 		autocomplete="off"
-		if item.Category.Type == store.GarantiaType {
-			hx-delete={ string(templ.URL("/admin/garantia/" + item.Category.Slug)) }
-		} else {
-			hx-delete={ string(templ.URL("/admin/store/" + item.Category.Slug)) }
-		}
+		hx-delete={ path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories", item.Category.Slug, "items", item.Slug) }
 		hx-target="#table-items"
 		hx-encoding="multipart/form-data"
 	>
-		<input type="hidden" name="id" value={ fmt.Sprintf("%d", item.Id) }/>
 		<div>
 			<label>Nombre:</label>
 			<input class="block w-full border border-livid" type="text" value={ item.Name } disabled/>

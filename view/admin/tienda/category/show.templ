@@ -1,8 +1,10 @@
 package category
 
 import (
+	"path"
 	"alc/view/layout"
 	"alc/model/store"
+	"alc/view/component"
 )
 
 templ Show(t store.Type, cats []store.Category) {
@@ -19,7 +21,7 @@ templ Show(t store.Type, cats []store.Category) {
 					<h2 class="font-bold text-2xl">Nueva categoría</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
-				<div id="new-item-form"></div>
+				<div id="insert-item-form"></div>
 			</dialog>
 			<!-- Update item dialog -->
 			<dialog
@@ -43,25 +45,29 @@ templ Show(t store.Type, cats []store.Category) {
 					<h2 class="font-bold text-2xl">¿Estás seguro?</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
-				<div id="remove-item-form"></div>
+				<div id="delete-item-form"></div>
 			</dialog>
 		</div>
 		<main>
 			<!-- Navigation -->
 			<div>
-				<span class="font-semibold text-azure">
-					<a href="/admin">Administración</a>
-				</span>
-				<span>
-					<svg class="inline w-4 h-4 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
-					</svg>
-				</span>
+				<span class="font-semibold text-azure"><a href="/admin">Administración</a></span>
+				@component.IconRight()
+				<span class="font-semibold text-azure"><a href="/admin/tienda">Tienda</a></span>
+				@component.IconRight()
 				<span class="text-livid">{ type2Title(t) }</span>
 			</div>
+			<!-- Title -->
+			<h1 class="font-bold text-3xl">Categorías</h1>
 			<!-- Control buttons -->
 			<div>
-				<button class="font-semibold text-azure">Nueva categoría</button>
+				<button
+					class="font-semibold text-azure"
+					hx-get={ path.Join("/admin/tienda/type", t.ToSlug(), "categories/insert") }
+					hx-target="#insert-item-form"
+				>
+					Nueva categoría
+				</button>
 			</div>
 			<!-- Items show table -->
 			<div id="table-items">

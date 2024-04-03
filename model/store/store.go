@@ -52,3 +52,11 @@ type Order struct {
 	PhoneNumber   string    `json:"phoneNumber"`
 	CreatedAt     time.Time `json:"createdAt"`
 }
+
+func (t Type) ToSlug() string {
+	if t == GarantiaType {
+		return "garantia"
+	} else {
+		return "store"
+	}
+}

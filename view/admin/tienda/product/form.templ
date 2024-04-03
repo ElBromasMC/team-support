@@ -1,48 +1,28 @@
 package product 
 
-script handleNewProductFormShow() {
-	const dialog = document.querySelector("#new-item-dialog");
-	const form = dialog.querySelector("form.new-item");
-	form.reset();
-	dialog.showModal();
-}
+import (
+	"path"
+	"alc/model/store"
+)
 
-script handleUpdateProductFormShow(p store.Product) {
-	const dialog = document.querySelector("#update-item-dialog");
-	const form = dialog.querySelector("form.update-item");
-	form.reset();
-	form.querySelector("#up-id").value = p.id;
-	form.querySelector("#up-name").value = p.name;
-	form.querySelector("#up-price").value = (p.price / 100).toFixed(2);
-	dialog.showModal();
-}
-
-script handleDeleteProductFormShow(p store.Product) {
-	const dialog = document.querySelector("#delete-item-dialog");
-	const form = dialog.querySelector("form.delete-item");
-	form.reset();
-	form.querySelector("#de-id").value = p.id;
-	form.querySelector("#de-name").value = p.name;
-	dialog.showModal();
-}
-
-templ InsertionForm() {
+templ InsertionForm(item store.Item) {
 	<form
-		class="new-item mt-3 space-y-2"
-		hx-post={ string(templ.URL(path.Join("/admin/garantia", item.Category.Slug, item.Slug))) }
-		hx-target="#table-items"
-		hx-on::after-request="document.querySelector('#new-item-dialog').close()"
-		enctype="application/x-www-form-urlencoded"
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
 		autocomplete="off"
+		hx-post={ path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories", item.Category.Slug, "items", item.Slug, "products") }
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+		hx-on::after-request="this.reset();"
 	>
 		<!-- Fields -->
 		<div>
-			<label for="name">Nombre:</label>
-			<input class="block w-full border border-livid" type="text" id="name" name="name" required/>
+			<label>Nombre:</label>
+			<input class="block w-full border border-livid" type="text" name="name" required/>
 		</div>
 		<div>
-			<label for="price">Precio:</label>
-			<input class="block w-full border border-livid" placeholder="US$" type="number" min="0" step="0.01" id="price" name="price" required/>
+			<label>Precio:</label>
+			<input class="block w-full border border-livid" placeholder="US$" type="number" min="0" step="0.01" name="price" required/>
 		</div>
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Guardar</button>
@@ -61,14 +41,13 @@ templ UpdateForm() {
 		autocomplete="off"
 	>
 		<!-- Fields -->
-		<input type="hidden" id="up-id" name="id" required/>
 		<div>
-			<label for="up-name">Nombre:</label>
-			<input class="block w-full border border-livid" type="text" id="up-name" name="name" required/>
+			<label>Nombre:</label>
+			<input class="block w-full border border-livid" type="text" name="name" required/>
 		</div>
 		<div>
-			<label for="up-price">Precio:</label>
-			<input class="block w-full border border-livid" placeholder="US$" type="number" min="0" step="0.01" id="up-price" name="price" required/>
+			<label>Precio:</label>
+			<input class="block w-full border border-livid" placeholder="US$" type="number" min="0" step="0.01" name="price" required/>
 		</div>
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Actualizar</button>
@@ -87,10 +66,9 @@ templ DeletionForm() {
 		autocomplete="off"
 	>
 		<!-- Fields -->
-		<input type="hidden" id="de-id" name="id" required/>
 		<div>
-			<label for="de-name">Nombre:</label>
-			<input class="block w-full border border-livid" type="text" id="de-name" disabled/>
+			<label>Nombre:</label>
+			<input class="block w-full border border-livid" type="text" disabled/>
 		</div>
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Sí</button>

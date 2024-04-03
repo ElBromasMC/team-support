@@ -27,7 +27,7 @@ templ Table(items []store.Item) {
 					<td>{ i.Description }</td>
 					<td>{ i.Slug }</td>
 					<td>
-						if len(i.Img.Filename) != 0 {
+						if i.Img.Id != 0 {
 							<button
 								class="block font-semibold text-azure"
 								onclick={ admin.HandleImageShow(i.Img.Filename, path.Join(config.IMAGES_PATH, i.Img.Filename)) }
@@ -37,8 +37,20 @@ templ Table(items []store.Item) {
 						}
 					</td>
 					<td>
-						<button class="block font-semibold text-azure">Editar</button>
-						<button class="block font-semibold text-azure">Borrar</button>
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ path.Join("/admin/tienda/type", i.Category.Type.ToSlug(), "categories", i.Category.Slug, "items", i.Slug, "update") }
+							hx-target="#update-item-form"
+						>
+							Editar
+						</button>
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ path.Join("/admin/tienda/type", i.Category.Type.ToSlug(), "categories", i.Category.Slug, "items", i.Slug, "delete") }
+							hx-target="#delete-item-form"
+						>
+							Borrar
+						</button>
 					</td>
 				</tr>
 			}

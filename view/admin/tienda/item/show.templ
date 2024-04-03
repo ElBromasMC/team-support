@@ -1,8 +1,10 @@
 package item
 
 import (
+	"path"
 	"alc/model/store"
 	"alc/view/layout"
+	"alc/view/component"
 )
 
 templ Show(cat store.Category, items []store.Item) {
@@ -19,7 +21,7 @@ templ Show(cat store.Category, items []store.Item) {
 					<h2 class="font-bold text-2xl">Nuevo item</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
-				<div id="new-item-form"></div>
+				<div id="insert-item-form"></div>
 			</dialog>
 			<!-- Update item dialog -->
 			<dialog
@@ -43,38 +45,46 @@ templ Show(cat store.Category, items []store.Item) {
 					<h2 class="font-bold text-2xl">¿Estás seguro?</h2>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
-				<div id="remove-item-form"></div>
+				<div id="delete-item-form"></div>
 			</dialog>
 		</div>
 		<main>
 			<!-- Navigation -->
 			<div>
+				<span class="font-semibold text-azure"><a href="/admin">Administración</a></span>
+				@component.IconRight()
+				<span class="font-semibold text-azure"><a href="/admin/tienda">Tienda</a></span>
+				@component.IconRight()
 				<span class="font-semibold text-azure">
-					<a href="/admin">Administración</a>
+					<a href={ templ.URL(path.Join("/admin/tienda/type", cat.Type.ToSlug(), "categories")) }>{ type2Title(cat.Type) }</a>
 				</span>
-				<span>
-					<svg class="inline w-4 h-4 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
-					</svg>
-				</span>
-				<span class="font-semibold text-azure">
-					<a href="/admin/garantia">Garantías</a>
-				</span>
-				<span>
-					<svg class="inline w-4 h-4 pb-[2px] text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
-					</svg>
-				</span>
+				@component.IconRight()
 				<span class="text-livid">{ cat.Name }</span>
 			</div>
+			<!-- Title -->
+			<h1 class="font-bold text-3xl">Items</h1>
 			<!-- Control buttons -->
 			<div>
-				<button class="font-semibold text-azure">Nuevo item</button>
+				<button
+					class="font-semibold text-azure"
+					hx-get={ path.Join("/admin/tienda/type", cat.Type.ToSlug(), "categories", cat.Slug, "items/insert") }
+					hx-target="insert-item-form"
+				>
+					Nuevo item
+				</button>
 			</div>
 			<!-- Items show table -->
 			<div id="table-items">
 				@Table(items)
 			</div>
 		</main>
+	}
+}
+
+func type2Title(t store.Type) string {
+	if t == store.GarantiaType {
+		return "Garantías"
+	} else {
+		return "Tienda"
 	}
 }
