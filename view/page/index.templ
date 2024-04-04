@@ -8,18 +8,82 @@ templ Index() {
 	@layout.BasePage("Team Support Services") {
 		<main>
 			<!-- Carousel -->
-			<my-carousel class="h-[36rem]">
+			<my-carousel class="h-[36rem]" controls indicator autoplay="6000">
 				<div>
-					<img class="relative object-cover w-full h-full" src="/static/img/background1.jpg" alt=""/>
-					<section class="absolute flex flex-col items-center inset-x-0 inset-y-0 pb-9 text-chalky lg:flex-row-reverse lg:justify-evenly">
-						<img class="w-[60%] mt-5 max-w-64 lg:w-[30%] lg:max-w-96" src="/static/img/laptop.webp" alt="laptop"/>
-						<div class="flex flex-col lg:items-start">
-							<img src="/static/img/logo2.png" alt="logo"/>
-							<h2 class="my-3 text-2xl font-semibold text-center lg:my-9 lg:text-6xl lg:text-left">Empieza bien el año <br/> protege tu equipo</h2>
-							<div class="flex flex-col gap-5 items-center lg:flex-row lg:gap-12">
-								<img src="/static/img/garantia.png" alt="garantia"/>
-								<a class="px-8 py-2 rounded-2xl font-semibold bg-azure" href="/garantia">Consulte aquí</a>
-							</div>
+					<img class="relative object-cover w-full h-full" src="/static/img/fondo1.webp" alt=""/>
+					<section class="absolute flex flex-col gap-6 items-center px-4 py-16 max-w-7xl mx-auto inset-x-0 inset-y-0 text-chalky lg:flex-row-reverse lg:justify-between lg:gap-0">
+						<div class="relative w-full max-w-sm aspect-[3/2] lg:max-w-2xl">
+							<img
+								class="absolute w-[50%] left-0"
+								src="/static/img/laptop4.webp"
+								alt="laptop"
+							/>
+							<img
+								class="absolute w-[70%] right-0 top-[15%]"
+								src="/static/img/laptop3.webp"
+								alt="laptop"
+							/>
+						</div>
+						<div class="flex flex-col items-center gap-6 lg:items-start lg:gap-9">
+							<img class="w-72" src="/static/img/logo2.webp" alt="logo"/>
+							<h3
+								class="text-2xl font-semibold text-center lg:text-6xl lg:text-left lg:font-bold lg:italic"
+							>
+								Empieza bien el año 
+								<br/>
+								protege tu equipo
+							</h3>
+							<img class="w-40" src="/static/img/garantiaext.webp" alt="garantia"/>
+						</div>
+					</section>
+				</div>
+				<div>
+					<img class="relative object-cover w-full h-full" src="/static/img/fondo2.webp" alt=""/>
+					<section class="absolute flex flex-col gap-6 items-center px-4 py-16 max-w-7xl mx-auto inset-x-0 inset-y-0 text-chalky lg:flex-row-reverse lg:justify-between lg:gap-0">
+						<div class="relative w-full max-w-sm aspect-[3/2] lg:max-w-2xl">
+							<img
+								class="absolute w-[55%] left-0"
+								src="/static/img/laptop2.webp"
+								alt="laptop"
+							/>
+							<img
+								class="absolute w-[50%] right-0 top-[25%]"
+								src="/static/img/laptop1.webp"
+								alt="laptop"
+							/>
+						</div>
+						<div class="flex flex-col items-center gap-6 lg:items-start lg:gap-9">
+							<img class="w-72" src="/static/img/logo2.webp" alt="logo"/>
+							<h3
+								class="text-2xl font-semibold text-center lg:text-6xl lg:text-left lg:font-bold lg:italic"
+							>
+								<div>Centro autorizado</div>
+								<div class="lg:mt-3">
+									de servicio
+									<img class="w-52 mt-6 lg:inline lg:mt-0" src="/static/img/asus.webp" alt="asus"/>
+								</div>
+							</h3>
+						</div>
+					</section>
+				</div>
+				<div>
+					<div class="overflow-hidden w-full h-full">
+						<img class="absolute hidden object-cover w-full h-full lg:block xl:-right-[10%] 2xl:-right-[15%]" src="/static/img/fondo3.webp" alt=""/>
+						<img class="absolute hidden object-cover w-full h-full lg:block" src="/static/img/fondo3_.webp" alt=""/>
+						<div class="w-full h-full bg-navy"></div>
+					</div>
+					<section class="absolute flex flex-col gap-6 justify-center items-center px-4 py-16 max-w-7xl mx-auto inset-x-0 inset-y-0 text-chalky lg:flex-row-reverse lg:justify-end lg:gap-0">
+						<div class="flex flex-col items-center gap-6 lg:items-start lg:gap-9">
+							<img class="w-72" src="/static/img/logo2.webp" alt="logo"/>
+							<h3
+								class="text-2xl font-semibold text-center lg:text-6xl lg:text-left lg:font-bold lg:italic"
+							>
+								<div>Centro autorizado</div>
+								<div class="lg:mt-3">
+									de servicio
+									<img class="w-96 mt-6 lg:inline lg:mt-0" src="/static/img/viewsonic.webp" alt="viewsonic"/>
+								</div>
+							</h3>
 						</div>
 					</section>
 				</div>

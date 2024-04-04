@@ -1,4 +1,4 @@
-package admin
+package store
 
 import (
 	"alc/handler/util"
@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GET "/admin/store"
-func (h *Handler) HandleStoreShow(c echo.Context) error {
+// GET "/admin/tienda"
+func (h *Handler) HandleIndexShow(c echo.Context) error {
 	return util.Render(c, http.StatusOK, store.Show())
 }

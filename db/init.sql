@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 -- Image administrarion
-CREATE TABLE images (
+CREATE TABLE IF NOT EXISTS images (
     id SERIAL PRIMARY KEY,
     filename VARCHAR(25) UNIQUE NOT NULL
 );
@@ -57,17 +57,19 @@ CREATE TABLE IF NOT EXISTS store_items (
 );
 CREATE INDEX idx_items_name ON store_items USING gin (name gin_trgm_ops);
 
-CREATE TABLE store_products (
+CREATE TABLE IF NOT EXISTS store_products (
     id SERIAL PRIMARY KEY,
     item_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     price INT NOT NULL,
     details HSTORE NOT NULL DEFAULT ''::hstore,
+    slug VARCHAR(255) NOT NULL,
+    UNIQUE(item_id, slug),
     FOREIGN KEY (item_id) REFERENCES store_items(id) ON DELETE CASCADE
 );
 
 CREATE SEQUENCE purchase_order_seq AS INT START WITH 100000;
-CREATE TABLE store_orders (
+CREATE TABLE IF NOT EXISTS store_orders (
     purchase_order INT PRIMARY KEY DEFAULT nextval('purchase_order_seq'),
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
@@ -76,7 +78,7 @@ CREATE TABLE store_orders (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE order_products (
+CREATE TABLE IF NOT EXISTS order_products (
     id SERIAL PRIMARY KEY,
     order_id INT NOT NULL,
     quantity INT NOT NULL DEFAULT 1,

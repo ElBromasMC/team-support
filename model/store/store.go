@@ -42,6 +42,7 @@ type Product struct {
 	Name    string            `json:"name"`
 	Price   int               `json:"price"` // Stored in USD cents
 	Details map[string]string `json:"details"`
+	Slug    string            `json:"slug"`
 }
 
 type Order struct {

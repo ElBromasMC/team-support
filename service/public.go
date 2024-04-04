@@ -15,6 +15,18 @@ type Public struct {
 	DB *pgxpool.Pool
 }
 
+func (ps Public) GetType(slug string) (store.Type, error) {
+	var t store.Type
+	if slug == store.GarantiaType.ToSlug() {
+		t = store.GarantiaType
+	} else if slug == store.StoreType.ToSlug() {
+		t = store.StoreType
+	} else {
+		return "", echo.NewHTTPError(http.StatusBadRequest, "Invalid type")
+	}
+	return t, nil
+}
+
 // Check
 func (ps Public) GetCategories(t store.Type) ([]store.Category, error) {
 	rows, err := ps.DB.Query(context.Background(), `SELECT sc.id, sc.name, sc.description, sc.slug, img.id, img.filename
@@ -195,7 +207,7 @@ WHERE si.id = $1`, id).Scan(&item.Name, &item.Description, &item.LongDescription
 
 // Check
 func (ps Public) GetProducts(item store.Item) ([]store.Product, error) {
-	rows, err := ps.DB.Query(context.Background(), `SELECT id, name, price, details
+	rows, err := ps.DB.Query(context.Background(), `SELECT id, name, price, details, slug
 FROM store_products
 WHERE item_id = $1
 ORDER BY id ASC`, item.Id)
@@ -209,7 +221,7 @@ ORDER BY id ASC`, item.Id)
 		product.Details = make(map[string]string)
 
 		var detailsHstore pgtype.Hstore
-		err := row.Scan(&product.Id, &product.Name, &product.Price, &detailsHstore)
+		err := row.Scan(&product.Id, &product.Name, &product.Price, &detailsHstore, &product.Slug)
 		for key, value := range detailsHstore {
 			if value != nil {
 				product.Details[key] = *value
@@ -225,15 +237,37 @@ ORDER BY id ASC`, item.Id)
 }
 
 // Check
+func (ps Public) GetProduct(i store.Item, slug string) (store.Product, error) {
+	var product store.Product
+	product.Details = make(map[string]string)
+
+	var detailsHstore pgtype.Hstore
+	if err := ps.DB.QueryRow(context.Background(), `SELECT id, name, price, details
+FROM store_products
+WHERE item_id = $1 AND slug = $2`, i.Id, slug).Scan(&product.Id, &product.Name, &product.Price, &detailsHstore); err != nil {
+		return store.Product{}, echo.NewHTTPError(http.StatusNotFound, "Product not found")
+	}
+	for key, value := range detailsHstore {
+		if value != nil {
+			product.Details[key] = *value
+		}
+	}
+	product.Item = i
+	product.Slug = slug
+
+	return product, nil
+}
+
+// Check
 func (ps Public) GetProductById(id int) (store.Product, error) {
 	var product store.Product
 	product.Details = make(map[string]string)
 
 	var itemId int
 	var detailsHstore pgtype.Hstore
-	if err := ps.DB.QueryRow(context.Background(), `SELECT item_id, name, price, details
+	if err := ps.DB.QueryRow(context.Background(), `SELECT item_id, name, price, details, slug
 FROM store_products
-WHERE id = $1`, id).Scan(&itemId, &product.Name, &product.Price, &detailsHstore); err != nil {
+WHERE id = $1`, id).Scan(&itemId, &product.Name, &product.Price, &detailsHstore, &product.Slug); err != nil {
 		return store.Product{}, echo.NewHTTPError(http.StatusNotFound, "Product not found")
 	}
 	for key, value := range detailsHstore {

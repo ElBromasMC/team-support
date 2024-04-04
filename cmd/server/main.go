@@ -2,6 +2,7 @@ package main
 
 import (
 	"alc/handler/admin"
+	"alc/handler/admin/store"
 	"alc/handler/public"
 	middle "alc/middleware"
 	"alc/service"
@@ -56,6 +57,8 @@ func main() {
 	ah := admin.Handler{
 		AdminService: as,
 	}
+
+	sh := store.Handler(ah)
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -113,22 +116,32 @@ func main() {
 	g3.Use(authMiddleware, middle.Admin)
 	g3.GET("", ah.HandleIndexShow)
 
-	g3.GET("/garantia", ah.HandleGarantiaShow)
-	g3.POST("/garantia", ah.HandleNewGarantiaCategory)
-	g3.PUT("/garantia", ah.HandleUpdateGarantiaCategory)
-	g3.DELETE("/garantia", ah.HandleRemoveGarantiaCategory)
+	g31 := g3.Group("/tienda")
+	g31.GET("", sh.HandleIndexShow)
 
-	g3.GET("/garantia/:slug", ah.HandleGarantiaCategoryShow)
-	g3.POST("/garantia/:slug", ah.HandleNewGarantiaItem)
-	g3.PUT("/garantia/:slug", ah.HandleUpdateGarantiaItem)
-	g3.DELETE("/garantia/:slug", ah.HandleRemoveGarantiaItem)
+	g31.GET("/type/:typeSlug/categories", sh.HandleCategoriesShow)
+	g31.POST("/type/:typeSlug/categories", sh.HandleCategoryInsertion)
+	g31.PUT("/type/:typeSlug/categories/:categorySlug", sh.HandleCategoryUpdate)
+	g31.DELETE("/type/:typeSlug/categories/:categorySlug", sh.HandleCategoryDeletion)
+	g31.GET("/type/:typeSlug/categories/insert", sh.HandleCategoryInsertionFormShow)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/update", sh.HandleCategoryUpdateFormShow)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/delete", sh.HandleCategoryDeletionFormShow)
 
-	g3.GET("/garantia/:categorySlug/:itemSlug", ah.HandleGarantiaItemShow)
-	g3.POST("/garantia/:categorySlug/:itemSlug", ah.HandleNewGarantiaProduct)
-	g3.PUT("/garantia/:categorySlug/:itemSlug", ah.HandleUpdateGarantiaProduct)
-	g3.DELETE("/garantia/:categorySlug/:itemSlug", ah.HandleRemoveGarantiaProduct)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items", sh.HandleItemsShow)
+	g31.POST("/type/:typeSlug/categories/:categorySlug/items", sh.HandleItemInsertion)
+	g31.PUT("/type/:typeSlug/categories/:categorySlug/items/:itemSlug", sh.HandleItemUpdate)
+	g31.DELETE("/type/:typeSlug/categories/:categorySlug/items/:itemSlug", sh.HandleItemDeletion)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/insert", sh.HandleItemInsertionFormShow)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/update", sh.HandleItemUpdateFormShow)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/delete", sh.HandleItemDeletionFormShow)
 
-	g3.GET("/store", ah.HandleStoreShow)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products", sh.HandleProductsShow)
+	g31.POST("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products", sh.HandleProductInsertion)
+	g31.PUT("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug", sh.HandleProductUpdate)
+	g31.DELETE("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug", sh.HandleProductDeletion)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/insert", sh.HandleProductInsertionFormShow)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/update", sh.HandleProductUpdateFormShow)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/delete", sh.HandleProductDeletionFormShow)
 
 	// Cart group
 	g4 := e.Group("/cart")

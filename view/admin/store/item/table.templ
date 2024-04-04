@@ -7,7 +7,7 @@ import (
 	"alc/view/admin"
 )
 
-templ Table(items []store.Item) {
+templ Table(cat store.Category, items []store.Item) {
 	<table class="table-auto w-full">
 		<thead>
 			<tr class="border-b border-black text-left">
@@ -22,7 +22,12 @@ templ Table(items []store.Item) {
 			for _, i := range items {
 				<tr class="border-b border-black">
 					<td>
-						<a class="font-semibold text-azure" href={ templ.URL(path.Join("/admin/garantia", i.Category.Slug, i.Slug)) }>{ i.Name }</a>
+						<a
+							class="font-semibold text-azure"
+							href={ templ.URL(path.Join("/admin/tienda/type", i.Category.Type.ToSlug(), "categories", i.Category.Slug, "items", i.Slug, "products")) }
+						>
+							{ i.Name }
+						</a>
 					</td>
 					<td>{ i.Description }</td>
 					<td>{ i.Slug }</td>

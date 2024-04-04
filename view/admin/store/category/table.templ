@@ -24,11 +24,7 @@ templ Table(t store.Type, cats []store.Category) {
 					<td>
 						<a
 							class="font-semibold text-azure"
-							if c.Type == store.GarantiaType {
-								href={ templ.URL("/admin/garantia/" + c.Slug) }
-							} else {
-								href={ templ.URL("/admin/store/" + c.Slug) }
-							}
+							href={ templ.URL(path.Join("/admin/tienda/type", c.Type.ToSlug(), "categories", c.Slug, "items")) }
 						>{ c.Name }</a>
 					</td>
 					<td>{ c.Description }</td>
