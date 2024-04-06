@@ -91,6 +91,104 @@ WHERE sc.id = $1`, id).Scan(&cat.Type, &cat.Name, &cat.Description, &cat.Slug, &
 	return cat, nil
 }
 
+func (ps Public) GetAllItemsLike(t store.Type, like string, page int, n int) ([]store.Item, error) {
+	var rows pgx.Rows
+	var err error
+	if len(like) != 0 {
+		rows, err = ps.DB.Query(context.Background(), `SELECT sc.slug, si.id, si.name, si.slug, img.id, img.filename
+		FROM store_items AS si
+		JOIN store_categories AS sc
+		ON si.category_id = sc.id
+		LEFT JOIN images AS img
+		ON si.img_id = img.id
+		WHERE sc.type = $1
+		AND si.name % $2
+		ORDER BY si.name <-> $2
+		LIMIT ($4 + 1) OFFSET ($3 - 1) * $4`, t, like, page, n)
+	} else {
+		rows, err = ps.DB.Query(context.Background(), `SELECT sc.slug, si.id, si.name, si.slug, img.id, img.filename
+		FROM store_items AS si
+		JOIN store_categories AS sc
+		ON si.category_id = sc.id
+		LEFT JOIN images AS img
+		ON si.img_id = img.id
+		WHERE sc.type = $1
+		ORDER BY si.id DESC
+		LIMIT ($3 + 1) OFFSET ($2 - 1) * $3`, t, page, n)
+	}
+
+	if err != nil {
+		return []store.Item{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer rows.Close()
+
+	items, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Item, error) {
+		var item store.Item
+		var imgId *int
+		var imgFilename *string
+		err := row.Scan(&item.Category.Slug, &item.Id, &item.Name, &item.Slug, &imgId, &imgFilename)
+		if imgId != nil {
+			item.Img.Id = *imgId
+			item.Img.Filename = *imgFilename
+		}
+		return item, err
+	})
+	if err != nil {
+		return []store.Item{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return items, nil
+}
+
+func (ps Public) GetItemsLike(cat store.Category, like string, page int, n int) ([]store.Item, error) {
+	var rows pgx.Rows
+	var err error
+	if len(like) != 0 {
+		rows, err = ps.DB.Query(context.Background(), `SELECT sc.slug, si.id, si.name, si.slug, img.id, img.filename
+		FROM store_items AS si
+		JOIN store_categories AS sc
+		ON si.category_id = sc.id
+		LEFT JOIN images AS img
+		ON si.img_id = img.id
+		WHERE si.category_id = $1
+		AND si.name % $2
+		ORDER BY si.name <-> $2
+		LIMIT ($4 + 1) OFFSET ($3 - 1) * $4`, cat.Id, like, page, n)
+	} else {
+		rows, err = ps.DB.Query(context.Background(), `SELECT sc.slug, si.id, si.name, si.slug, img.id, img.filename
+		FROM store_items AS si
+		JOIN store_categories AS sc
+		ON si.category_id = sc.id
+		LEFT JOIN images AS img
+		ON si.img_id = img.id
+		WHERE si.category_id = $1
+		ORDER BY si.id DESC
+		LIMIT ($3 + 1) OFFSET ($2 - 1) * $3`, cat.Id, page, n)
+	}
+
+	if err != nil {
+		return []store.Item{}, echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+	defer rows.Close()
+
+	items, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Item, error) {
+		var item store.Item
+		var imgId *int
+		var imgFilename *string
+		err := row.Scan(&item.Category.Slug, &item.Id, &item.Name, &item.Slug, &imgId, &imgFilename)
+		if imgId != nil {
+			item.Img.Id = *imgId
+			item.Img.Filename = *imgFilename
+		}
+		return item, err
+	})
+	if err != nil {
+		return []store.Item{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return items, nil
+}
+
 // Check
 func (ps Public) GetItems(cat store.Category) ([]store.Item, error) {
 	rows, err := ps.DB.Query(context.Background(), `SELECT si.id, si.name, si.description, si.long_description, si.slug,

@@ -96,13 +96,13 @@ func main() {
 	g2 := e.Group("/store")
 	g2.Use(authMiddleware, cartMiddleware)
 	g2.GET("", func(c echo.Context) error {
-		return c.Redirect(http.StatusPermanentRedirect, "/store/all")
+		return c.Redirect(http.StatusPermanentRedirect, "/store/categories/all")
 	})
-	g2.GET("/all", ph.HandleStoreAllShow)
-	g2.GET("/:slug", ph.HandleStoreCategoryShow)
-	g2.POST("/all", ph.HandleStoreAllItemsShow)
-	g2.POST("/:slug", ph.HandleStoreCategoryItemsShow)
-	g2.GET("/:categorySlug/:itemSlug", ph.HandleStoreItemShow)
+	g2.GET("/categories/all", ph.HandleStoreAllShow)
+	g2.GET("/categories/:categorySlug", ph.HandleStoreCategoryShow)
+	g2.GET("/categories/all/items", ph.HandleStoreAllItemsShow)
+	g2.GET("/categories/:categorySlug/items", ph.HandleStoreCategoryItemsShow)
+	g2.GET("/categories/:categorySlug/items/:itemSlug", ph.HandleStoreItemShow)
 
 	// User routes
 	e.GET("/login", ph.HandleLoginShow)
