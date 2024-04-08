@@ -13,7 +13,6 @@ templ Table(t store.Type, cats []store.Category) {
 			<tr class="border-b border-black text-left">
 				<th scope="col">Nombre</th>
 				<th class="w-72" scope="col">Descripción</th>
-				<th scope="col">Slug</th>
 				<th scope="col">Imagen</th>
 				<th scope="col">Acciones</th>
 			</tr>
@@ -28,7 +27,6 @@ templ Table(t store.Type, cats []store.Category) {
 						>{ c.Name }</a>
 					</td>
 					<td>{ c.Description }</td>
-					<td>{ c.Slug }</td>
 					<td>
 						if c.Img.Id != 0 {
 							<button

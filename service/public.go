@@ -1,6 +1,7 @@
 package service
 
 import (
+	"alc/model/checkout"
 	"alc/model/store"
 	"context"
 	"net/http"
@@ -380,4 +381,51 @@ WHERE id = $1`, id).Scan(&itemId, &product.Name, &product.Price, &detailsHstore,
 	product.Item = item
 
 	return product, nil
+}
+
+func (ps Public) InsertOrderProducts(order checkout.Order, products []checkout.OrderProduct) error {
+	tx, err := ps.DB.Begin(context.Background())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer tx.Rollback(context.Background())
+
+	// Insert order
+	var orderId int
+	if err := tx.QueryRow(context.Background(), `INSERT INTO store_orders (email, phone_number, name, address, city, postal_code)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING purchase_order`, order.Email, order.Phone, order.Name, order.Address, order.City, order.PostalCode).Scan(&orderId); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new order")
+	}
+
+	if _, err := tx.CopyFrom(
+		context.Background(),
+		pgx.Identifier{"order_products"},
+		[]string{"order_id", "quantity", "product_type", "product_category", "product_item", "product_name", "product_price"},
+		pgx.CopyFromSlice(len(products), func(i int) ([]any, error) {
+			// TODO: hstoreDetails, hstoreProductDetails
+			hstoreDetails := make(pgtype.Hstore, len(products[i].Details))
+			for key, val := range products[i].Details {
+				valCopy := val
+				hstoreDetails[key] = &valCopy
+			}
+
+			hstoreProductDetails := make(pgtype.Hstore, len(products[i].ProductDetails))
+			for key, val := range products[i].ProductDetails {
+				valCopy := val
+				hstoreProductDetails[key] = &valCopy
+			}
+
+			return []any{orderId, products[i].Quantity, products[i].ProductType, products[i].ProductCategory,
+				products[i].ProductItem, products[i].ProductName, products[i].ProductPrice}, nil
+		}),
+	); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error inserting order products")
+	}
+
+	if err := tx.Commit(context.Background()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return nil
 }

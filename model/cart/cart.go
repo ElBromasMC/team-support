@@ -23,11 +23,6 @@ type ItemRequest struct {
 	Details   map[string]string
 }
 
-type OrderRequest struct {
-	Order        store.Order
-	ItemsRequest []ItemRequest
-}
-
 func (item Item) IsValid() error {
 	if item.Product.Item.Category.Type == store.GarantiaType {
 		if item.Quantity != 1 {

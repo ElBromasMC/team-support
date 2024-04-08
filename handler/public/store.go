@@ -65,7 +65,7 @@ func (h *Handler) HandleStoreAllItemsShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, view.Category(page, "all", items))
+	return util.Render(c, http.StatusOK, view.Category(like, page, "all", items))
 }
 
 // GET "/store/categories/:categorySlug/items"
@@ -90,7 +90,7 @@ func (h *Handler) HandleStoreCategoryItemsShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, view.Category(page, cat.Slug, items))
+	return util.Render(c, http.StatusOK, view.Category(like, page, cat.Slug, items))
 }
 
 // GET "/store/categories/:categorySlug/items/:itemSlug"

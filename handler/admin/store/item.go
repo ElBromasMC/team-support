@@ -43,7 +43,9 @@ func (h *Handler) HandleItemInsertion(c echo.Context) error {
 	var i store.Item
 	i.Name = c.FormValue("name")
 	i.Description = c.FormValue("description")
+	i.LongDescription = c.FormValue("longDescription")
 	img, imgErr := c.FormFile("img")
+	largeImg, largeImgErr := c.FormFile("largeImg")
 
 	// Query data
 	t, err := h.AdminService.GetType(typeSlug)
@@ -59,13 +61,21 @@ func (h *Handler) HandleItemInsertion(c echo.Context) error {
 	i.Category = cat
 	i.Slug = slug.Make(i.Name)
 
-	// Insert and attach image if present in request
+	// Insert and attach images if they are present in request
 	if imgErr == nil {
 		newImg, err := h.AdminService.InsertImage(img)
 		if err != nil {
 			return err
 		}
 		i.Img = newImg
+	}
+
+	if largeImgErr == nil {
+		newLargeImg, err := h.AdminService.InsertImage(largeImg)
+		if err != nil {
+			return err
+		}
+		i.LargeImg = newLargeImg
 	}
 
 	// Insert it into database

@@ -15,10 +15,11 @@ templ Show(cats []store.Category, slug string, items []store.Item) {
 					<div class="p-4">
 						<input
 							class="block px-2 py-1 w-full border border-navy rounded-xl text-sm bg-chalky text-livid"
+							autocomplete="off"
 							type="search"
 							name="like"
 							placeholder="Buscar"
-							hx-get={ string(templ.SafeURL(path.Join("/store/categories", slug, "items?l&p=1"))) }
+							hx-get={ string(templ.SafeURL(path.Join("/store/categories", slug, "items?p=1"))) }
 							hx-trigger="input changed delay:500ms"
 							hx-target="#store-items"
 						/>
@@ -47,7 +48,7 @@ templ Show(cats []store.Category, slug string, items []store.Item) {
 				</div>
 				<!-- Store items -->
 				<div id="store-items" class="flex-grow">
-					@Category(1, slug, items)
+					@Category("", 1, slug, items)
 				</div>
 			</div>
 		</main>

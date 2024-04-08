@@ -24,9 +24,19 @@ templ InsertionForm(cat store.Category) {
 			<input class="block w-full border border-livid" type="text" name="description"/>
 		</div>
 		<div>
-			<label>Imagen:</label>
+			<label>Miniatura:</label>
 			<input class="block" type="file" name="img" accept="image/png, image/jpeg, image/webp"/>
 		</div>
+		if cat.Type == store.StoreType {
+			<div>
+				<label>Descripción larga:</label>
+				<textarea class="block resize-none w-full h-36 border border-livid" name="longDescription"></textarea>
+			</div>
+			<div>
+				<label>Imagen:</label>
+				<input class="block" type="file" name="largeImg" accept="image/png, image/jpeg, image/webp"/>
+			</div>
+		}
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Guardar</button>
 			<button class="font-bold text-azure" type="reset">Reiniciar</button>
@@ -52,12 +62,21 @@ templ UpdateForm(item store.Item) {
 			<input class="block w-full border border-livid" type="text" name="description" value={ item.Description }/>
 		</div>
 		<div>
-			<label>Imagen:</label>
+			<label>Miniatura:</label>
 			<input class="block" type="file" name="img" accept="image/png, image/jpeg, image/webp"/>
 		</div>
+		if item.Category.Type == store.StoreType {
+			<div>
+				<label>Descripción larga:</label>
+				<textarea class="block resize-none w-full h-36 border border-livid" name="longDescription">{ item.LongDescription }</textarea>
+			</div>
+			<div>
+				<label>Imagen:</label>
+				<input class="block" type="file" name="largeImg" accept="image/png, image/jpeg, image/webp"/>
+			</div>
+		}
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Actualizar</button>
-			<button class="font-bold text-azure" type="reset">Reiniciar</button>
 		</div>
 	</form>
 }

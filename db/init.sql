@@ -71,10 +71,12 @@ CREATE TABLE IF NOT EXISTS store_products (
 CREATE SEQUENCE purchase_order_seq AS INT START WITH 100000;
 CREATE TABLE IF NOT EXISTS store_orders (
     purchase_order INT PRIMARY KEY DEFAULT nextval('purchase_order_seq'),
-    name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    address TEXT NOT NULL DEFAULT '',
     phone_number VARCHAR(25) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    address TEXT NOT NULL,
+    city VARCHAR(25) NOT NULL,
+    postal_code VARCHAR(25) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

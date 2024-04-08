@@ -1,11 +1,21 @@
 package store
 
 import (
+	"fmt"
 	"path"
 	"alc/model/store"
 	"alc/view/layout"
 	"alc/config"
 )
+
+script HandleProductChange() {
+	const productSelect = document.querySelector("#product-id");
+	const priceShow = document.querySelector("#store\\:price");
+	productSelect.addEventListener("change", e => {
+		const price = productSelect.querySelector(`option[value='${e.target.value}']`).dataset.price;
+		priceShow.textContent = price;
+	});
+}
 
 templ Item(item store.Item, products []store.Product) {
 	@layout.BasePage(item.Name) {
@@ -35,73 +45,69 @@ templ Item(item store.Item, products []store.Product) {
 				</div>
 				<!-- Imagen -->
 				<div class="lg:col-span-1">
-					<img class="w-full aspect-[7/4] object-cover rounded-3xl shadow-[rgba(0,0,0,0.24)_0px_3px_8px]" src={ path.Join(config.IMAGES_PATH, item.LargeImg.Filename) } alt={ item.Slug }/>
+					<img
+						class="w-full aspect-[7/4] object-cover rounded-3xl shadow-[rgba(0,0,0,0.24)_0px_3px_8px]"
+						if item.LargeImg.Id != 0 {
+							src={ path.Join(config.IMAGES_PATH, item.LargeImg.Filename) }
+							alt={ item.Slug }
+						} else {
+							src="/static/img/noimage.png"
+						}
+					/>
 				</div>
 				<!-- Producto -->
 				<div class="space-y-6 lg:col-span-1 lg:row-span-2">
 					<h2 class="text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>
 					<p>{ item.Description }</p>
-					<p class="text-3xl font-semibold text-navy"></p>
+					<p id="store:price" class="text-3xl font-semibold text-azure">
+						if len(products) >= 1 {
+							{ fmt.Sprintf("US$ %.2f", float64(products[0].Price)/100.0) }
+						} else {
+							No disponible!
+						}
+					</p>
 					<ul class="list-disc list-inside text-sm font-bold">
 						<li>Precio incluye el I.G.V</li>
 						<li>Precio sujeto a cambios sin previo aviso</li>
 						<li>Precio no incluye flete por envío</li>
 					</ul>
 					<!-- Formulario de compra -->
-					<form id="item-form" class="space-y-4" autocomplete="off">
+					<form
+						id="new-item-form"
+						class="space-y-4"
+						hx-post="/cart"
+						hx-target="#cart-applet"
+						hx-on::after-request="this.reset()"
+						enctype="application/x-www-form-urlencoded"
+						autocomplete="off"
+					>
 						<div>
 							<label class="block my-2 font-bold text-lg text-navy" for="quantity">Cantidad:</label>
-							<input class="p-2 w-16 border border-navy rounded-xl bg-chalky text-livid" type="number" id="quantity" name="quantity" min="1" value="1" required/>
+							<input class="p-2 w-16 border border-navy rounded-xl bg-chalky text-livid" type="number" id="quantity" name="Quantity" min="1" value="1" required/>
+						</div>
+						<div class="space-y-2">
+							<label class="block font-bold text-lg text-navy" for="product-id">Opciones:</label>
+							<!-- Product select -->
+							<select
+								class="product-select block p-2 w-full border border-navy rounded-xl bg-chalky text-livid"
+								id="product-id"
+								name="Id"
+								required
+							>
+								for _, p := range products {
+									<option
+										value={ fmt.Sprintf("%d", p.Id) }
+										data-price={ fmt.Sprintf("US$ %.2f", float64(p.Price)/100.0) }
+									>{ p.Name }</option>
+								}
+							</select>
+							@HandleProductChange()
 						</div>
 						<div class="flex gap-6">
 							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="submit" data-action="addToCart">Agregar al carrito</button>
 							<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit" data-action="buyNow">Comprar ahora</button>
 						</div>
 					</form>
-					<script>
-(() => {
-	const itemForm = document.querySelector("#item-form");
-	itemForm.addEventListener("submit", e => {
-		e.preventDefault();
-		const formData = new FormData(e.target);
-		const quantity = parseInt(formData.get("quantity"));
-		const cartDialog = document.querySelector("#cart-dialog"); // From header
-		const newItem = {
-			...JSON.parse(e.currentTarget.dataset.item),
-			quantity,
-		};
-		const action = e.submitter.dataset.action;
-		if (action === "addToCart") {
-			const addItem = items => {
-				let found = false;
-				const newItems = items.map(item => {
-					if (item.uuid === newItem.uuid) {
-						found = true;
-						return {
-							...newItem,
-							quantity: item.quantity + newItem.quantity,
-						};
-					} else {
-						return item;
-					}
-				});
-				if (!found) {
-					newItems.push(newItem);
-				}
-				return newItems;
-			};
-			(async () => {
-				const cart = document.querySelector("#shopping-cart");
-				await customElements.whenDefined(cart.localName);
-				cart.dispatchEvent(new CustomEvent("UPDATE", { detail: addItem }));
-				cartDialog.showModal();
-			})();
-		} else if (action === "buyNow") {
-		}
-		e.currentTarget.reset();
-	});
-})()
-					</script>
 				</div>
 				<!-- Descripcion del producto -->
 				<div class="rounded-3xl shadow-[rgba(0,0,0,0.24)_0px_3px_8px] overflow-hidden lg:col-span-1">

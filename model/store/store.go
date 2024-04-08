@@ -1,9 +1,5 @@
 package store
 
-import (
-	"time"
-)
-
 type Image struct {
 	Id       int    `json:"id"`
 	Filename string `json:"filename"`
@@ -43,15 +39,6 @@ type Product struct {
 	Price   int               `json:"price"` // Stored in USD cents
 	Details map[string]string `json:"details"`
 	Slug    string            `json:"slug"`
-}
-
-type Order struct {
-	PurchaseOrder int       `json:"purchaseOrder"`
-	Name          string    `json:"name"`
-	Email         string    `json:"email"`
-	Address       string    `json:"address"`
-	PhoneNumber   string    `json:"phoneNumber"`
-	CreatedAt     time.Time `json:"createdAt"`
 }
 
 func (t Type) ToSlug() string {

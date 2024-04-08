@@ -104,12 +104,17 @@ func main() {
 	g2.GET("/categories/:categorySlug/items", ph.HandleStoreCategoryItemsShow)
 	g2.GET("/categories/:categorySlug/items/:itemSlug", ph.HandleStoreItemShow)
 
-	// User routes
-	e.GET("/login", ph.HandleLoginShow)
-	e.GET("/signup", ph.HandleSignupShow)
-	e.POST("/login", ph.HandleLogin)
-	e.POST("/signup", ph.HandleSignup)
-	e.GET("/logout", ph.HandleLogout, authMiddleware)
+	// Cart group
+	g4 := e.Group("/cart")
+	g4.Use(authMiddleware, cartMiddleware)
+	g4.POST("", ph.HandleNewCartItem)
+	g4.DELETE("", ph.HandleRemoveCartItem)
+
+	// Checkout group
+	g5 := e.Group("/checkout")
+	g5.Use(authMiddleware, cartMiddleware)
+	g5.GET("", ph.HandleCheckoutShow)
+	g5.POST("", ph.HandleCheckoutOrder)
 
 	// Admin group
 	g3 := e.Group("/admin")
@@ -143,11 +148,12 @@ func main() {
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/update", sh.HandleProductUpdateFormShow)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/delete", sh.HandleProductDeletionFormShow)
 
-	// Cart group
-	g4 := e.Group("/cart")
-	g4.Use(authMiddleware, cartMiddleware)
-	g4.POST("", ph.HandleNewCartItem)
-	g4.DELETE("", ph.HandleRemoveCartItem)
+	// User routes
+	e.GET("/login", ph.HandleLoginShow)
+	e.GET("/signup", ph.HandleSignupShow)
+	e.POST("/login", ph.HandleLogin)
+	e.POST("/signup", ph.HandleSignup)
+	e.GET("/logout", ph.HandleLogout, authMiddleware)
 
 	// Start server
 	port := os.Getenv("PORT")

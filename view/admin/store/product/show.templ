@@ -60,7 +60,7 @@ templ Show(item store.Item, products []store.Product) {
 				</span>
 				@component.IconRight()
 				<span class="text-livid">
-					<a href={ templ.URL(path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories", item.Category.Slug, "items")) }>{ item.Category.Name }></a>
+					<a href={ templ.URL(path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories", item.Category.Slug, "items")) }>{ item.Category.Name }</a>
 				</span>
 				@component.IconRight()
 				<span class="text-livid">{ item.Name }</span>

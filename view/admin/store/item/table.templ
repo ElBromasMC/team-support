@@ -13,8 +13,11 @@ templ Table(cat store.Category, items []store.Item) {
 			<tr class="border-b border-black text-left">
 				<th scope="col">Nombre</th>
 				<th class="w-72" scope="col">Descripción</th>
-				<th scope="col">Slug</th>
-				<th scope="col">Imagen</th>
+				<th scope="col">Miniatura</th>
+				if cat.Type == store.StoreType {
+					<th scope="col">Descripción larga</th>
+					<th scope="col">Imagen</th>
+				}
 				<th scope="col">Acciones</th>
 			</tr>
 		</thead>
@@ -30,7 +33,6 @@ templ Table(cat store.Category, items []store.Item) {
 						</a>
 					</td>
 					<td>{ i.Description }</td>
-					<td>{ i.Slug }</td>
 					<td>
 						if i.Img.Id != 0 {
 							<button
@@ -41,6 +43,19 @@ templ Table(cat store.Category, items []store.Item) {
 							<span>No image</span>
 						}
 					</td>
+					if cat.Type == store.StoreType {
+						<td>{ i.LongDescription }</td>
+						<td>
+							if i.LargeImg.Id != 0 {
+								<button
+									class="block font-semibold text-azure"
+									onclick={ admin.HandleImageShow(i.LargeImg.Filename, path.Join(config.IMAGES_PATH, i.LargeImg.Filename)) }
+								>{ i.LargeImg.Filename }</button>
+							} else {
+								<span>No image</span>
+							}
+						</td>
+					}
 					<td>
 						<button
 							class="block font-semibold text-azure"
