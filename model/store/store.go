@@ -37,6 +37,7 @@ type Product struct {
 	Item    Item              `json:"item"`
 	Name    string            `json:"name"`
 	Price   int               `json:"price"` // Stored in USD cents
+	Stock   *int              `json:"stock"`
 	Details map[string]string `json:"details"`
 	Slug    string            `json:"slug"`
 }

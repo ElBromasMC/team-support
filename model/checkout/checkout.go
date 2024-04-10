@@ -1,11 +1,25 @@
 package checkout
 
 import (
+	"alc/model"
 	"alc/model/store"
 	"time"
+
+	"github.com/gofrs/uuid/v5"
+)
+
+type Status string
+
+const (
+	Pendiente    Status = "PENDIENTE"
+	Asignado     Status = "ASIGNADO"
+	EnProceso    Status = "EN PROCESO"
+	PorConfirmar Status = "POR CONFIRMAR"
+	Realizado    Status = "REALIZADO"
 )
 
 type Order struct {
+	Id            uuid.UUID
 	PurchaseOrder int
 	Email         string
 	Phone         string
@@ -14,6 +28,7 @@ type Order struct {
 	City          string
 	PostalCode    string
 	CreatedAt     time.Time
+	AssignedTo    model.User
 }
 
 type OrderProduct struct {

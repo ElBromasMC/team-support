@@ -2,6 +2,15 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 CREATE EXTENSION IF NOT EXISTS "hstore";
 
+-- Row update management
+CREATE OR REPLACE FUNCTION trigger_set_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- User administration
 CREATE TYPE user_role AS ENUM ('ADMIN', 'NORMAL');
 
@@ -10,14 +19,16 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     hashed_password TEXT NOT NULL,
-    role user_role NOT NULL DEFAULT 'NORMAL'
+    role user_role NOT NULL DEFAULT 'NORMAL',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
     session_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP + INTERVAL '1 month',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '1 month',
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
@@ -37,6 +48,8 @@ CREATE TABLE IF NOT EXISTS store_categories (
     description TEXT NOT NULL DEFAULT '',
     img_id INT,
     slug VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(type, slug),
     FOREIGN KEY (img_id) REFERENCES images(id) ON DELETE SET NULL
 );
@@ -50,6 +63,8 @@ CREATE TABLE IF NOT EXISTS store_items (
     img_id INT,
     largeimg_id INT,
     slug VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(category_id, slug),
     FOREIGN KEY (category_id) REFERENCES store_categories(id) ON DELETE CASCADE,
     FOREIGN KEY (img_id) REFERENCES images(id) ON DELETE SET NULL,
@@ -62,22 +77,34 @@ CREATE TABLE IF NOT EXISTS store_products (
     item_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     price INT NOT NULL,
+    stock INT,
     details HSTORE NOT NULL DEFAULT ''::hstore,
     slug VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(item_id, slug),
     FOREIGN KEY (item_id) REFERENCES store_items(id) ON DELETE CASCADE
 );
 
+-- Order administration
+CREATE TYPE order_status AS ENUM ('PENDIENTE', 'ASIGNADO', 'EN PROCESO', 'POR CONFIRMAR', 'REALIZADO');
+
 CREATE SEQUENCE purchase_order_seq AS INT START WITH 100000;
+
 CREATE TABLE IF NOT EXISTS store_orders (
-    purchase_order INT PRIMARY KEY DEFAULT nextval('purchase_order_seq'),
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    purchase_order INT DEFAULT nextval('purchase_order_seq'),
     email VARCHAR(255) NOT NULL,
     phone_number VARCHAR(25) NOT NULL,
     name VARCHAR(255) NOT NULL,
     address TEXT NOT NULL,
     city VARCHAR(25) NOT NULL,
     postal_code VARCHAR(25) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    assigned_to UUID,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE(purchase_order),
+    FOREIGN KEY (assigned_to) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS order_products (
@@ -93,3 +120,9 @@ CREATE TABLE IF NOT EXISTS order_products (
     product_details HSTORE NOT NULL DEFAULT ''::hstore,
     FOREIGN KEY (order_id) REFERENCES store_orders(purchase_order) ON DELETE CASCADE
 );
+
+-- Triggers
+CREATE TRIGGER set_order_timestamp
+BEFORE UPDATE ON store_orders
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();

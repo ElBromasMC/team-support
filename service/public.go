@@ -103,8 +103,8 @@ func (ps Public) GetAllItemsLike(t store.Type, like string, page int, n int) ([]
 		LEFT JOIN images AS img
 		ON si.img_id = img.id
 		WHERE sc.type = $1
-		AND si.name % $2
-		ORDER BY si.name <-> $2
+		AND $2 <% si.name
+		ORDER BY $2 <<-> si.name, si.name
 		LIMIT ($4 + 1) OFFSET ($3 - 1) * $4`, t, like, page, n)
 	} else {
 		rows, err = ps.DB.Query(context.Background(), `SELECT sc.slug, si.id, si.name, si.slug, img.id, img.filename
@@ -152,8 +152,8 @@ func (ps Public) GetItemsLike(cat store.Category, like string, page int, n int) 
 		LEFT JOIN images AS img
 		ON si.img_id = img.id
 		WHERE si.category_id = $1
-		AND si.name % $2
-		ORDER BY si.name <-> $2
+		AND $2 <% si.name
+		ORDER BY $2 <<-> si.name, si.name
 		LIMIT ($4 + 1) OFFSET ($3 - 1) * $4`, cat.Id, like, page, n)
 	} else {
 		rows, err = ps.DB.Query(context.Background(), `SELECT sc.slug, si.id, si.name, si.slug, img.id, img.filename

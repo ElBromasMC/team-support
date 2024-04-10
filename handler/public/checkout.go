@@ -74,5 +74,10 @@ func (h *Handler) HandleCheckoutOrder(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.Redirect(http.StatusFound, "/store")
+	return c.Redirect(http.StatusFound, "/checkout/success")
+}
+
+// GET "/checkout/success"
+func (h *Handler) HandleCheckoutSuccess(c echo.Context) error {
+	return util.Render(c, http.StatusOK, view.Success())
 }
