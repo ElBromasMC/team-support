@@ -7,6 +7,7 @@ import (
 	view "alc/view/checkout"
 	"net/http"
 
+	"github.com/gofrs/uuid/v5"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -23,7 +24,7 @@ func (h *Handler) HandleCheckoutShow(c echo.Context) error {
 }
 
 // POST "/checkout"
-func (h *Handler) HandleCheckoutOrder(c echo.Context) error {
+func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 	// Parsing request
 	var order checkout.Order
 	order.Email = c.FormValue("email")
@@ -56,7 +57,8 @@ func (h *Handler) HandleCheckoutOrder(c echo.Context) error {
 	}
 
 	// Insert order products
-	if err := h.PublicService.InsertOrderProducts(order, products); err != nil {
+	orderID, err := h.PublicService.InsertOrderProducts(order, products)
+	if err != nil {
 		return err
 	}
 
@@ -74,10 +76,26 @@ func (h *Handler) HandleCheckoutOrder(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.Redirect(http.StatusFound, "/checkout/success")
+	return c.Redirect(http.StatusFound, "/checkout/"+orderID.String())
 }
 
-// GET "/checkout/success"
-func (h *Handler) HandleCheckoutSuccess(c echo.Context) error {
-	return util.Render(c, http.StatusOK, view.Success())
+// GET "/checkout/:orderID"
+func (h *Handler) HandleCheckoutOrderShow(c echo.Context) error {
+	// Parsing request
+	orderID, err := uuid.FromString(c.Param("orderID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Identificador no válido")
+	}
+
+	// Query data
+	order, err := h.PublicService.GetOrderById(orderID)
+	if err != nil {
+		return err
+	}
+	products, err := h.PublicService.GetOrderProducts(order)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, view.Tracking(order, products))
 }

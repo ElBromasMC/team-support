@@ -32,6 +32,7 @@ func main() {
 		log.Fatalln("Failed to parse config:", err)
 	}
 	dbconfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		// Register uuid type
 		pgxuuid.Register(conn.TypeMap())
 		return nil
 	}
@@ -114,8 +115,8 @@ func main() {
 	g5 := e.Group("/checkout")
 	g5.Use(authMiddleware, cartMiddleware)
 	g5.GET("", ph.HandleCheckoutShow)
-	g5.POST("", ph.HandleCheckoutOrder)
-	g5.GET("/success", ph.HandleCheckoutSuccess)
+	g5.POST("", ph.HandleCheckoutOrderInsertion)
+	g5.GET("/:orderID", ph.HandleCheckoutOrderShow)
 
 	// Admin group
 	g3 := e.Group("/admin")

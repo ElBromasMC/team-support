@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS store_products (
 );
 
 -- Order administration
-CREATE TYPE order_status AS ENUM ('PENDIENTE', 'ASIGNADO', 'EN PROCESO', 'POR CONFIRMAR', 'REALIZADO');
+CREATE TYPE order_status AS ENUM ('PENDIENTE', 'EN PROCESO', 'POR CONFIRMAR', 'ENTREGADO', 'CANCELADO');
 
 CREATE SEQUENCE purchase_order_seq AS INT START WITH 100000;
 
@@ -97,19 +97,19 @@ CREATE TABLE IF NOT EXISTS store_orders (
     email VARCHAR(255) NOT NULL,
     phone_number VARCHAR(25) NOT NULL,
     name VARCHAR(255) NOT NULL,
+    dni VARCHAR(25) NOT NULL DEFAULT '',
     address TEXT NOT NULL,
     city VARCHAR(25) NOT NULL,
     postal_code VARCHAR(25) NOT NULL,
     assigned_to UUID,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(purchase_order),
     FOREIGN KEY (assigned_to) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS order_products (
     id SERIAL PRIMARY KEY,
-    order_id INT NOT NULL,
+    order_id UUID NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     details HSTORE NOT NULL DEFAULT ''::hstore,
     product_type store_type NOT NULL,
@@ -118,11 +118,33 @@ CREATE TABLE IF NOT EXISTS order_products (
     product_name VARCHAR(255) NOT NULL,
     product_price INT NOT NULL,
     product_details HSTORE NOT NULL DEFAULT ''::hstore,
-    FOREIGN KEY (order_id) REFERENCES store_orders(purchase_order) ON DELETE CASCADE
+    status order_status NOT NULL DEFAULT 'PENDIENTE',
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (order_id) REFERENCES store_orders(id) ON DELETE CASCADE
 );
 
 -- Triggers
-CREATE TRIGGER set_order_timestamp
-BEFORE UPDATE ON store_orders
+CREATE OR REPLACE TRIGGER set_order_timestamp
+BEFORE UPDATE ON order_products
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE OR REPLACE TRIGGER set_product_timestamp
+BEFORE UPDATE ON store_products
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE OR REPLACE TRIGGER set_item_timestamp
+BEFORE UPDATE ON store_items
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE OR REPLACE TRIGGER set_category_timestamp
+BEFORE UPDATE ON store_categories
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE OR REPLACE TRIGGER set_user_timestamp
+BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();

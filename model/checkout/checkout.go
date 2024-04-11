@@ -12,10 +12,10 @@ type Status string
 
 const (
 	Pendiente    Status = "PENDIENTE"
-	Asignado     Status = "ASIGNADO"
 	EnProceso    Status = "EN PROCESO"
 	PorConfirmar Status = "POR CONFIRMAR"
-	Realizado    Status = "REALIZADO"
+	Entregado    Status = "ENTREGADO"
+	Cancelado    Status = "CANCELADO"
 )
 
 type Order struct {
@@ -27,8 +27,8 @@ type Order struct {
 	Address       string
 	City          string
 	PostalCode    string
-	CreatedAt     time.Time
 	AssignedTo    model.User
+	CreatedAt     time.Time
 }
 
 type OrderProduct struct {
@@ -42,4 +42,6 @@ type OrderProduct struct {
 	ProductName     string
 	ProductPrice    int
 	ProductDetails  map[string]string
+	Status          Status
+	UpdatedAt       time.Time
 }
