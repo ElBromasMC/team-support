@@ -38,7 +38,7 @@ ON sc.img_id = img.id
 WHERE sc.type = $1
 ORDER BY sc.id DESC`, t)
 	if err != nil {
-		return []store.Category{}, echo.NewHTTPError(http.StatusInternalServerError)
+		return []store.Category{}, echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 	defer rows.Close()
 
