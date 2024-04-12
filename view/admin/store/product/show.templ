@@ -59,7 +59,7 @@ templ Show(item store.Item, products []store.Product) {
 					<a href={ templ.URL(path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories")) }>{ type2Title(item.Category.Type) }</a>
 				</span>
 				@component.IconRight()
-				<span class="text-livid">
+				<span class="font-semibold text-azure">
 					<a href={ templ.URL(path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories", item.Category.Slug, "items")) }>{ item.Category.Name }</a>
 				</span>
 				@component.IconRight()

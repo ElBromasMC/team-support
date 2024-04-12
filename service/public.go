@@ -447,7 +447,7 @@ product_name, product_price, product_details, status, updated_at
 FROM order_products
 WHERE order_id = $1`, order.Id)
 	if err != nil {
-		return []checkout.OrderProduct{}, echo.NewHTTPError(http.StatusInternalServerError, err)
+		return []checkout.OrderProduct{}, echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	defer rows.Close()
 
@@ -475,7 +475,7 @@ WHERE order_id = $1`, order.Id)
 		return product, err
 	})
 	if err != nil {
-		return []checkout.OrderProduct{}, echo.NewHTTPError(http.StatusInternalServerError, err)
+		return []checkout.OrderProduct{}, echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	return products, nil

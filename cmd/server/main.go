@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	_ "time/tzdata"
 
 	"github.com/gorilla/sessions"
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
