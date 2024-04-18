@@ -11,6 +11,7 @@ require (
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/labstack/echo-contrib v0.16.0
 	github.com/labstack/echo/v4 v4.11.4
+	github.com/wneessen/go-mail v0.4.1
 	golang.org/x/crypto v0.22.0
 )
 
