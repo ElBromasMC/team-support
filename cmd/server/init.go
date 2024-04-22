@@ -6,5 +6,6 @@ import (
 )
 
 func init() {
+	gob.Register([]byte{})
 	gob.Register([]cart.ItemRequest{})
 }

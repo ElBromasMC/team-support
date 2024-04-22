@@ -42,6 +42,13 @@ type Product struct {
 	Slug    string            `json:"slug"`
 }
 
+type Device struct {
+	Id       int
+	Serie    string
+	Valid    bool
+	IssuedBy string
+}
+
 func (t Type) ToSlug() string {
 	if t == GarantiaType {
 		return "garantia"

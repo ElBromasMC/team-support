@@ -12,5 +12,6 @@ func init() {
 	// Live reload
 	http.Get("http://localhost:8020")
 
+	gob.Register([]byte{})
 	gob.Register([]cart.ItemRequest{})
 }

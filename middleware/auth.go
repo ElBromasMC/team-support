@@ -1,38 +1,48 @@
 package middleware
 
 import (
-	"alc/handler/util"
-	"alc/model"
+	"alc/model/auth"
+	"alc/service"
 	"context"
 	"net/http"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
-func Auth(db *pgxpool.Pool) echo.MiddlewareFunc {
+func Auth(us service.Auth) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cookie, err := c.Cookie("session")
+			sess, err := session.Get(auth.SessionName, c)
 			if err != nil {
+				c.Logger().Debug("Error getting user session: ", err)
 				return next(c)
 			}
-			session, err := uuid.FromString(cookie.Value)
+
+			// Retrieve session
+			s, ok := sess.Values["session"].([]byte)
+			if !ok {
+				c.Logger().Debug("Invalid session from request")
+				return next(c)
+			}
+
+			// Get UUID
+			sessionID, err := uuid.FromBytes(s)
 			if err != nil {
-				util.RemoveCookie(c, "session")
+				c.Logger().Debug("Invalid session from request: ", err)
 				return next(c)
 			}
-			var user model.User
-			if err = db.QueryRow(context.Background(), `SELECT u.name, u.email, u.role
-FROM users u
-JOIN sessions s ON u.user_id = s.user_id
-WHERE s.session_id = $1`, session).Scan(&user.Name, &user.Email, &user.Role); err != nil {
-				util.RemoveCookie(c, "session")
+
+			// Get user
+			u, err := us.GetUserByUuid(sessionID)
+			if err != nil {
+				c.Logger().Debug("Unauthorized: ", err)
 				return next(c)
 			}
-			user.Session = session
-			ctx := context.WithValue(c.Request().Context(), "user", user)
+
+			// Attach user to request context
+			ctx := context.WithValue(c.Request().Context(), auth.AuthKey{}, u)
 			c.SetRequest(c.Request().WithContext(ctx))
 			return next(c)
 		}
@@ -41,11 +51,11 @@ WHERE s.session_id = $1`, session).Scan(&user.Name, &user.Email, &user.Role); er
 
 func Admin(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		user, ok := c.Request().Context().Value("user").(model.User)
+		u, ok := auth.GetUser(c.Request().Context())
 		if !ok {
 			return c.Redirect(http.StatusFound, "/login?to=/admin")
 		}
-		if user.Role != model.AdminRole {
+		if u.Role != auth.AdminRole {
 			return c.Redirect(http.StatusFound, "/login?to=/admin")
 		}
 		return next(c)

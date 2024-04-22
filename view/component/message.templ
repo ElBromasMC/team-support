@@ -1,7 +1,7 @@
 package component
 
-templ Message(msg string) {
-	<div>
-		Hola perros { msg }
+templ ErrorMessage(msg string) {
+	<div class="flex items-center h-full text-xl text-red-600 font-semibold">
+		{ msg }
 	</div>
 }

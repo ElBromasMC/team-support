@@ -1,7 +1,7 @@
 package checkout
 
 import (
-	"alc/model"
+	"alc/model/auth"
 	"alc/model/store"
 	"time"
 
@@ -27,7 +27,7 @@ type Order struct {
 	Address       string
 	City          string
 	PostalCode    string
-	AssignedTo    model.User
+	AssignedTo    auth.User
 	CreatedAt     time.Time
 }
 

@@ -6,4 +6,6 @@ import (
 
 type Handler struct {
 	PublicService service.Public
+	EmailService  service.Email
+	AuthService   service.Auth
 }

@@ -12,7 +12,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- User administration
-CREATE TYPE user_role AS ENUM ('ADMIN', 'NORMAL');
+CREATE TYPE user_role AS ENUM ('ADMIN', 'NORMAL', 'RECORDER');
 
 CREATE TABLE IF NOT EXISTS users (
     user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -86,6 +86,15 @@ CREATE TABLE IF NOT EXISTS store_products (
     FOREIGN KEY (item_id) REFERENCES store_items(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS store_devices (
+    id SERIAL PRIMARY KEY,
+    serie VARCHAR(25) UNIQUE NOT NULL,
+    valid BOOLEAN NOT NULL,
+    issued_by VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- Order administration
 CREATE TYPE order_status AS ENUM ('PENDIENTE', 'EN PROCESO', 'POR CONFIRMAR', 'ENTREGADO', 'CANCELADO');
 
@@ -146,5 +155,10 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 
 CREATE OR REPLACE TRIGGER set_user_timestamp
 BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE OR REPLACE TRIGGER set_device_timestamp
+BEFORE UPDATE ON store_devices
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();

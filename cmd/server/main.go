@@ -4,6 +4,7 @@ import (
 	"alc/handler/admin"
 	"alc/handler/admin/store"
 	"alc/handler/public"
+	"alc/handler/util"
 	middle "alc/middleware"
 	"alc/service"
 	"context"
@@ -19,6 +20,7 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/wneessen/go-mail"
 )
 
 func main() {
@@ -43,6 +45,15 @@ func main() {
 	}
 	defer dbpool.Close()
 
+	// Initialize email client
+	client, err := mail.NewClient(os.Getenv("SMTP_HOSTNAME"),
+		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithTLSPortPolicy(mail.TLSMandatory),
+		mail.WithUsername(os.Getenv("SMTP_USER")), mail.WithPassword(os.Getenv("SMTP_PASS")),
+	)
+	if err != nil {
+		log.Fatalln("Failed to create email client:", err)
+	}
+
 	// Initialize services
 	ps := service.Public{
 		DB: dbpool,
@@ -50,10 +61,16 @@ func main() {
 	as := service.Admin{
 		Public: ps,
 	}
+	ms := service.Email{
+		Client: client,
+	}
+	us := service.NewAuthService(dbpool)
 
 	// Initialize handlers
 	ph := public.Handler{
 		PublicService: ps,
+		EmailService:  ms,
+		AuthService:   us,
 	}
 
 	ah := admin.Handler{
@@ -74,7 +91,7 @@ func main() {
 		log.Fatalln("Missing SESSION_KEY env variable")
 	}
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(key))))
-	authMiddleware := middle.Auth(dbpool)
+	authMiddleware := middle.Auth(us)
 	cartMiddleware := middle.Cart(ps)
 
 	// Static files
@@ -86,6 +103,13 @@ func main() {
 	// Page routes
 	e.GET("/", ph.HandleIndexShow, authMiddleware, cartMiddleware)
 	e.GET("/ticket", ph.HandleTicketShow, authMiddleware, cartMiddleware)
+
+	// Auth routes
+	e.GET("/login", ph.HandleLoginShow)
+	e.GET("/signup", ph.HandleSignupShow)
+	e.POST("/login", ph.HandleLogin)
+	e.POST("/signup", ph.HandleSignup)
+	e.GET("/logout", ph.HandleLogout)
 
 	// Garantia routes
 	g1 := e.Group("/garantia")
@@ -151,12 +175,8 @@ func main() {
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/update", sh.HandleProductUpdateFormShow)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/delete", sh.HandleProductDeletionFormShow)
 
-	// User routes
-	e.GET("/login", ph.HandleLoginShow)
-	e.GET("/signup", ph.HandleSignupShow)
-	e.POST("/login", ph.HandleLogin)
-	e.POST("/signup", ph.HandleSignup)
-	e.GET("/logout", ph.HandleLogout, authMiddleware)
+	// Error handler
+	e.HTTPErrorHandler = util.HTTPErrorHandler
 
 	// Start server
 	port := os.Getenv("PORT")
