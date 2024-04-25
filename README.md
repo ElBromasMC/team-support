@@ -26,6 +26,9 @@ DATABASE_URL=postgres://<username>:<password>@localhost:5432/<database_name>
 SESSION_KEY=mysecretkey
 PORT=8080
 REL=1
+SMTP_HOSTNAME=mail.example.com
+SMTP_USER=<username>
+SMTP_PASS=<password>
 ```
 
 ### Load env variables
