@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS store_items (
 );
 CREATE INDEX idx_items_name ON store_items USING gin (name gin_trgm_ops);
 
+-- Product management
 CREATE TABLE IF NOT EXISTS store_products (
     id SERIAL PRIMARY KEY,
     item_id INT NOT NULL,
@@ -86,13 +87,54 @@ CREATE TABLE IF NOT EXISTS store_products (
     FOREIGN KEY (item_id) REFERENCES store_items(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS product_discount (
+    id SERIAL PRIMARY KEY,
+    product_id INT NOT NULL,
+    discount_value INT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    valid_from TIMESTAMPTZ NOT NULL,
+    valid_until TIMESTAMPTZ NOT NULL,
+    coupon_code VARCHAR(10),
+    minimum_amount INT,
+    maximum_amount INT,
+    FOREIGN KEY (product_id) REFERENCES store_products(id) ON DELETE CASCADE
+);
+
+-- Comment management
+CREATE TABLE IF NOT EXISTS item_comments (
+    id SERIAL PRIMARY KEY,
+    item_id INT NOT NULL,
+    parent_comment INT,
+    commented_by UUID,
+    title VARCHAR(255) NOT NULL DEFAULT '',
+    message TEXT NOT NULL DEFAULT '',
+    rating INT NOT NULL,
+    up_votes INT NOT NULL DEFAULT 0,
+    down_votes INT NOT NULL DEFAULT 0,
+    is_edited BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    edited_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (item_id) REFERENCES store_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_comment) REFERENCES item_comments(id) ON DELETE CASCADE,
+    FOREIGN KEY (commented_by) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Serial management
 CREATE TABLE IF NOT EXISTS store_devices (
     id SERIAL PRIMARY KEY,
     serie VARCHAR(25) UNIQUE NOT NULL,
     valid BOOLEAN NOT NULL,
-    issued_by VARCHAR(255) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS store_devices_history (
+    id SERIAL PRIMARY KEY,
+    device_id INT NOT NULL,
+    issued_by VARCHAR(255) NOT NULL,
+    issued_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (device_id) REFERENCES store_devices(id) ON DELETE RESTRICT
 );
 
 -- Order administration
@@ -132,12 +174,13 @@ CREATE TABLE IF NOT EXISTS order_products (
     FOREIGN KEY (order_id) REFERENCES store_orders(id) ON DELETE CASCADE
 );
 
--- Triggers
+-- Order triggers
 CREATE OR REPLACE TRIGGER set_order_timestamp
 BEFORE UPDATE ON order_products
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
+-- Store triggers
 CREATE OR REPLACE TRIGGER set_product_timestamp
 BEFORE UPDATE ON store_products
 FOR EACH ROW
@@ -153,12 +196,22 @@ BEFORE UPDATE ON store_categories
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
+CREATE OR REPLACE TRIGGER set_product_discount_timestamp
+BEFORE UPDATE ON product_discount
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- User triggers
 CREATE OR REPLACE TRIGGER set_user_timestamp
 BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
+-- Serial triggers
 CREATE OR REPLACE TRIGGER set_device_timestamp
 BEFORE UPDATE ON store_devices
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- Comment triggers
+-- TODO

@@ -39,7 +39,7 @@ func (us Auth) GetUserIdAndHpassByEmail(email string) (uuid.UUID, []byte, error)
 
 	if err := us.db.QueryRow(context.Background(), `SELECT user_id, hashed_password
 FROM users WHERE email = $1`, email).Scan(&id, &hpass); err != nil {
-		return uuid.UUID{}, []byte{}, echo.NewHTTPError(http.StatusUnauthorized, "Email not found")
+		return uuid.UUID{}, []byte{}, echo.NewHTTPError(http.StatusUnauthorized, "Email no encontrado")
 	}
 	return id, []byte(hpass), nil
 }
@@ -48,7 +48,7 @@ func (us Auth) InsertUser(u auth.User, hpass []byte) error {
 	if _, err := us.db.Exec(context.Background(), `INSERT INTO users (name, email, hashed_password)
 VALUES ($1, $2, $3)`, u.Name, u.Email, string(hpass)); err != nil {
 		// TODO: Test and handle unique email condition
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusConflict, "Ya existe una cuenta con el email proporcionado")
 	}
 	return nil
 }

@@ -24,7 +24,7 @@ func (h *Handler) HandleSignup(c echo.Context) error {
 	// Bind
 	var u auth.User
 	if err := c.Bind(&u); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid format")
+		return echo.NewHTTPError(http.StatusBadRequest, "Formato inválido")
 	}
 
 	// Trim name and email
@@ -34,16 +34,20 @@ func (h *Handler) HandleSignup(c echo.Context) error {
 	// Validate
 	address, err := mail.ParseAddress(u.Email)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid email")
+		return echo.NewHTTPError(http.StatusBadRequest, "Email inválido")
 	}
 	u.Email = address.Address
 
-	if !(8 <= len(u.Password) && len(u.Password) <= 72) {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid password")
+	if len(u.Password) < 8 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Contraseña muy corta (mínimo 8 caracteres)")
+	}
+
+	if len(u.Password) > 72 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Contraseña muy larga (máximo 72 caracteres)")
 	}
 
 	if !(0 < len(u.Name) && len(u.Name) <= 200) {
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid name")
+		return echo.NewHTTPError(http.StatusBadRequest, "Nombre inválido")
 	}
 
 	// Hash password
