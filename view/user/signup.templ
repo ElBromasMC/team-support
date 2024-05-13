@@ -5,9 +5,20 @@ import "alc/view/layout"
 templ SignupShow() {
 	@layout.Base("Registro") {
 		<main class="flex justify-center items-center py-12 min-h-dvh bg-sky-100 sm:px-4">
-			<section class="px-9 py-16 w-full space-y-9 bg-white sm:max-w-xl sm:rounded-3xl">
-				<h2 class="font-semibold text-4xl">Regístrate!</h2>
-				<form class="space-y-6" action="/signup" method="post">
+			<section class="px-9 py-16 w-full bg-white sm:max-w-xl sm:rounded-3xl">
+				<div class="flex gap-4 items-center">
+					<h2 class="font-semibold text-4xl">Regístrate!</h2>
+					<img id="login-indicator" class="htmx-indicator w-9" src="/static/img/bars.svg"/>
+				</div>
+				<div id="error-message" class="min-h-6"></div>
+				<form
+					class="space-y-6"
+					action="/signup"
+					method="post"
+					hx-post="/signup"
+					hx-target-error="#error-message"
+					hx-indicator="#login-indicator"
+				>
 					<div>
 						<label class="block text-lg" for="name">Nombre:</label>
 						<input id="name" class="block p-2 w-full border rounded-lg border-slate-500" type="text" name="name" required/>

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	"github.com/gofrs/uuid/v5"
 )
@@ -19,11 +20,12 @@ const (
 )
 
 type User struct {
-	Id       uuid.UUID `form:"-"`
-	Name     string    `form:"name"`
-	Email    string    `form:"email"`
-	Password string    `form:"password"`
-	Role     UserRole  `form:"-"`
+	Id        uuid.UUID `form:"-"`
+	Name      string    `form:"name"`
+	Email     string    `form:"email"`
+	Password  string    `form:"password"`
+	Role      UserRole  `form:"-"`
+	CreatedAt time.Time `form:"-"`
 }
 
 func GetUser(ctx context.Context) (User, bool) {

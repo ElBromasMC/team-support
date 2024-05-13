@@ -3,6 +3,7 @@ package main
 import (
 	"alc/handler/admin"
 	"alc/handler/admin/store"
+	"alc/handler/admin/user"
 	"alc/handler/public"
 	"alc/handler/util"
 	middle "alc/middleware"
@@ -55,15 +56,9 @@ func main() {
 	}
 
 	// Initialize services
-	ps := service.Public{
-		DB: dbpool,
-	}
-	as := service.Admin{
-		Public: ps,
-	}
-	ms := service.Email{
-		Client: client,
-	}
+	ps := service.NewPublicService(dbpool)
+	as := service.NewAdminService(ps)
+	ms := service.NewEmailService(client)
 	us := service.NewAuthService(dbpool)
 
 	// Initialize handlers
@@ -75,9 +70,10 @@ func main() {
 
 	ah := admin.Handler{
 		AdminService: as,
+		AuthService:  us,
 	}
-
 	sh := store.Handler(ah)
+	uh := user.Handler(ah)
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -148,6 +144,7 @@ func main() {
 	g3.Use(authMiddleware, middle.Admin)
 	g3.GET("", ah.HandleIndexShow)
 
+	// Admin store group
 	g31 := g3.Group("/tienda")
 	g31.GET("", sh.HandleIndexShow)
 
@@ -174,6 +171,15 @@ func main() {
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/insert", sh.HandleProductInsertionFormShow)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/update", sh.HandleProductUpdateFormShow)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/delete", sh.HandleProductDeletionFormShow)
+
+	// Admin user group
+	g32 := g3.Group("/usuarios")
+	g32.GET("", uh.HandleIndexShow)
+	g32.GET("/role/recorder/users", uh.HandleRecordersShow)
+	g32.POST("/role/recorder/users", uh.HandleRecorderInsertion)
+	g32.DELETE("/role/recorder/users/:userId", uh.HandleRecorderDeletion)
+	g32.GET("/role/recorder/users/insert", uh.HandleRecorderInsertionFormShow)
+	g32.GET("/role/recorder/users/:userId/delete", uh.HandleRecorderDeletionFormShow)
 
 	// Error handler
 	e.HTTPErrorHandler = util.HTTPErrorHandler

@@ -54,7 +54,7 @@ func (h *Handler) HandleSignup(c echo.Context) error {
 	hpass, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
 	if err != nil {
 		c.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error desconocido")
 	}
 
 	// Save user
@@ -62,7 +62,12 @@ func (h *Handler) HandleSignup(c echo.Context) error {
 		return err
 	}
 
-	return c.Redirect(http.StatusFound, "/login")
+	_, ok := c.Request().Header[http.CanonicalHeaderKey("HX-Request")]
+	if !ok {
+		return c.Redirect(http.StatusFound, "/login")
+	}
+	c.Response().Header().Set("HX-Redirect", "/login")
+	return c.NoContent(http.StatusOK)
 }
 
 // Login

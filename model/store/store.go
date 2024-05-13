@@ -1,5 +1,10 @@
 package store
 
+import (
+	"alc/model/auth"
+	"time"
+)
+
 type Image struct {
 	Id       int    `json:"id"`
 	Filename string `json:"filename"`
@@ -42,11 +47,46 @@ type Product struct {
 	Slug    string            `json:"slug"`
 }
 
+type ProductDiscount struct {
+	Id            int
+	Product       Product
+	DiscountValue int
+	ValidFrom     time.Time
+	ValidUntil    time.Time
+	CouponCode    *string
+	MinimumAmount *int
+	MaximumAmount *int
+}
+
+// Comment management
+type ItemComment struct {
+	Id          int
+	Item        Item
+	CommentedBy auth.User
+	Title       string
+	Message     string
+	Rating      int
+	UpVotes     int
+	DownVotes   int
+	IsEdited    bool
+	CreatedAt   time.Time
+	EditedAt    time.Time
+}
+
+// Serial management
 type Device struct {
+	Id        int
+	Serie     string
+	Valid     bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type DeviceHistory struct {
 	Id       int
-	Serie    string
-	Valid    bool
+	Device   Device
 	IssuedBy string
+	IssuedAt time.Time
 }
 
 func (t Type) ToSlug() string {

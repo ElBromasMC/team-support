@@ -17,6 +17,12 @@ type Public struct {
 	DB *pgxpool.Pool
 }
 
+func NewPublicService(db *pgxpool.Pool) Public {
+	return Public{
+		DB: db,
+	}
+}
+
 func (ps Public) GetType(slug string) (store.Type, error) {
 	var t store.Type
 	if slug == store.GarantiaType.ToSlug() {
@@ -307,7 +313,7 @@ WHERE si.id = $1`, id).Scan(&item.Name, &item.Description, &item.LongDescription
 
 // Check
 func (ps Public) GetProducts(item store.Item) ([]store.Product, error) {
-	rows, err := ps.DB.Query(context.Background(), `SELECT id, name, price, details, slug
+	rows, err := ps.DB.Query(context.Background(), `SELECT id, name, price, details, slug, stock
 FROM store_products
 WHERE item_id = $1
 ORDER BY id ASC`, item.Id)
@@ -321,7 +327,7 @@ ORDER BY id ASC`, item.Id)
 		product.Details = make(map[string]string)
 
 		var detailsHstore pgtype.Hstore
-		err := row.Scan(&product.Id, &product.Name, &product.Price, &detailsHstore, &product.Slug)
+		err := row.Scan(&product.Id, &product.Name, &product.Price, &detailsHstore, &product.Slug, &product.Stock)
 		for key, value := range detailsHstore {
 			if value != nil {
 				product.Details[key] = *value
@@ -342,9 +348,9 @@ func (ps Public) GetProduct(i store.Item, slug string) (store.Product, error) {
 	product.Details = make(map[string]string)
 
 	var detailsHstore pgtype.Hstore
-	if err := ps.DB.QueryRow(context.Background(), `SELECT id, name, price, details
+	if err := ps.DB.QueryRow(context.Background(), `SELECT id, name, price, details, stock
 FROM store_products
-WHERE item_id = $1 AND slug = $2`, i.Id, slug).Scan(&product.Id, &product.Name, &product.Price, &detailsHstore); err != nil {
+WHERE item_id = $1 AND slug = $2`, i.Id, slug).Scan(&product.Id, &product.Name, &product.Price, &detailsHstore, &product.Stock); err != nil {
 		return store.Product{}, echo.NewHTTPError(http.StatusNotFound, "Product not found")
 	}
 	for key, value := range detailsHstore {
@@ -365,9 +371,9 @@ func (ps Public) GetProductById(id int) (store.Product, error) {
 
 	var itemId int
 	var detailsHstore pgtype.Hstore
-	if err := ps.DB.QueryRow(context.Background(), `SELECT item_id, name, price, details, slug
+	if err := ps.DB.QueryRow(context.Background(), `SELECT item_id, name, price, details, slug, stock
 FROM store_products
-WHERE id = $1`, id).Scan(&itemId, &product.Name, &product.Price, &detailsHstore, &product.Slug); err != nil {
+WHERE id = $1`, id).Scan(&itemId, &product.Name, &product.Price, &detailsHstore, &product.Slug, &product.Stock); err != nil {
 		return store.Product{}, echo.NewHTTPError(http.StatusNotFound, "Product not found")
 	}
 	for key, value := range detailsHstore {
@@ -383,6 +389,8 @@ WHERE id = $1`, id).Scan(&itemId, &product.Name, &product.Price, &detailsHstore,
 
 	return product, nil
 }
+
+// Order management
 
 func (ps Public) InsertOrderProducts(order checkout.Order, products []checkout.OrderProduct) (uuid.UUID, error) {
 	tx, err := ps.DB.Begin(context.Background())

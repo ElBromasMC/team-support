@@ -35,7 +35,7 @@ func Auth(us service.Auth) echo.MiddlewareFunc {
 			}
 
 			// Get user
-			u, err := us.GetUserByUuid(sessionID)
+			u, err := us.GetUserBySession(sessionID)
 			if err != nil {
 				c.Logger().Debug("Unauthorized: ", err)
 				return next(c)

@@ -19,6 +19,14 @@ type Admin struct {
 	Public
 }
 
+func NewAdminService(ps Public) Admin {
+	return Admin{
+		Public: ps,
+	}
+}
+
+// Category management
+
 func (as Admin) InsertCategory(cat store.Category) (int, error) {
 	var imgId *int
 	if cat.Img.Id != 0 {
@@ -98,6 +106,8 @@ WHERE id = $1`, id); err != nil {
 
 	return nil
 }
+
+// Item management
 
 func (as Admin) InsertItem(item store.Item) (int, error) {
 	var imgId *int
@@ -181,6 +191,8 @@ WHERE id = $1 RETURNING img_id, largeimg_id`, id).Scan(&imgId, &largeimgId); err
 	return nil
 }
 
+// Product management
+
 func (as Admin) InsertProduct(product store.Product) (int, error) {
 	hstoreDetails := make(pgtype.Hstore, len(product.Details))
 	for key, val := range product.Details {
@@ -189,9 +201,9 @@ func (as Admin) InsertProduct(product store.Product) (int, error) {
 	}
 
 	var id int
-	if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products (item_id, name, price, details, slug)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug).Scan(&id); err != nil {
+	if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products (item_id, name, price, details, slug, stock)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug, product.Stock).Scan(&id); err != nil {
 		return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting product into database")
 	}
 	return id, nil
@@ -213,6 +225,18 @@ WHERE id = $5`, product.Name, product.Price, hstoreDetails, product.Slug, id); e
 	return nil
 }
 
+func (as Admin) UpdateStock(id int, quantity int) error {
+	sql := `UPDATE store_products SET stock = stock + $1 WHERE id = $2`
+	c, err := as.DB.Exec(context.Background(), sql, quantity, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	if c.RowsAffected() != 1 {
+		return echo.NewHTTPError(http.StatusNotFound, "Producto no encontrado")
+	}
+	return nil
+}
+
 func (as Admin) RemoveProduct(id int) error {
 	if _, err := as.DB.Exec(context.Background(), `DELETE FROM store_products WHERE id = $1`, id); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
@@ -220,6 +244,8 @@ func (as Admin) RemoveProduct(id int) error {
 
 	return nil
 }
+
+// Image management
 
 func (as Admin) InsertImage(img *multipart.FileHeader) (store.Image, error) {
 	// Source

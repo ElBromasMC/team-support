@@ -5,5 +5,11 @@ import (
 )
 
 type Email struct {
-	Client *mail.Client
+	client *mail.Client
+}
+
+func NewEmailService(client *mail.Client) Email {
+	return Email{
+		client: client,
+	}
 }

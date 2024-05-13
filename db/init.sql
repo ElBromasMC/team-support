@@ -105,8 +105,7 @@ CREATE TABLE IF NOT EXISTS product_discount (
 CREATE TABLE IF NOT EXISTS item_comments (
     id SERIAL PRIMARY KEY,
     item_id INT NOT NULL,
-    parent_comment INT,
-    commented_by UUID,
+    commented_by UUID NOT NULL,
     title VARCHAR(255) NOT NULL DEFAULT '',
     message TEXT NOT NULL DEFAULT '',
     rating INT NOT NULL,
@@ -116,7 +115,6 @@ CREATE TABLE IF NOT EXISTS item_comments (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     edited_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (item_id) REFERENCES store_items(id) ON DELETE CASCADE,
-    FOREIGN KEY (parent_comment) REFERENCES item_comments(id) ON DELETE CASCADE,
     FOREIGN KEY (commented_by) REFERENCES users(user_id) ON DELETE CASCADE
 );
 

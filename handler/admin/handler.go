@@ -6,4 +6,5 @@ import (
 
 type Handler struct {
 	AdminService service.Admin
+	AuthService  service.Auth
 }
