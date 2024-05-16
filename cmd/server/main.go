@@ -2,6 +2,7 @@ package main
 
 import (
 	"alc/handler/admin"
+	"alc/handler/admin/device"
 	"alc/handler/admin/store"
 	"alc/handler/admin/user"
 	"alc/handler/public"
@@ -60,6 +61,7 @@ func main() {
 	as := service.NewAdminService(ps)
 	ms := service.NewEmailService(client)
 	us := service.NewAuthService(dbpool)
+	ds := service.NewDeviceService(dbpool)
 
 	// Initialize handlers
 	ph := public.Handler{
@@ -69,11 +71,13 @@ func main() {
 	}
 
 	ah := admin.Handler{
-		AdminService: as,
-		AuthService:  us,
+		AdminService:  as,
+		AuthService:   us,
+		DeviceService: ds,
 	}
 	sh := store.Handler(ah)
 	uh := user.Handler(ah)
+	dh := device.Handler(ah)
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -146,6 +150,7 @@ func main() {
 
 	// Admin store group
 	g31 := g3.Group("/tienda")
+	g31.Use(middle.RoleAdmin)
 	g31.GET("", sh.HandleIndexShow)
 
 	g31.GET("/type/:typeSlug/categories", sh.HandleCategoriesShow)
@@ -174,12 +179,22 @@ func main() {
 
 	// Admin user group
 	g32 := g3.Group("/usuarios")
+	g32.Use(middle.RoleAdmin)
 	g32.GET("", uh.HandleIndexShow)
 	g32.GET("/role/recorder/users", uh.HandleRecordersShow)
 	g32.POST("/role/recorder/users", uh.HandleRecorderInsertion)
 	g32.DELETE("/role/recorder/users/:userId", uh.HandleRecorderDeletion)
 	g32.GET("/role/recorder/users/insert", uh.HandleRecorderInsertionFormShow)
 	g32.GET("/role/recorder/users/:userId/delete", uh.HandleRecorderDeletionFormShow)
+
+	// Admin device group
+	g33 := g3.Group("/dispositivos")
+	g33.GET("", dh.HandleIndexShow)
+	g33.POST("", dh.HandleInsertion)
+	g33.PUT("/:deviceId/desactivate", dh.HandleDeactivation)
+	g33.GET("/insert", dh.HandleInsertionFormShow)
+	g33.GET("/:deviceId/history", dh.HandleHistoryShow)
+	g33.GET("/:deviceId/desactivate", dh.HandleDeactivationFormShow)
 
 	// Error handler
 	e.HTTPErrorHandler = util.HTTPErrorHandler

@@ -74,7 +74,7 @@ func (ds Device) GetDeviceHistory(device store.Device) ([]store.DeviceHistory, e
 func (ds Device) InsertDevice(serial string, email string) error {
 	// Check if exists
 	var exists bool
-	sql := `EXISTS(
+	sql := `SELECT EXISTS (
 		SELECT 1 FROM store_devices
 		WHERE serie = $1
 	)`
