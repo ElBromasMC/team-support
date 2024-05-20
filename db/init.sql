@@ -161,6 +161,7 @@ CREATE TABLE IF NOT EXISTS order_products (
     order_id UUID NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     details HSTORE NOT NULL DEFAULT ''::hstore,
+    product_id INT,
     product_type store_type NOT NULL,
     product_category VARCHAR(255) NOT NULL,
     product_item VARCHAR(255) NOT NULL,
@@ -169,7 +170,8 @@ CREATE TABLE IF NOT EXISTS order_products (
     product_details HSTORE NOT NULL DEFAULT ''::hstore,
     status order_status NOT NULL DEFAULT 'PENDIENTE',
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (order_id) REFERENCES store_orders(id) ON DELETE CASCADE
+    FOREIGN KEY (order_id) REFERENCES store_orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES store_products(id) ON DELETE SET NULL
 );
 
 -- Order triggers

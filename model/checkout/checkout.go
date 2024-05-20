@@ -36,6 +36,7 @@ type OrderProduct struct {
 	Order           Order
 	Quantity        int
 	Details         map[string]string
+	Product         store.Product
 	ProductType     store.Type
 	ProductCategory string
 	ProductItem     string

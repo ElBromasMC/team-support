@@ -40,7 +40,11 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 	if err := item.IsValid(); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		if err.Error() == "quantity exceeds current stock" {
+			return echo.NewHTTPError(http.StatusBadRequest, "La cantidad seleccionada supera al stock")
+		} else {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
 	}
 
 	// Get cart items
@@ -68,6 +72,17 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 	}
 	if !found {
 		items = append(items, item)
+	}
+
+	// Validate new items
+	for _, i := range items {
+		if err := i.IsValid(); err != nil {
+			if err.Error() == "quantity exceeds current stock" {
+				return echo.NewHTTPError(http.StatusBadRequest, "La cantidad seleccionada supera al stock")
+			} else {
+				return echo.NewHTTPError(http.StatusBadRequest, err)
+			}
+		}
 	}
 
 	// Update cart items

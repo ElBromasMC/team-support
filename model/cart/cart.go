@@ -39,6 +39,11 @@ func (item Item) IsValid() error {
 		if item.Quantity < 1 {
 			return errors.New("invalid quantity for store item")
 		}
+		if item.Product.Stock != nil {
+			if item.Quantity > *item.Product.Stock {
+				return errors.New("quantity exceeds current stock")
+			}
+		}
 	}
 	return nil
 }

@@ -11,10 +11,14 @@ import (
 script HandleProductChange() {
 	const productSelect = document.querySelector("#product-id");
 	const priceShow = document.querySelector("#store\\:price");
-	productSelect.addEventListener("change", e => {
+	const stockShow = document.querySelector("#store\\:stock");
+	const handler = e => {
 		const price = productSelect.querySelector(`option[value='${e.target.value}']`).dataset.price;
+		const stock = productSelect.querySelector(`option[value='${e.target.value}']`).dataset.stock;
 		priceShow.textContent = price;
-	});
+		stockShow.textContent = stock;
+	}
+	productSelect.addEventListener("change", handler);
 }
 
 templ Item(item store.Item, products []store.Product) {
@@ -77,13 +81,21 @@ templ Item(item store.Item, products []store.Product) {
 						class="space-y-4"
 						hx-post="/cart"
 						hx-target="#cart-applet"
-						hx-on::after-request="this.reset()"
+						hx-target-error="#error-message"
+						hx-on::after-request="if(event.detail.target.id==='cart-applet'){this.querySelector('#quantity').value=1;this.querySelector('#error-message').textContent='';}"
 						enctype="application/x-www-form-urlencoded"
 						autocomplete="off"
 					>
 						<div>
 							<label class="block my-2 font-bold text-lg text-navy" for="quantity">Cantidad:</label>
 							<input class="p-2 w-16 border border-navy rounded-xl bg-chalky text-livid" type="number" id="quantity" name="Quantity" min="1" value="1" required/>
+							<p id="store:stock" class="text-sm text-livid">
+								if len(products) >= 1 {
+									if products[0].Stock != nil {
+										{ fmt.Sprintf("%d unidades disponibles", *products[0].Stock) }
+									}
+								}
+							</p>
 						</div>
 						<div class="space-y-2">
 							<label class="block font-bold text-lg text-navy" for="product-id">Opciones:</label>
@@ -98,16 +110,20 @@ templ Item(item store.Item, products []store.Product) {
 									<option
 										value={ fmt.Sprintf("%d", p.Id) }
 										data-price={ fmt.Sprintf("US$ %.2f", float64(p.Price)/100.0) }
+										if p.Stock != nil {
+											data-stock={ fmt.Sprintf("%d unidades disponibles", *p.Stock) }
+										}
 									>{ p.Name }</option>
 								}
 							</select>
-							@HandleProductChange()
 						</div>
 						<div class="flex gap-6">
 							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="submit" data-action="addToCart">Agregar al carrito</button>
 							<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit" data-action="buyNow">Comprar ahora</button>
 						</div>
+						<div id="error-message" class="min-h-6 font-semibold text-red-600"></div>
 					</form>
+					@HandleProductChange()
 				</div>
 				<!-- Descripcion del producto -->
 				<div class="rounded-3xl shadow-[rgba(0,0,0,0.24)_0px_3px_8px] overflow-hidden lg:col-span-1">

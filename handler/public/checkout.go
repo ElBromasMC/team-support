@@ -46,6 +46,7 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 		p := checkout.OrderProduct{
 			Quantity:        i.Quantity,
 			Details:         i.Details,
+			Product:         i.Product,
 			ProductType:     i.Product.Item.Category.Type,
 			ProductCategory: i.Product.Item.Category.Name,
 			ProductItem:     i.Product.Item.Name,

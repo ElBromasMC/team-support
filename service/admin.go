@@ -226,13 +226,13 @@ WHERE id = $5`, product.Name, product.Price, hstoreDetails, product.Slug, id); e
 }
 
 func (as Admin) UpdateStock(id int, quantity int) error {
-	sql := `UPDATE store_products SET stock = stock + $1 WHERE id = $2`
+	sql := `UPDATE store_products SET stock = stock + $1 WHERE id = $2 AND stock + $1 >= 0`
 	c, err := as.DB.Exec(context.Background(), sql, quantity, id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 	if c.RowsAffected() != 1 {
-		return echo.NewHTTPError(http.StatusNotFound, "Producto no encontrado")
+		return echo.NewHTTPError(http.StatusNotFound, "Producto no encontrado o stock inválido")
 	}
 	return nil
 }

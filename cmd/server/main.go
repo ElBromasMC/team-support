@@ -173,9 +173,11 @@ func main() {
 	g31.POST("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products", sh.HandleProductInsertion)
 	g31.PUT("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug", sh.HandleProductUpdate)
 	g31.DELETE("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug", sh.HandleProductDeletion)
+	g31.PUT("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/stock", sh.HandleProductStockUpdate)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/insert", sh.HandleProductInsertionFormShow)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/update", sh.HandleProductUpdateFormShow)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/delete", sh.HandleProductDeletionFormShow)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/stock", sh.HandleProductStockUpdateFormShow)
 
 	// Admin user group
 	g32 := g3.Group("/usuarios")

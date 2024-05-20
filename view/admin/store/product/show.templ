@@ -47,6 +47,18 @@ templ Show(item store.Item, products []store.Product) {
 				</form>
 				<div id="delete-item-form"></div>
 			</dialog>
+			<!-- Update stock dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Actualizar stock</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="update-stock-form"></div>
+			</dialog>
 		</div>
 		<main>
 			<!-- Navigation -->

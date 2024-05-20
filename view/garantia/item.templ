@@ -74,7 +74,8 @@ templ ShowItem(item store.Item, products []store.Product) {
 						class="space-y-4"
 						hx-post="/cart"
 						hx-target="#cart-applet"
-						hx-on::after-request="this.reset()"
+						hx-target-error="#error-message"
+						hx-on::after-request="if(event.detail.target.id==='cart-applet'){this.querySelector('#serialnumber').value='';this.querySelector('#error-message').textContent='';}"
 						enctype="application/x-www-form-urlencoded"
 						autocomplete="off"
 					>
@@ -100,13 +101,14 @@ templ ShowItem(item store.Item, products []store.Product) {
 									>{ p.Name }</option>
 								}
 							</select>
-							@HandleProductChange()
 						</div>
 						<div class="flex gap-6">
 							<button class="flex-1 p-2 border border-azure rounded-3xl font-semibold text-azure" type="submit" data-action="addToCart">Agregar al carrito</button>
 							<button class="flex-1 p-2 border bg-azure border-azure rounded-3xl font-semibold text-chalky" type="submit" data-action="buyNow">Comprar ahora</button>
 						</div>
+						<div id="error-message" class="min-h-6 font-semibold text-red-600"></div>
 					</form>
+					@HandleProductChange()
 				</div>
 				<div class="space-y-6 lg:order-4 lg:row-span-2">
 					<!-- Requisitos -->

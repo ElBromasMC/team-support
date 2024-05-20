@@ -407,8 +407,24 @@ RETURNING id`, order.Email, order.Phone, order.Name, order.Address, order.City, 
 		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new order")
 	}
 
-	// Insert products
 	for _, product := range products {
+		if product.Product.Id == 0 {
+			return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+
+		// Update stock
+		if product.Product.Stock != nil {
+			sql := `UPDATE store_products SET stock = stock - $1 WHERE id = $2 AND stock - $1 >= 0`
+			c, err := ps.DB.Exec(context.Background(), sql, product.Quantity, product.Product.Id)
+			if err != nil {
+				return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
+			}
+			if c.RowsAffected() != 1 {
+				return uuid.Nil, echo.NewHTTPError(http.StatusNotFound, "Producto no encontrado o stock inválido")
+			}
+		}
+
+		// Insert product
 		hstoreDetails := make(pgtype.Hstore, len(product.Details))
 		for key, val := range product.Details {
 			valCopy := val
@@ -422,9 +438,9 @@ RETURNING id`, order.Email, order.Phone, order.Name, order.Address, order.City, 
 		}
 
 		if _, err := tx.Exec(context.Background(), `INSERT INTO order_products (order_id, quantity, details,
-product_type, product_category, product_item, product_name, product_price, product_details)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, orderID, product.Quantity, hstoreDetails,
-			product.ProductType, product.ProductCategory, product.ProductItem, product.ProductName, product.ProductPrice, hstoreProductDetails); err != nil {
+product_type, product_category, product_item, product_name, product_price, product_details, product_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, orderID, product.Quantity, hstoreDetails,
+			product.ProductType, product.ProductCategory, product.ProductItem, product.ProductName, product.ProductPrice, hstoreProductDetails, product.Product.Id); err != nil {
 			return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
