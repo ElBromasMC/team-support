@@ -29,6 +29,8 @@ REL=1
 SMTP_HOSTNAME=mail.example.com
 SMTP_USER=<username>
 SMTP_PASS=<password>
+IZIPAY_STOREID=
+IZIPAY_APIKEY=
 ```
 
 ### Load env variables

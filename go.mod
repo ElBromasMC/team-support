@@ -3,7 +3,7 @@ module alc
 go 1.21.1
 
 require (
-	github.com/a-h/templ v0.2.598
+	github.com/a-h/templ v0.2.707
 	github.com/gofrs/uuid/v5 v5.0.0
 	github.com/gorilla/sessions v1.2.2
 	github.com/gosimple/slug v1.14.0

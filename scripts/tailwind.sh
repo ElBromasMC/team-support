@@ -1,10 +1,7 @@
 #!/bin/bash
-
 TMP_DIR="${1:-"./tmp"}"
-
-LINE_FILE="line"
 LOG_FILE="${2:-"tailwind.log"}"
-
+LINE_FILE="line"
 LAST_LINE=0
 CURRENT_LINES=0
 
@@ -23,7 +20,7 @@ fi
 if [ "$LAST_LINE" -ge "$CURRENT_LINES" ]; then
     echo "Waiting"
     while read f; do 
-        if [ "$f" = "$LOG_FILE" ] && [ $(($(wc -l < "$TMP_DIR/$LOG_FILE") % 4)) -eq 1 ]; then 
+        if [ "$f" = "$LOG_FILE" ] && [ $(($(wc -l < "$TMP_DIR/$LOG_FILE") % 4)) -eq 3 ]; then 
             pkill -P $$ inotifywait
             break
         fi
