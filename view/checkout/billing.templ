@@ -1,0 +1,115 @@
+package checkout
+
+import (
+	"alc/model/checkout"
+)
+
+templ BillingForm(order checkout.Order) {
+	<nav class="text-3xl">
+		<span class="font-semibold">Facturación</span>
+		<span>
+			<svg class="inline w-6 h-6 pb-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+			</svg>
+		</span>
+		<span class="text-gray-400">Pago</span>
+	</nav>
+	<form
+		class="mt-4"
+		action="/checkout/payment"
+		method="post"
+		hx-post="/checkout/payment"
+		hx-target="#checkout-form"
+		hx-target-error="#error-message"
+		hx-indicator="#indicator"
+	>
+		<!-- Contact information -->
+		<div class="mt-4 space-y-2">
+			<h2 class="font-bold text-2xl">Contacto</h2>
+			<div>
+				<label for="email">Correo electrónico:</label>
+				<input
+					id="email"
+					class="block p-2 w-full border rounded-md border-slate-500"
+					type="email"
+					placeholder="Correo electrónico"
+					name="email"
+					value={ order.Email }
+					required
+				/>
+			</div>
+			<div>
+				<label for="phone">Teléfono:</label>
+				<input
+					id="phone"
+					class="block p-2 w-full border rounded-md border-slate-500"
+					type="tel"
+					placeholder="Teléfono"
+					name="phone"
+					value={ order.Phone }
+				/>
+			</div>
+		</div>
+		<!-- Billing information -->
+		<div class="mt-4 space-y-2">
+			<h2 class="font-bold text-2xl">Dirección de facturación</h2>
+			<div>
+				<label for="billing-name">Nombre completo:</label>
+				<input
+					id="billing-name"
+					class="block p-2 w-full border rounded-md border-slate-500"
+					type="text"
+					placeholder="Nombre completo"
+					name="billing-name"
+					value={ order.Name }
+					required
+				/>
+			</div>
+			<div>
+				<label for="billing-address">Dirección:</label>
+				<span class="font-semibold text-azure">(Solo disponible en Perú)</span>
+				<input
+					id="billing-address"
+					class="block p-2 w-full border rounded-md border-slate-500"
+					type="text"
+					placeholder="Dirección"
+					name="billing-address"
+					value={ order.Address }
+					required
+				/>
+			</div>
+			<div class="grid grid-cols-2 gap-6">
+				<div>
+					<label for="billing-city">Ciudad:</label>
+					<input
+						id="billing-city"
+						class="block p-2 w-full border rounded-md border-slate-500"
+						type="text"
+						placeholder="Ciudad"
+						name="billing-city"
+						value={ order.City }
+						required
+					/>
+				</div>
+				<div>
+					<label for="billing-zip">Código postal:</label>
+					<input
+						id="billing-zip"
+						class="block p-2 w-full border rounded-md border-slate-500"
+						type="text"
+						placeholder="Código postal"
+						name="billing-zip"
+						value={ order.PostalCode }
+						required
+					/>
+				</div>
+			</div>
+		</div>
+		<div id="error-message" class="mt-1 min-h-6 text-red-600 font-semibold"></div>
+		<div class="mt-1">
+			<button class="w-full p-2 border bg-azure border-azure rounded-xl text-lg font-bold text-chalky" type="submit">
+				Siguiente
+			</button>
+		</div>
+	</form>
+}

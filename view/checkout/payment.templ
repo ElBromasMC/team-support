@@ -1,0 +1,51 @@
+package checkout
+
+import "alc/model/checkout"
+
+templ PaymentForm(order checkout.Order) {
+	<nav class="text-3xl">
+		<span>
+			<form
+				class="inline"
+				action="/checkout/billing"
+				method="post"
+				hx-post="/checkout/billing"
+				hx-target="#checkout-form"
+				hx-indicator="#indicator"
+			>
+				<input type="hidden" name="email" value={ order.Email }/>
+				<input type="hidden" name="phone" value={ order.Phone }/>
+				<input type="hidden" name="billing-name" value={ order.Name }/>
+				<input type="hidden" name="billing-address" value={ order.Address }/>
+				<input type="hidden" name="billing-city" value={ order.City }/>
+				<input type="hidden" name="billing-zip" value={ order.PostalCode }/>
+				<button class="text-azure font-semibold cursor-pointer hover:text-sky-300" type="submit">Facturación</button>
+			</form>
+		</span>
+		<span>
+			<svg class="inline w-6 h-6 pb-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
+			</svg>
+		</span>
+		<span class="font-semibold">Pago</span>
+	</nav>
+	<div class="mt-4">
+		<!-- Payment information -->
+		<h2 class="mt-2 font-bold text-2xl">Pago</h2>
+		<p class="mt-2 text-lg">
+			Luego de hacer click en "Pagar ahora", se le mostrará la pasarela de pagos Izipay para completar su compra de forma segura.
+		</p>
+		<form
+			class="mt-8"
+			action="https://secure.micuentaweb.pe/vads-payment/"
+			method="post"
+			target="payment-frame"
+		>
+			<input type="hidden" name="vads_action_mode" value="IFRAME"/>
+			<button class="w-full p-2 border bg-azure border-azure rounded-xl text-lg font-bold text-chalky" type="submit">
+				Pagar ahora
+			</button>
+		</form>
+		<iframe class="w-full mt-2 h-[30rem] border-none" name="payment-frame" src="" title="izipay" frameborder="0" scrolling="no"></iframe>
+	</div>
+}

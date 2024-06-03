@@ -140,8 +140,10 @@ func main() {
 	g5 := e.Group("/checkout")
 	g5.Use(authMiddleware, cartMiddleware)
 	g5.GET("", ph.HandleCheckoutShow)
-	g5.POST("", ph.HandleCheckoutOrderInsertion)
-	g5.GET("/:orderID", ph.HandleCheckoutOrderShow)
+	g5.POST("/billing", ph.HandleCheckoutBillingFormShow)
+	g5.POST("/payment", ph.HandleCheckoutPaymentFormShow)
+	g5.POST("/orders", ph.HandleCheckoutOrderInsertion)
+	g5.GET("/orders/:orderID", ph.HandleCheckoutOrderShow)
 
 	// Admin group
 	g3 := e.Group("/admin")

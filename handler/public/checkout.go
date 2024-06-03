@@ -23,7 +23,47 @@ func (h *Handler) HandleCheckoutShow(c echo.Context) error {
 	return util.Render(c, http.StatusOK, view.Show(items))
 }
 
-// POST "/checkout"
+// POST "/checkout/payment"
+func (h *Handler) HandleCheckoutPaymentFormShow(c echo.Context) error {
+	// Parsing request
+	var order checkout.Order
+	order.Email = c.FormValue("email")
+	order.Phone = c.FormValue("phone")
+	order.Name = c.FormValue("billing-name")
+	order.Address = c.FormValue("billing-address")
+	order.City = c.FormValue("billing-city")
+	order.PostalCode = c.FormValue("billing-zip")
+
+	// Validate order
+	order, err := order.Normalize()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return util.Render(c, http.StatusOK, view.PaymentForm(order))
+}
+
+// POST "/checkout/billing"
+func (h *Handler) HandleCheckoutBillingFormShow(c echo.Context) error {
+	// Parsing request
+	var order checkout.Order
+	order.Email = c.FormValue("email")
+	order.Phone = c.FormValue("phone")
+	order.Name = c.FormValue("billing-name")
+	order.Address = c.FormValue("billing-address")
+	order.City = c.FormValue("billing-city")
+	order.PostalCode = c.FormValue("billing-zip")
+
+	// Validate order
+	order, err := order.Normalize()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return util.Render(c, http.StatusOK, view.BillingForm(order))
+}
+
+// POST "/checkout/orders"
 func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 	// Parsing request
 	var order checkout.Order
@@ -80,7 +120,7 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/checkout/"+orderID.String())
 }
 
-// GET "/checkout/:orderID"
+// GET "/checkout/orders/:orderID"
 func (h *Handler) HandleCheckoutOrderShow(c echo.Context) error {
 	// Parsing request
 	orderID, err := uuid.FromString(c.Param("orderID"))
