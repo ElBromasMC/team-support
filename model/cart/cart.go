@@ -2,7 +2,6 @@ package cart
 
 import (
 	"alc/model/store"
-	"alc/service"
 	"context"
 	"errors"
 )
@@ -54,19 +53,6 @@ func (i Item) ToRequest() ItemRequest {
 		Quantity:  i.Quantity,
 		Details:   i.Details,
 	}
-}
-
-func (i ItemRequest) ToItem(ps service.Public) (Item, error) {
-	product, err := ps.GetProductById(i.ProductId)
-	if err != nil {
-		return Item{}, err
-	}
-	item := Item{
-		Product:  product,
-		Quantity: i.Quantity,
-		Details:  i.Details,
-	}
-	return item, nil
 }
 
 func GetItems(ctx context.Context) []Item {

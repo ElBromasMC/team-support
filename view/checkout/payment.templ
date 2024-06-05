@@ -1,8 +1,11 @@
 package checkout
 
-import "alc/model/checkout"
+import (
+	"alc/model/checkout"
+	"alc/model/payment"
+)
 
-templ PaymentForm(order checkout.Order) {
+templ PaymentForm(order checkout.Order, fields []payment.FormData) {
 	<nav class="text-3xl">
 		<span>
 			<form
@@ -41,7 +44,9 @@ templ PaymentForm(order checkout.Order) {
 			method="post"
 			target="payment-frame"
 		>
-			<input type="hidden" name="vads_action_mode" value="IFRAME"/>
+			for _, field := range fields {
+				<input type="hidden" name={ field.Key } value={ field.Value }/>
+			}
 			<button class="w-full p-2 border bg-azure border-azure rounded-xl text-lg font-bold text-chalky" type="submit">
 				Pagar ahora
 			</button>

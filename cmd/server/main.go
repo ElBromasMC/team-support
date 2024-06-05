@@ -8,6 +8,7 @@ import (
 	"alc/handler/public"
 	"alc/handler/util"
 	middle "alc/middleware"
+	"alc/model/payment"
 	"alc/service"
 	"context"
 	"log"
@@ -26,9 +27,11 @@ import (
 )
 
 func main() {
+	mode := payment.PRODUCTION
 	e := echo.New()
 	if os.Getenv("ENV") == "development" {
 		e.Debug = true
+		mode = payment.TEST
 	}
 
 	// Database connection
@@ -62,12 +65,14 @@ func main() {
 	ms := service.NewEmailService(client)
 	us := service.NewAuthService(dbpool)
 	ds := service.NewDeviceService(dbpool)
+	pys := service.NewPaymentService(mode, os.Getenv("IZIPAY_STOREID"), os.Getenv("IZIPAY_APIKEY"))
 
 	// Initialize handlers
 	ph := public.Handler{
-		PublicService: ps,
-		EmailService:  ms,
-		AuthService:   us,
+		PublicService:  ps,
+		EmailService:   ms,
+		AuthService:    us,
+		PaymentService: pys,
 	}
 
 	ah := admin.Handler{

@@ -5,7 +5,8 @@ import (
 )
 
 type Handler struct {
-	PublicService service.Public
-	EmailService  service.Email
-	AuthService   service.Auth
+	PublicService  service.Public
+	EmailService   service.Email
+	AuthService    service.Auth
+	PaymentService service.Payment
 }

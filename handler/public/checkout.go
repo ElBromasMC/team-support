@@ -40,7 +40,16 @@ func (h *Handler) HandleCheckoutPaymentFormShow(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return util.Render(c, http.StatusOK, view.PaymentForm(order))
+	// Get cart items
+	items := cart.GetItems(c.Request().Context())
+	if len(items) == 0 {
+		return c.Redirect(http.StatusFound, "/store")
+	}
+
+	// Get form data
+	fields := h.PaymentService.GetPaymentData(order, items)
+
+	return util.Render(c, http.StatusOK, view.PaymentForm(order, fields))
 }
 
 // POST "/checkout/billing"

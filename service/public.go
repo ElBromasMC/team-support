@@ -1,6 +1,7 @@
 package service
 
 import (
+	"alc/model/cart"
 	"alc/model/checkout"
 	"alc/model/store"
 	"context"
@@ -388,6 +389,21 @@ WHERE id = $1`, id).Scan(&itemId, &product.Name, &product.Price, &detailsHstore,
 	product.Item = item
 
 	return product, nil
+}
+
+// Cart management
+
+func (ps Public) RequestToItem(i cart.ItemRequest) (cart.Item, error) {
+	product, err := ps.GetProductById(i.ProductId)
+	if err != nil {
+		return cart.Item{}, err
+	}
+	item := cart.Item{
+		Product:  product,
+		Quantity: i.Quantity,
+		Details:  i.Details,
+	}
+	return item, nil
 }
 
 // Order management

@@ -28,7 +28,7 @@ func Cart(ps service.Public) echo.MiddlewareFunc {
 			// Get and validate items from request
 			items := make([]cart.Item, 0, len(itemsRequest))
 			for _, i := range itemsRequest {
-				item, err := i.ToItem(ps)
+				item, err := ps.RequestToItem(i)
 				if err != nil {
 					c.Logger().Debug("Error getting item: ", err)
 					return next(c)

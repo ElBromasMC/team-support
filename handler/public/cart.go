@@ -35,7 +35,7 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 	}
 
 	// Get and validate the new item
-	item, err := i.ToItem(h.PublicService)
+	item, err := h.PublicService.RequestToItem(i)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
