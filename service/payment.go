@@ -1,7 +1,6 @@
 package service
 
 import (
-	"alc/model/cart"
 	"alc/model/checkout"
 	"alc/model/payment"
 	"cmp"
@@ -28,11 +27,11 @@ func NewPaymentService(mode payment.Mode, storeId string, apiKey string) Payment
 	}
 }
 
-func (ps Payment) GetPaymentData(order checkout.Order, cartItems []cart.Item) []payment.FormData {
+func (ps Payment) GetPaymentData(order checkout.Order, products []checkout.OrderProduct) []payment.FormData {
 	// Get final amount
 	amount := 0
-	for _, cartItem := range cartItems {
-		amount += cartItem.Quantity * cartItem.Product.Price
+	for _, product := range products {
+		amount += product.Quantity * product.ProductPrice
 	}
 
 	formData := []payment.FormData{

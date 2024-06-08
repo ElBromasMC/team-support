@@ -12,16 +12,12 @@ templ BillingForm(order checkout.Order) {
 				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
 			</svg>
 		</span>
-		<span class="text-gray-400">Pago</span>
+		<span class="font-semibold text-gray-400">Pago</span>
 	</nav>
 	<form
 		class="mt-4"
-		action="/checkout/payment"
+		action="/checkout/orders"
 		method="post"
-		hx-post="/checkout/payment"
-		hx-target="#checkout-form"
-		hx-target-error="#error-message"
-		hx-indicator="#indicator"
 	>
 		<!-- Contact information -->
 		<div class="mt-4 space-y-2">
@@ -105,8 +101,7 @@ templ BillingForm(order checkout.Order) {
 				</div>
 			</div>
 		</div>
-		<div id="error-message" class="mt-1 min-h-6 text-red-600 font-semibold"></div>
-		<div class="mt-1">
+		<div class="mt-4">
 			<button class="w-full p-2 border bg-azure border-azure rounded-xl text-lg font-bold text-chalky" type="submit">
 				Siguiente
 			</button>

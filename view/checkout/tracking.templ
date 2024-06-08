@@ -2,24 +2,9 @@ package checkout
 
 import (
 	"fmt"
-	"time"
 	"alc/model/checkout"
 	"alc/view/layout"
 )
-
-func GetTime(t time.Time) string {
-	loc, _ := time.LoadLocation("America/Lima")
-	locTime := t.In(loc)
-	return locTime.Format(time.DateTime)
-}
-
-func TotalProductPrice(products []checkout.OrderProduct) int {
-	total := 0
-	for _, p := range products {
-		total += p.ProductPrice * p.Quantity
-	}
-	return total
-}
 
 templ Tracking(order checkout.Order, products []checkout.OrderProduct) {
 	@layout.Base(fmt.Sprintf("%d", order.PurchaseOrder)) {

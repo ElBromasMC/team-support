@@ -1,30 +1,75 @@
 package checkout
 
 import (
+	"fmt"
+	"alc/view/layout"
 	"alc/model/checkout"
 	"alc/model/payment"
 )
 
-templ PaymentForm(order checkout.Order, fields []payment.FormData) {
+templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields []payment.FormData) {
+	@layout.Base("Pago") {
+		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
+			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:px-9">
+				<section class="grid gap-6 lg:grid-cols-2 lg:gap-x-12">
+					<div class="flex gap-4 items-center lg:col-span-2">
+						<h1 class="text-4xl font-semibold">Checkout</h1>
+					</div>
+					<!-- Payment form -->
+					<section class="lg:col-span-1">
+						@PaymentForm(fields)
+					</section>
+					<hr class="border-gray-400 lg:hidden"/>
+					<!-- Order summary -->
+					<section class="filter grayscale lg:col-span-1">
+						<h2 class="text-2xl font-bold">Información del pedido</h2>
+						<ul class="space-y-3 mt-3">
+							for _, p := range products {
+								<li class="p-2 border">
+									<h3 class="font-bold text-sm">
+										{ p.ProductCategory + " - " + p.ProductItem + " - " + p.ProductName }
+									</h3>
+									<div class="text-sm">
+										<span class="font-bold">Estado:</span>
+										<span>{ string(p.Status) }</span>
+									</div>
+									<div class="text-sm text-livid">
+										<span class="font-bold">Precio:</span>
+										<span>{ ToUSD(p.ProductPrice) }</span>
+									</div>
+									<div class="text-sm text-livid">
+										<span class="font-bold">Cantidad:</span>
+										<span>{ fmt.Sprintf("%d", p.Quantity) }</span>
+									</div>
+									for key, value := range p.Details {
+										<div class="text-sm text-livid">
+											<span class="font-bold">{ key + ":" }</span>
+											<span>{ value }</span>
+										</div>
+									}
+									<div class="text-sm text-navy">
+										<span class="font-bold">Subtotal:</span>
+										<span>{ ToUSD(p.ProductPrice * p.Quantity) }</span>
+									</div>
+								</li>
+							}
+						</ul>
+						<div class="mt-3">
+							<div class="flex justify-between text-2xl">
+								<span class="font-semibold">Total:</span>
+								<span>{ ToUSD(TotalProductPrice(products)) }</span>
+							</div>
+						</div>
+					</section>
+				</section>
+			</div>
+		</main>
+	}
+}
+
+templ PaymentForm(fields []payment.FormData) {
 	<nav class="text-3xl">
-		<span>
-			<form
-				class="inline"
-				action="/checkout/billing"
-				method="post"
-				hx-post="/checkout/billing"
-				hx-target="#checkout-form"
-				hx-indicator="#indicator"
-			>
-				<input type="hidden" name="email" value={ order.Email }/>
-				<input type="hidden" name="phone" value={ order.Phone }/>
-				<input type="hidden" name="billing-name" value={ order.Name }/>
-				<input type="hidden" name="billing-address" value={ order.Address }/>
-				<input type="hidden" name="billing-city" value={ order.City }/>
-				<input type="hidden" name="billing-zip" value={ order.PostalCode }/>
-				<button class="text-azure font-semibold cursor-pointer hover:text-sky-300" type="submit">Facturación</button>
-			</form>
-		</span>
+		<span class="font-semibold text-gray-400">Facturación</span>
 		<span>
 			<svg class="inline w-6 h-6 pb-[2px]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
 				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"></path>
@@ -33,7 +78,6 @@ templ PaymentForm(order checkout.Order, fields []payment.FormData) {
 		<span class="font-semibold">Pago</span>
 	</nav>
 	<div class="mt-4">
-		<!-- Payment information -->
 		<h2 class="mt-2 font-bold text-2xl">Pago</h2>
 		<p class="mt-2 text-lg">
 			Luego de hacer click en "Pagar ahora", se le mostrará la pasarela de pagos Izipay para completar su compra de forma segura.
@@ -51,6 +95,6 @@ templ PaymentForm(order checkout.Order, fields []payment.FormData) {
 				Pagar ahora
 			</button>
 		</form>
-		<iframe class="w-full mt-2 h-[30rem] border-none" name="payment-frame" src="" title="izipay" frameborder="0" scrolling="no"></iframe>
+		<iframe class="w-full mt-2 h-[35rem] border-none" name="payment-frame" src="" title="izipay" frameborder="0" scrolling="no"></iframe>
 	</div>
 }

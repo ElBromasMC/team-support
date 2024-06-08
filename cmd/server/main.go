@@ -65,6 +65,7 @@ func main() {
 	ms := service.NewEmailService(client)
 	us := service.NewAuthService(dbpool)
 	ds := service.NewDeviceService(dbpool)
+	ors := service.NewOrderService(dbpool)
 	pys := service.NewPaymentService(mode, os.Getenv("IZIPAY_STOREID"), os.Getenv("IZIPAY_APIKEY"))
 
 	// Initialize handlers
@@ -72,6 +73,7 @@ func main() {
 		PublicService:  ps,
 		EmailService:   ms,
 		AuthService:    us,
+		OrderService:   ors,
 		PaymentService: pys,
 	}
 
@@ -145,9 +147,8 @@ func main() {
 	g5 := e.Group("/checkout")
 	g5.Use(authMiddleware, cartMiddleware)
 	g5.GET("", ph.HandleCheckoutShow)
-	g5.POST("/billing", ph.HandleCheckoutBillingFormShow)
-	g5.POST("/payment", ph.HandleCheckoutPaymentFormShow)
 	g5.POST("/orders", ph.HandleCheckoutOrderInsertion)
+	g5.GET("/orders/:orderID/payment", ph.HandleCheckoutPaymentShow)
 	g5.GET("/orders/:orderID", ph.HandleCheckoutOrderShow)
 
 	// Admin group

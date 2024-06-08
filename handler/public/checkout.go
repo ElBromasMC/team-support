@@ -23,55 +23,6 @@ func (h *Handler) HandleCheckoutShow(c echo.Context) error {
 	return util.Render(c, http.StatusOK, view.Show(items))
 }
 
-// POST "/checkout/payment"
-func (h *Handler) HandleCheckoutPaymentFormShow(c echo.Context) error {
-	// Parsing request
-	var order checkout.Order
-	order.Email = c.FormValue("email")
-	order.Phone = c.FormValue("phone")
-	order.Name = c.FormValue("billing-name")
-	order.Address = c.FormValue("billing-address")
-	order.City = c.FormValue("billing-city")
-	order.PostalCode = c.FormValue("billing-zip")
-
-	// Validate order
-	order, err := order.Normalize()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	// Get cart items
-	items := cart.GetItems(c.Request().Context())
-	if len(items) == 0 {
-		return c.Redirect(http.StatusFound, "/store")
-	}
-
-	// Get form data
-	fields := h.PaymentService.GetPaymentData(order, items)
-
-	return util.Render(c, http.StatusOK, view.PaymentForm(order, fields))
-}
-
-// POST "/checkout/billing"
-func (h *Handler) HandleCheckoutBillingFormShow(c echo.Context) error {
-	// Parsing request
-	var order checkout.Order
-	order.Email = c.FormValue("email")
-	order.Phone = c.FormValue("phone")
-	order.Name = c.FormValue("billing-name")
-	order.Address = c.FormValue("billing-address")
-	order.City = c.FormValue("billing-city")
-	order.PostalCode = c.FormValue("billing-zip")
-
-	// Validate order
-	order, err := order.Normalize()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return util.Render(c, http.StatusOK, view.BillingForm(order))
-}
-
 // POST "/checkout/orders"
 func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 	// Parsing request
@@ -82,6 +33,12 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 	order.Address = c.FormValue("billing-address")
 	order.City = c.FormValue("billing-city")
 	order.PostalCode = c.FormValue("billing-zip")
+
+	// Validate order
+	order, err := order.Normalize()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
 
 	// Get cart items
 	items := cart.GetItems(c.Request().Context())
@@ -107,11 +64,59 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 	}
 
 	// Insert order products
-	orderID, err := h.PublicService.InsertOrderProducts(order, products)
+	orderID, err := h.OrderService.InsertOrderProducts(order, products)
 	if err != nil {
 		return err
 	}
 
+	return c.Redirect(http.StatusFound, "/checkout/orders/"+orderID.String()+"/payment")
+}
+
+// GET "/checkout/orders/:orderID/payment"
+func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
+	// Parsing request
+	orderID, err := uuid.FromString(c.Param("orderID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Identificador no válido")
+	}
+
+	// Query data
+	order, err := h.OrderService.GetOrderById(orderID)
+	if err != nil {
+		return err
+	}
+	products, err := h.OrderService.GetOrderProducts(order)
+	if err != nil {
+		return err
+	}
+	formFields := h.PaymentService.GetPaymentData(order, products)
+
+	return util.Render(c, http.StatusOK, view.PaymentPage(order, products, formFields))
+}
+
+// GET "/checkout/orders/:orderID"
+func (h *Handler) HandleCheckoutOrderShow(c echo.Context) error {
+	// Parsing request
+	orderID, err := uuid.FromString(c.Param("orderID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Identificador no válido")
+	}
+
+	// Query data
+	order, err := h.OrderService.GetOrderById(orderID)
+	if err != nil {
+		return err
+	}
+	products, err := h.OrderService.GetOrderProducts(order)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, view.Tracking(order, products))
+}
+
+// TODO
+func TODOCHECK(c echo.Context) error {
 	// Remove cart cookie
 	sess, _ := session.Get(cart.SessionName, c)
 	sess.Options = &sessions.Options{
@@ -125,27 +130,5 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 		c.Logger().Debug("Error removing cart session: ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-
-	return c.Redirect(http.StatusFound, "/checkout/"+orderID.String())
-}
-
-// GET "/checkout/orders/:orderID"
-func (h *Handler) HandleCheckoutOrderShow(c echo.Context) error {
-	// Parsing request
-	orderID, err := uuid.FromString(c.Param("orderID"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Identificador no válido")
-	}
-
-	// Query data
-	order, err := h.PublicService.GetOrderById(orderID)
-	if err != nil {
-		return err
-	}
-	products, err := h.PublicService.GetOrderProducts(order)
-	if err != nil {
-		return err
-	}
-
-	return util.Render(c, http.StatusOK, view.Tracking(order, products))
+	return nil
 }

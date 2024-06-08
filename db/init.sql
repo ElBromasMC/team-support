@@ -174,6 +174,30 @@ CREATE TABLE IF NOT EXISTS order_products (
     FOREIGN KEY (product_id) REFERENCES store_products(id) ON DELETE SET NULL
 );
 
+-- Transaction management
+/*  PENDING: The transaction has been initiated but is not yet completed. 
+    AUTHORISED: The transaction has been approved but the funds have not yet been transferred.
+    COMPLETED: The transaction has been successfully completed, and the funds have been transferred.
+    FAILED: The transaction did not go through due to various reasons such as insufficient funds, declined by the bank, or other errors.
+    CANCELLED: The transaction was cancelled by the user or by the system before completion.
+*/
+CREATE TYPE transaction_status AS ENUM ('PENDING', 'AUTHORISED', 'COMPLETED', 'FAILED', 'CANCELLED');
+
+CREATE TABLE IF NOT EXISTS store_transactions (
+    id SERIAL PRIMARY KEY,
+    trans_id VARCHAR(6) UNIQUE,
+    order_id UUID NOT NULL,
+    status transaction_status NOT NULL DEFAULT 'PENDING',
+    amount INT NOT NULL,
+    platform VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CHECK (
+        trans_id ~ '^[a-z0-9]{6}$'
+    ),
+    FOREIGN KEY (order_id) REFERENCES store_orders(id) ON DELETE CASCADE
+);
+
 -- Order triggers
 CREATE OR REPLACE TRIGGER set_order_timestamp
 BEFORE UPDATE ON order_products
@@ -215,3 +239,23 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- Comment triggers
 -- TODO
+
+-- 'Store transactions' functions and triggers
+-- Automatically convert 'trans_id' to lowercase before storing
+CREATE OR REPLACE FUNCTION trigger_force_trans_lowercase()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.trans_id := lower(NEW.trans_id);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER force_trans_lowercase
+BEFORE INSERT OR UPDATE ON store_transactions
+FOR EACH ROW
+EXECUTE FUNCTION trigger_force_trans_lowercase();
+
+CREATE OR REPLACE TRIGGER set_transaction_timestamp
+BEFORE UPDATE ON store_transactions
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();

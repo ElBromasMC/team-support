@@ -1,0 +1,46 @@
+package checkout
+
+import (
+	"fmt"
+	"time"
+	"alc/model/cart"
+	"alc/model/checkout"
+)
+
+func ToUSD(value int) string {
+	return fmt.Sprintf("US$ %.2f", float64(value)/100.0)
+}
+
+func TotalProducts(items []cart.Item) int {
+	count := 0
+	for _, i := range items {
+		count += i.Quantity
+	}
+	return count
+}
+
+func TotalPrice(items []cart.Item) int {
+	total := 0
+	for _, i := range items {
+		total += i.Product.Price * i.Quantity
+	}
+	return total
+}
+
+func TotalProductPrice(products []checkout.OrderProduct) int {
+	total := 0
+	for _, p := range products {
+		total += p.ProductPrice * p.Quantity
+	}
+	return total
+}
+
+func GetTime(t time.Time) string {
+	loc, _ := time.LoadLocation("America/Lima")
+	locTime := t.In(loc)
+	return locTime.Format(time.DateTime)
+}
+
+templ Hi() {
+	<p>Hi</p>
+}

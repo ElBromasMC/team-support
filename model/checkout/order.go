@@ -11,14 +11,14 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-type Status string
+type OrderStatus string
 
 const (
-	Pendiente    Status = "PENDIENTE"
-	EnProceso    Status = "EN PROCESO"
-	PorConfirmar Status = "POR CONFIRMAR"
-	Entregado    Status = "ENTREGADO"
-	Cancelado    Status = "CANCELADO"
+	Pendiente    OrderStatus = "PENDIENTE"
+	EnProceso    OrderStatus = "EN PROCESO"
+	PorConfirmar OrderStatus = "POR CONFIRMAR"
+	Entregado    OrderStatus = "ENTREGADO"
+	Cancelado    OrderStatus = "CANCELADO"
 )
 
 type Order struct {
@@ -46,7 +46,7 @@ type OrderProduct struct {
 	ProductName     string
 	ProductPrice    int
 	ProductDetails  map[string]string
-	Status          Status
+	Status          OrderStatus
 	UpdatedAt       time.Time
 }
 
