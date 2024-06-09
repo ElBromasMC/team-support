@@ -82,3 +82,11 @@ func (order Order) Normalize() (Order, error) {
 
 	return order, nil
 }
+
+func CalculateAmount(products []OrderProduct) int {
+	amount := 0
+	for _, product := range products {
+		amount += product.ProductPrice * product.Quantity
+	}
+	return amount
+}

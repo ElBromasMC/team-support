@@ -66,15 +66,17 @@ func main() {
 	us := service.NewAuthService(dbpool)
 	ds := service.NewDeviceService(dbpool)
 	ors := service.NewOrderService(dbpool)
+	ts := service.NewTransactionService(dbpool)
 	pys := service.NewPaymentService(mode, os.Getenv("IZIPAY_STOREID"), os.Getenv("IZIPAY_APIKEY"))
 
 	// Initialize handlers
 	ph := public.Handler{
-		PublicService:  ps,
-		EmailService:   ms,
-		AuthService:    us,
-		OrderService:   ors,
-		PaymentService: pys,
+		PublicService:      ps,
+		EmailService:       ms,
+		AuthService:        us,
+		OrderService:       ors,
+		TransactionService: ts,
+		PaymentService:     pys,
 	}
 
 	ah := admin.Handler{

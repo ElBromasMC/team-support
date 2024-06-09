@@ -89,7 +89,11 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	formFields := h.PaymentService.GetPaymentData(order, products)
+	trans, err := h.TransactionService.InsertTransaction(order, checkout.CalculateAmount(products), "IZIPAY")
+	if err != nil {
+		return err
+	}
+	formFields := h.PaymentService.GetPaymentData(order, trans)
 
 	return util.Render(c, http.StatusOK, view.PaymentPage(order, products, formFields))
 }

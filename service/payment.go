@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-	"time"
 )
 
 type Payment struct {
@@ -27,24 +26,29 @@ func NewPaymentService(mode payment.Mode, storeId string, apiKey string) Payment
 	}
 }
 
-func (ps Payment) GetPaymentData(order checkout.Order, products []checkout.OrderProduct) []payment.FormData {
-	// Get final amount
-	amount := 0
-	for _, product := range products {
-		amount += product.Quantity * product.ProductPrice
-	}
-
+func (ps Payment) GetPaymentData(order checkout.Order, trans checkout.Transaction) []payment.FormData {
 	formData := []payment.FormData{
 		{Key: "vads_action_mode", Value: "IFRAME"},
-		{Key: "vads_amount", Value: fmt.Sprintf("%d", amount)},
+		{Key: "vads_amount", Value: fmt.Sprintf("%d", trans.Amount)},
 		{Key: "vads_ctx_mode", Value: string(ps.mode)},
 		{Key: "vads_currency", Value: "840"},
 		{Key: "vads_page_action", Value: "PAYMENT"},
 		{Key: "vads_payment_config", Value: "SINGLE"},
 		{Key: "vads_site_id", Value: ps.storeId},
-		{Key: "vads_trans_date", Value: time.Now().UTC().Format("20060102150405")},
-		{Key: "vads_trans_id", Value: "xrT15p"},
+		{Key: "vads_trans_date", Value: trans.CreatedAt.UTC().Format("20060102150405")},
+		{Key: "vads_trans_id", Value: trans.TransId},
 		{Key: "vads_version", Value: "V2"},
+		{Key: "vads_order_id", Value: order.Id.String()},
+		{Key: "vads_cust_email", Value: order.Email},
+		{Key: "vads_cust_first_name", Value: order.Name},
+		{Key: "vads_cust_cell_phone", Value: order.Phone},
+		{Key: "vads_cust_country", Value: "PE"},
+		{Key: "vads_ship_to_street", Value: order.Address},
+		{Key: "vads_ship_to_zip", Value: order.PostalCode},
+		{Key: "vads_ship_to_city", Value: order.City},
+		{Key: "vads_ship_to_country", Value: "PE"},
+		{Key: "vads_ship_to_first_name", Value: order.Name},
+		{Key: "vads_ship_to_phone_num", Value: order.Phone},
 	}
 
 	// Sort the form data alphabetically by key

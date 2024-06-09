@@ -1,6 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 CREATE EXTENSION IF NOT EXISTS "hstore";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Row update management
 CREATE OR REPLACE FUNCTION trigger_set_timestamp()
@@ -10,6 +11,24 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Random lowercase alphanumeric strings with fixed length
+-- Thanks! (https://stackoverflow.com/questions/41970461/how-to-generate-a-random-unique-alphanumeric-id-of-length-n-in-postgres-9-6)
+CREATE OR REPLACE FUNCTION generate_random_string(size INT) RETURNS TEXT AS $$
+DECLARE
+  characters TEXT := 'abcdefghijklmnopqrstuvwxyz0123456789';
+  bytes BYTEA := gen_random_bytes(size);
+  l INT := length(characters);
+  i INT := 0;
+  output TEXT := '';
+BEGIN
+  WHILE i < size LOOP
+    output := output || substr(characters, get_byte(bytes, i) % l + 1, 1);
+    i := i + 1;
+  END LOOP;
+  RETURN output;
+END;
+$$ LANGUAGE plpgsql VOLATILE;
 
 -- User administration
 CREATE TYPE user_role AS ENUM ('ADMIN', 'NORMAL', 'RECORDER');
@@ -185,16 +204,18 @@ CREATE TYPE transaction_status AS ENUM ('PENDING', 'AUTHORISED', 'COMPLETED', 'F
 
 CREATE TABLE IF NOT EXISTS store_transactions (
     id SERIAL PRIMARY KEY,
-    trans_id VARCHAR(6) UNIQUE,
     order_id UUID NOT NULL,
     status transaction_status NOT NULL DEFAULT 'PENDING',
     amount INT NOT NULL,
     platform VARCHAR(255) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    trans_id VARCHAR(6) NOT NULL DEFAULT generate_random_string(6),
+    trans_date DATE GENERATED ALWAYS AS ((created_at AT TIME ZONE 'UTC')::DATE) STORED,
     CHECK (
         trans_id ~ '^[a-z0-9]{6}$'
     ),
+    UNIQUE (trans_id, trans_date),
     FOREIGN KEY (order_id) REFERENCES store_orders(id) ON DELETE CASCADE
 );
 
