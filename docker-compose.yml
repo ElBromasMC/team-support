@@ -42,6 +42,8 @@ services:
       - SMTP_HOSTNAME=${SMTP_HOSTNAME}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
+      - IZIPAY_STOREID=${IZIPAY_STOREID}
+      - IZIPAY_APIKEY=${IZIPAY_APIKEY}
     networks:
       - http_network
       - store_network
@@ -49,11 +51,11 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=http_network"
       - "traefik.http.routers.webserver.entrypoints=websecure"
-      - "traefik.http.routers.webserver.rule=Host(`www.teamsupportperu.com`)"
+      - "traefik.http.routers.webserver.rule=Host(`${WEBSERVER_HOSTNAME}`)"
       - "traefik.http.routers.webserver.service=webserver"
       - "traefik.http.routers.webserver.tls=true"
       - "traefik.http.routers.webserver.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.webserver.tls.domains[0].main=www.teamsupportperu.com"
+      - "traefik.http.routers.webserver.tls.domains[0].main=${WEBSERVER_HOSTNAME}"
       - "traefik.http.routers.webserver.tls.options=default"
       - "traefik.http.services.webserver.loadbalancer.server.port=8080"
       - "traefik.http.services.webserver.loadbalancer.server.scheme=http"

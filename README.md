@@ -33,6 +33,22 @@ IZIPAY_STOREID=
 IZIPAY_APIKEY=
 ```
 
+### Docker .env file example
+```
+ENV=production
+WEBSERVER_HOSTNAME=www.domain.tld
+DB_NAME=<database_name>
+DB_PASSWORD=<password>
+SESSION_KEY=mysecretkey
+PORT=8080
+REL=1
+SMTP_HOSTNAME=mail.example.com
+SMTP_USER=<username>
+SMTP_PASS=<password>
+IZIPAY_STOREID=
+IZIPAY_APIKEY=
+```
+
 ### Load env variables
 ```shell
 $ export $(grep -v '^#' .env | xargs -d '\n')
