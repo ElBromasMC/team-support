@@ -1,6 +1,8 @@
 # go-webserver-template
 Team Support Peru webpage
 
+## Local environment
+
 ### Prerequisites
 * Go
 * Node and npm
@@ -33,7 +35,22 @@ IZIPAY_STOREID=
 IZIPAY_APIKEY=
 ```
 
-### Docker .env file example
+### Load env variables
+```shell
+$ export $(grep -v '^#' .env | xargs -d '\n')
+```
+
+### Live reload
+```shell
+$ make live
+```
+
+## Docker
+
+### Prerequisites
+* [Traefik](https://doc.traefik.io/traefik/getting-started/quick-start/)
+
+### Docker compose .env file example
 ```
 ENV=production
 WEBSERVER_HOSTNAME=www.domain.tld
@@ -47,14 +64,4 @@ SMTP_USER=<username>
 SMTP_PASS=<password>
 IZIPAY_STOREID=
 IZIPAY_APIKEY=
-```
-
-### Load env variables
-```shell
-$ export $(grep -v '^#' .env | xargs -d '\n')
-```
-
-### Live reload
-```shell
-$ make live
 ```
