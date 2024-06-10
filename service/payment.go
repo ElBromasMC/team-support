@@ -51,6 +51,16 @@ func (ps Payment) GetPaymentData(order checkout.Order, trans checkout.Transactio
 		{Key: "vads_ship_to_phone_num", Value: order.Phone},
 	}
 
+	signature := ps.ComputeSignature(formData)
+
+	// Append the signature
+	formData = append(formData, payment.FormData{Key: "signature", Value: signature})
+
+	return formData
+}
+
+// 'formData' must consists of 'vads_...' keys
+func (ps Payment) ComputeSignature(formData []payment.FormData) string {
 	// Sort the form data alphabetically by key
 	slices.SortFunc(formData, func(a, b payment.FormData) int {
 		return cmp.Compare(a.Key, b.Key)
@@ -69,8 +79,5 @@ func (ps Payment) GetPaymentData(order checkout.Order, trans checkout.Transactio
 	h.Write([]byte(valuesJoin))
 	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	// Append the signature
-	formData = append(formData, payment.FormData{Key: "signature", Value: signature})
-
-	return formData
+	return signature
 }

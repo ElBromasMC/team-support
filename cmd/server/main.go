@@ -5,6 +5,7 @@ import (
 	"alc/handler/admin/device"
 	"alc/handler/admin/store"
 	"alc/handler/admin/user"
+	"alc/handler/notification"
 	"alc/handler/public"
 	"alc/handler/util"
 	middle "alc/middleware"
@@ -87,6 +88,10 @@ func main() {
 	sh := store.Handler(ah)
 	uh := user.Handler(ah)
 	dh := device.Handler(ah)
+	nh := notification.Handler{
+		TransactionService: ts,
+		PaymentService:     pys,
+	}
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -100,6 +105,7 @@ func main() {
 		log.Fatalln("Missing SESSION_KEY env variable")
 	}
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(key))))
+
 	authMiddleware := middle.Auth(us)
 	cartMiddleware := middle.Cart(ps)
 
@@ -152,6 +158,10 @@ func main() {
 	g5.POST("/orders", ph.HandleCheckoutOrderInsertion)
 	g5.GET("/orders/:orderID/payment", ph.HandleCheckoutPaymentShow)
 	g5.GET("/orders/:orderID", ph.HandleCheckoutOrderShow)
+
+	// Notification group
+	g6 := e.Group("/notification")
+	g6.POST("/izipay/pay", nh.HandleIzipayNotification)
 
 	// Admin group
 	g3 := e.Group("/admin")
