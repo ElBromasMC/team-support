@@ -43,18 +43,6 @@ RETURNING id`, order.Email, order.Phone, order.Name, order.Address, order.City, 
 			return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
 		}
 
-		// Update stock
-		// if product.Product.Stock != nil {
-		// 	sql := `UPDATE store_products SET stock = stock - $1 WHERE id = $2 AND stock - $1 >= 0`
-		// 	c, err := os.db.Exec(context.Background(), sql, product.Quantity, product.Product.Id)
-		// 	if err != nil {
-		// 		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
-		// 	}
-		// 	if c.RowsAffected() != 1 {
-		// 		return uuid.Nil, echo.NewHTTPError(http.StatusNotFound, "Producto no encontrado o stock inválido")
-		// 	}
-		// }
-
 		// Insert product
 		hstoreDetails := make(pgtype.Hstore, len(product.Details))
 		for key, val := range product.Details {
@@ -86,10 +74,10 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, orderID, product.Quantity, hs
 func (os Order) GetOrderById(id uuid.UUID) (checkout.Order, error) {
 	var order checkout.Order
 	if err := os.db.QueryRow(context.Background(), `SELECT purchase_order, email, phone_number,
-name, address, city, postal_code, created_at
+name, address, city, postal_code, created_at, payment_status
 FROM store_orders
 WHERE id = $1`, id).Scan(&order.PurchaseOrder, &order.Email, &order.Phone,
-		&order.Name, &order.Address, &order.City, &order.PostalCode, &order.CreatedAt); err != nil {
+		&order.Name, &order.Address, &order.City, &order.PostalCode, &order.CreatedAt, &order.PaymentStatus); err != nil {
 		return checkout.Order{}, echo.NewHTTPError(http.StatusNotFound, "Orden no encontrada")
 	}
 	order.Id = id

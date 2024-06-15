@@ -21,6 +21,15 @@ const (
 	Cancelado    OrderStatus = "CANCELADO"
 )
 
+type OrderPaymentStatus string
+
+const (
+	Pending    OrderPaymentStatus = "PENDING"
+	Processing OrderPaymentStatus = "PROCESSING"
+	Completed  OrderPaymentStatus = "COMPLETED"
+	Failed     OrderPaymentStatus = "FAILED"
+)
+
 type Order struct {
 	Id            uuid.UUID
 	PurchaseOrder int
@@ -32,6 +41,7 @@ type Order struct {
 	PostalCode    string
 	AssignedTo    auth.User
 	CreatedAt     time.Time
+	PaymentStatus OrderPaymentStatus
 }
 
 type OrderProduct struct {

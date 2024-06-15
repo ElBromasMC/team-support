@@ -155,7 +155,13 @@ CREATE TABLE IF NOT EXISTS store_devices_history (
 );
 
 -- Order administration
-CREATE TYPE order_status AS ENUM ('PENDIENTE', 'EN PROCESO', 'POR CONFIRMAR', 'ENTREGADO', 'CANCELADO');
+/*  PENDING: The order has been created, but the payment status is unknown.
+        Or the current transaction has 'FAILED' or 'CANCELLED'
+    PROCESSING: The payment process has been approved, but the funds have not yet been transferred.
+    COMPLETED: The payment process completed successfully.
+    CANCELLED: The order was cancelled by the user or by the system.
+*/
+CREATE TYPE order_payment_status AS ENUM ('PENDING', 'PROCESSING', 'COMPLETED', 'CANCELLED');
 
 CREATE SEQUENCE purchase_order_seq AS INT START WITH 100000;
 
@@ -171,9 +177,12 @@ CREATE TABLE IF NOT EXISTS store_orders (
     postal_code VARCHAR(25) NOT NULL,
     assigned_to UUID,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    payment_status order_payment_status NOT NULL DEFAULT 'PENDING',
     UNIQUE(purchase_order),
     FOREIGN KEY (assigned_to) REFERENCES users(user_id) ON DELETE SET NULL
 );
+
+CREATE TYPE order_status AS ENUM ('PENDIENTE', 'EN PROCESO', 'POR CONFIRMAR', 'ENTREGADO', 'CANCELADO');
 
 CREATE TABLE IF NOT EXISTS order_products (
     id SERIAL PRIMARY KEY,
@@ -212,18 +221,14 @@ CREATE TABLE IF NOT EXISTS store_transactions (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     trans_id VARCHAR(6) NOT NULL DEFAULT generate_random_string(6),
     trans_date DATE GENERATED ALWAYS AS ((created_at AT TIME ZONE 'UTC')::DATE) STORED,
+    trans_uuid TEXT,
     CHECK (
         trans_id ~ '^[a-z0-9]{6}$'
     ),
     UNIQUE (trans_id, trans_date),
+    UNIQUE (order_id, trans_id),
     FOREIGN KEY (order_id) REFERENCES store_orders(id) ON DELETE CASCADE
 );
-
--- Order triggers
-CREATE OR REPLACE TRIGGER set_order_timestamp
-BEFORE UPDATE ON order_products
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- Store triggers
 CREATE OR REPLACE TRIGGER set_product_timestamp
@@ -259,24 +264,69 @@ FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
 -- Comment triggers
--- TODO
 
--- 'Store transactions' functions and triggers
--- Automatically convert 'trans_id' to lowercase before storing
-CREATE OR REPLACE FUNCTION trigger_force_trans_lowercase()
+-- Order functions
+CREATE OR REPLACE FUNCTION trigger_update_stock()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.trans_id := lower(NEW.trans_id);
+    FOR p IN SELECT quantity, product_id
+        FROM order_products
+        WHERE order_id = NEW.id
+    LOOP
+        UPDATE store_products SET stock = stock - p.quantity WHERE id = p.product_id AND stock - p.quantity >= 0;
+    END LOOP;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER force_trans_lowercase
-BEFORE INSERT OR UPDATE ON store_transactions
-FOR EACH ROW
-EXECUTE FUNCTION trigger_force_trans_lowercase();
+CREATE OR REPLACE FUNCTION trigger_update_payment_status()
+RETURNS TRIGGER AS $$
+DECLARE
+    all_status transaction_status[];
+BEGIN
+    -- Fetch the statuses of all related transactions for the order
+    SELECT ARRAY_AGG(status) INTO all_status
+    FROM store_transactions
+    WHERE order_id = NEW.order_id;
 
+    -- Determine the new payment status based on transaction statuses
+    IF 'COMPLETED' = ANY(all_status) THEN
+        UPDATE store_orders SET payment_status = 'COMPLETED'
+        WHERE id = NEW.order_id AND payment_status != 'COMPLETED';
+    ELSIF 'AUTHORISED' = ANY(all_status) THEN
+        UPDATE store_orders SET payment_status = 'PROCESSING'
+        WHERE id = NEW.order_id AND payment_status != 'PROCESSING';
+    ELSE
+        UPDATE store_orders SET payment_status = 'PENDING'
+        WHERE id = NEW.order_id AND payment_status != 'PENDING'
+        AND payment_status != 'CANCELLED';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Order triggers
+CREATE OR REPLACE TRIGGER set_order_timestamp
+BEFORE UPDATE ON order_products
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE OR REPLACE TRIGGER update_product_stock
+AFTER UPDATE ON store_orders
+FOR EACH ROW
+WHEN (OLD.payment_status IS DISTINCT FROM NEW.payment_status AND NEW.payment_status = 'COMPLETED')
+EXECUTE FUNCTION trigger_update_stock();
+
+-- Transaction triggers
 CREATE OR REPLACE TRIGGER set_transaction_timestamp
 BEFORE UPDATE ON store_transactions
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
+
+CREATE OR REPLACE TRIGGER update_order_payment_status
+AFTER UPDATE ON store_transactions
+FOR EACH ROW
+WHEN (OLD.status IS DISTINCT FROM NEW.status)
+EXECUTE FUNCTION trigger_update_payment_status();

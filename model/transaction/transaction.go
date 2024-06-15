@@ -1,6 +1,9 @@
-package checkout
+package transaction
 
-import "time"
+import (
+	"alc/model/checkout"
+	"time"
+)
 
 type TransactionStatus string
 
@@ -15,7 +18,8 @@ const (
 type Transaction struct {
 	Id        int
 	TransId   string
-	Order     Order
+	TransUuid *string
+	Order     checkout.Order
 	Status    TransactionStatus
 	Amount    int
 	Platform  string

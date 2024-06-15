@@ -161,7 +161,7 @@ func main() {
 
 	// Notification group
 	g6 := e.Group("/notification")
-	g6.POST("/izipay/pay", nh.HandleIzipayNotification)
+	g6.POST("/izipay/pay", nh.HandleIzipayPayNotification)
 
 	// Admin group
 	g3 := e.Group("/admin")

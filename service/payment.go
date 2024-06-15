@@ -3,6 +3,7 @@ package service
 import (
 	"alc/model/checkout"
 	"alc/model/payment"
+	"alc/model/transaction"
 	"cmp"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -26,7 +27,11 @@ func NewPaymentService(mode payment.Mode, storeId string, apiKey string) Payment
 	}
 }
 
-func (ps Payment) GetPaymentData(order checkout.Order, trans checkout.Transaction) []payment.FormData {
+func (ps Payment) GetMode() payment.Mode {
+	return ps.mode
+}
+
+func (ps Payment) GetPaymentData(order checkout.Order, trans transaction.Transaction) []payment.FormData {
 	formData := []payment.FormData{
 		{Key: "vads_action_mode", Value: "IFRAME"},
 		{Key: "vads_amount", Value: fmt.Sprintf("%d", trans.Amount)},
