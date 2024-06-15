@@ -268,6 +268,8 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 -- Order functions
 CREATE OR REPLACE FUNCTION trigger_update_stock()
 RETURNS TRIGGER AS $$
+DECLARE
+    p RECORD;
 BEGIN
     FOR p IN SELECT quantity, product_id
         FROM order_products
