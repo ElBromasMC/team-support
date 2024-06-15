@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"fmt"
 	"strings"
 
 	"alc/model/payment"
@@ -39,10 +40,8 @@ func (h *Handler) HandleIzipayNotification(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
-	switch form.Get("vads_url_check_src") {
-	case "PAY":
-
-	}
+	fmt.Println("IZIPAY response:")
+	fmt.Println(form)
 
 	return c.NoContent(http.StatusOK)
 }
