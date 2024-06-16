@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"alc/config"
+	"alc/model/auth"
 	"alc/model/cart"
 	"alc/model/checkout"
 	"alc/view/layout"
@@ -19,7 +20,11 @@ templ Show(items []cart.Item) {
 					</div>
 					<!-- Checkout form -->
 					<div class="lg:col-span-1">
-						@BillingForm(checkout.Order{})
+						if user, ok := auth.GetUser(ctx); ok {
+							@BillingForm(checkout.Order{Email: user.Email})
+						} else {
+							@BillingForm(checkout.Order{})
+						}
 					</div>
 					<hr class="border-gray-400 lg:hidden"/>
 					<!-- Cart summary -->

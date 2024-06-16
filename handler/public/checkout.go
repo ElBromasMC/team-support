@@ -1,10 +1,12 @@
 package public
 
 import (
+	"alc/config"
 	"alc/handler/util"
 	"alc/model/cart"
 	"alc/model/checkout"
 	view "alc/view/checkout"
+	"fmt"
 	"net/http"
 
 	"github.com/gofrs/uuid/v5"
@@ -69,10 +71,24 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 		return err
 	}
 
+	// Remove cart cookie
+	sess, _ := session.Get(cart.SessionName, c)
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   -1,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteStrictMode,
+	}
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		c.Logger().Debug("Error removing cart session: ", err)
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
 	return c.Redirect(http.StatusFound, "/checkout/orders/"+orderID.String()+"/payment")
 }
 
-// GET "/checkout/orders/:orderID/payment"
+// GET "/checkout/orders/:orderID/payment?fail=true"
 func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 	// Parsing request
 	orderID, err := uuid.FromString(c.Param("orderID"))
@@ -80,11 +96,39 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Identificador no válido")
 	}
 
-	// Query data
+	fail := false
+	if len(c.QueryParam("fail")) > 0 {
+		fail = true
+	}
+
+	// Query order
 	order, err := h.OrderService.GetOrderById(orderID)
 	if err != nil {
 		return err
 	}
+
+	switch order.PaymentStatus {
+	case checkout.Cancelled:
+		return echo.NewHTTPError(http.StatusNotFound, "Orden no encontrada")
+
+	case checkout.Processing, checkout.Completed:
+		return c.Redirect(http.StatusFound, "/checkout/orders/"+orderID.String())
+	}
+
+	// Query the number of transactions
+	ntrans, err := h.TransactionService.NumberOfTransactions(order)
+	if err != nil {
+		return err
+	}
+
+	if ntrans >= config.MAX_TRANSACTIONS {
+		if err := h.OrderService.CancelOrder(order); err != nil {
+			return err
+		}
+		return c.Redirect(http.StatusFound, "/store/categories/all")
+	}
+
+	// Query data
 	products, err := h.OrderService.GetOrderProducts(order)
 	if err != nil {
 		return err
@@ -95,7 +139,21 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 	}
 	formFields := h.PaymentService.GetPaymentData(order, trans)
 
-	return util.Render(c, http.StatusOK, view.PaymentPage(order, products, formFields))
+	return util.Render(c, http.StatusOK, view.PaymentPage(order, products, formFields, ntrans, fail))
+}
+
+// POST "/checkout/orders/:orderID/preview"
+func (h *Handler) HandleCheckoutOrderPreview(c echo.Context) error {
+	// Get form data
+	form, err := c.FormParams()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	fmt.Println("IZIPAY:")
+	fmt.Println(form)
+
+	return c.NoContent(http.StatusOK)
 }
 
 // GET "/checkout/orders/:orderID"
@@ -111,28 +169,19 @@ func (h *Handler) HandleCheckoutOrderShow(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	switch order.PaymentStatus {
+	case checkout.Cancelled:
+		return echo.NewHTTPError(http.StatusNotFound, "Orden no encontrada")
+
+	case checkout.Pending:
+		return c.Redirect(http.StatusFound, "/checkout/orders/"+orderID.String()+"/payment")
+	}
+
 	products, err := h.OrderService.GetOrderProducts(order)
 	if err != nil {
 		return err
 	}
 
 	return util.Render(c, http.StatusOK, view.Tracking(order, products))
-}
-
-// TODO
-func TODOCHECK(c echo.Context) error {
-	// Remove cart cookie
-	sess, _ := session.Get(cart.SessionName, c)
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   -1,
-		Secure:   true,
-		HttpOnly: false,
-		SameSite: http.SameSiteStrictMode,
-	}
-	if err := sess.Save(c.Request(), c.Response()); err != nil {
-		c.Logger().Debug("Error removing cart session: ", err)
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return nil
 }

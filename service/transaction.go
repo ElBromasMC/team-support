@@ -31,10 +31,19 @@ func (ts Transaction) InsertTransaction(order checkout.Order, amount int, platfo
 	id, status, amount, platform, created_at, updated_at, trans_id`
 	if err := ts.db.QueryRow(context.Background(), sql, order.Id, amount, platform).Scan(&trans.Id, &trans.Status,
 		&trans.Amount, &trans.Platform, &trans.CreatedAt, &trans.UpdatedAt, &trans.TransId); err != nil {
-		return transaction.Transaction{}, echo.NewHTTPError(http.StatusInternalServerError, err)
+		return transaction.Transaction{}, echo.NewHTTPError(http.StatusInternalServerError, "Error desconocido, recargue la página")
 	}
 	trans.Order = order
 	return trans, nil
+}
+
+func (ts Transaction) NumberOfTransactions(order checkout.Order) (int, error) {
+	var number int
+	sql := `SELECT COUNT(*) FROM store_transactions WHERE order_id = $1`
+	if err := ts.db.QueryRow(context.Background(), sql, order.Id).Scan(&number); err != nil {
+		return 0, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return number, nil
 }
 
 func (ts Transaction) UpdateTransaction(orderId uuid.UUID, transId string, transUuid string, status transaction.TransactionStatus) error {

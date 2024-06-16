@@ -27,7 +27,7 @@ const (
 	Pending    OrderPaymentStatus = "PENDING"
 	Processing OrderPaymentStatus = "PROCESSING"
 	Completed  OrderPaymentStatus = "COMPLETED"
-	Failed     OrderPaymentStatus = "FAILED"
+	Cancelled  OrderPaymentStatus = "CANCELLED"
 )
 
 type Order struct {

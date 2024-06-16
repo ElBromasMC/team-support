@@ -14,16 +14,18 @@ import (
 )
 
 type Payment struct {
-	mode    payment.Mode
-	storeId string
-	apiKey  string
+	mode     payment.Mode
+	storeId  string
+	apiKey   string
+	hostname string
 }
 
-func NewPaymentService(mode payment.Mode, storeId string, apiKey string) Payment {
+func NewPaymentService(mode payment.Mode, storeId string, apiKey string, hostname string) Payment {
 	return Payment{
-		mode:    mode,
-		storeId: storeId,
-		apiKey:  apiKey,
+		mode:     mode,
+		storeId:  storeId,
+		apiKey:   apiKey,
+		hostname: hostname,
 	}
 }
 
@@ -54,6 +56,12 @@ func (ps Payment) GetPaymentData(order checkout.Order, trans transaction.Transac
 		{Key: "vads_ship_to_country", Value: "PE"},
 		{Key: "vads_ship_to_first_name", Value: order.Name},
 		{Key: "vads_ship_to_phone_num", Value: order.Phone},
+		{Key: "vads_redirect_success_timeout", Value: "0"},
+		{Key: "vads_redirect_error_timeout", Value: "0"},
+		{Key: "vads_url_success", Value: "https://" + ps.hostname + "/checkout/orders/" + order.Id.String() + "/preview"},
+		{Key: "vads_url_return", Value: "https://" + ps.hostname + "/checkout/orders/" + order.Id.String() + "/payment?fail=true"},
+		{Key: "vads_return_mode", Value: "POST"},
+		{Key: "vads_theme_config", Value: "FORM_TARGET=_top"},
 	}
 
 	signature := ps.ComputeSignature(formData)

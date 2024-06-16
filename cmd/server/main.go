@@ -68,7 +68,7 @@ func main() {
 	ds := service.NewDeviceService(dbpool)
 	ors := service.NewOrderService(dbpool)
 	ts := service.NewTransactionService(dbpool)
-	pys := service.NewPaymentService(mode, os.Getenv("IZIPAY_STOREID"), os.Getenv("IZIPAY_APIKEY"))
+	pys := service.NewPaymentService(mode, os.Getenv("IZIPAY_STOREID"), os.Getenv("IZIPAY_APIKEY"), os.Getenv("WEBSERVER_HOSTNAME"))
 
 	// Initialize handlers
 	ph := public.Handler{

@@ -31,6 +31,7 @@ REL=1
 SMTP_HOSTNAME=mail.example.com
 SMTP_USER=<username>
 SMTP_PASS=<password>
+WEBSERVER_HOSTNAME=www.domain.tld
 IZIPAY_STOREID=
 IZIPAY_APIKEY=
 ```

@@ -123,3 +123,15 @@ WHERE order_id = $1`, order.Id)
 
 	return products, nil
 }
+
+func (os Order) CancelOrder(order checkout.Order) error {
+	sql := `UPDATE store_orders SET payment_status = 'CANCELLED' WHERE id = $1`
+	c, err := os.db.Exec(context.Background(), sql, order.Id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	if c.RowsAffected() != 1 {
+		return echo.NewHTTPError(http.StatusNotFound, "Order not found")
+	}
+	return nil
+}

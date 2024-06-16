@@ -2,12 +2,13 @@ package checkout
 
 import (
 	"fmt"
+	"alc/config"
 	"alc/view/layout"
 	"alc/model/checkout"
 	"alc/model/payment"
 )
 
-templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields []payment.FormData) {
+templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields []payment.FormData, ntrans int, fail bool) {
 	@layout.Base("Pago") {
 		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
 			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:px-9">
@@ -17,7 +18,7 @@ templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields
 					</div>
 					<!-- Payment form -->
 					<section class="lg:col-span-1">
-						@PaymentForm(fields)
+						@PaymentForm(fields, ntrans, fail)
 					</section>
 					<hr class="border-gray-400 lg:hidden"/>
 					<!-- Order summary -->
@@ -25,14 +26,10 @@ templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields
 						<h2 class="text-2xl font-bold">Información del pedido</h2>
 						<ul class="space-y-3 mt-3">
 							for _, p := range products {
-								<li class="p-2 border">
+								<li class="p-2 border-2">
 									<h3 class="font-bold text-sm">
 										{ p.ProductCategory + " - " + p.ProductItem + " - " + p.ProductName }
 									</h3>
-									<div class="text-sm">
-										<span class="font-bold">Estado:</span>
-										<span>{ string(p.Status) }</span>
-									</div>
 									<div class="text-sm text-livid">
 										<span class="font-bold">Precio:</span>
 										<span>{ ToUSD(p.ProductPrice) }</span>
@@ -67,7 +64,7 @@ templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields
 	}
 }
 
-templ PaymentForm(fields []payment.FormData) {
+templ PaymentForm(fields []payment.FormData, ntrans int, fail bool) {
 	<nav class="text-3xl">
 		<span class="font-semibold text-gray-400">Facturación</span>
 		<span>
@@ -78,23 +75,40 @@ templ PaymentForm(fields []payment.FormData) {
 		<span class="font-semibold">Pago</span>
 	</nav>
 	<div class="mt-4">
-		<h2 class="mt-2 font-bold text-2xl">Pago</h2>
+		<h2 class="mt-2 font-bold text-2xl">
+			<span>Pago</span>
+			<span class="text-red-600">{ fmt.Sprintf("(%d intentos restantes)", config.MAX_TRANSACTIONS - ntrans) }</span>
+		</h2>
 		<p class="mt-2 text-lg">
 			Luego de hacer click en "Pagar ahora", se le mostrará la pasarela de pagos Izipay para completar su compra de forma segura.
 		</p>
-		<form
-			class="mt-8"
-			action="https://secure.micuentaweb.pe/vads-payment/"
-			method="post"
-			target="payment-frame"
-		>
-			for _, field := range fields {
-				<input type="hidden" name={ field.Key } value={ field.Value }/>
-			}
-			<button class="w-full p-2 border bg-azure border-azure rounded-xl text-lg font-bold text-chalky" type="submit">
-				Pagar ahora
-			</button>
-		</form>
+		<p class={ "flex items-center h-9 mt-3 text-xl font-bold text-red-600", templ.KV("invisible", !fail) }>
+			El pago ha sido rechazado
+		</p>
+		<div class="flex gap-6">
+			<form
+				class="flex-1"
+				action="https://secure.micuentaweb.pe/vads-payment/"
+				method="post"
+				target="payment-frame"
+			>
+				for _, field := range fields {
+					<input type="hidden" name={ field.Key } value={ field.Value }/>
+				}
+				<button class="w-full p-2 border bg-azure border-azure rounded-xl text-lg font-bold text-chalky" type="submit">
+					Pagar ahora
+				</button>
+			</form>
+			<form
+				class="flex-1"
+				action="./"
+				method="get"
+			>
+				<button class="w-full p-2 border border-azure bg-chalky rounded-xl text-lg font-bold text-azure" type="submit">
+					Reiniciar
+				</button>
+			</form>
+		</div>
 		<iframe class="w-full mt-2 h-[35rem] border-none" name="payment-frame" src="" title="izipay" frameborder="0" scrolling="yes"></iframe>
 	</div>
 }
