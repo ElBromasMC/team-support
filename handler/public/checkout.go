@@ -121,6 +121,7 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		return err
 	}
 
+	// Cancel order if it exceeds the maximum number of transactions
 	if ntrans >= config.MAX_TRANSACTIONS {
 		if err := h.OrderService.CancelOrder(order); err != nil {
 			return err
@@ -128,15 +129,19 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/store/categories/all")
 	}
 
-	// Query data
+	// Query products
 	products, err := h.OrderService.GetOrderProducts(order)
 	if err != nil {
 		return err
 	}
+
+	// Generate a new transaction
 	trans, err := h.TransactionService.InsertTransaction(order, checkout.CalculateAmount(products), "IZIPAY")
 	if err != nil {
 		return err
 	}
+
+	// Generate the form fields
 	formFields := h.PaymentService.GetPaymentData(order, trans)
 
 	return util.Render(c, http.StatusOK, view.PaymentPage(order, products, formFields, ntrans, fail))

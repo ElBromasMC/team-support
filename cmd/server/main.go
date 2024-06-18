@@ -157,6 +157,7 @@ func main() {
 	g5.GET("", ph.HandleCheckoutShow)
 	g5.POST("/orders", ph.HandleCheckoutOrderInsertion)
 	g5.GET("/orders/:orderID/payment", ph.HandleCheckoutPaymentShow)
+	g5.POST("/orders/:orderID/preview", ph.HandleCheckoutOrderPreview)
 	g5.GET("/orders/:orderID", ph.HandleCheckoutOrderShow)
 
 	// Notification group
