@@ -73,14 +73,13 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, orderID, product.Quantity, hs
 
 func (os Order) GetOrderById(id uuid.UUID) (checkout.Order, error) {
 	var order checkout.Order
-	if err := os.db.QueryRow(context.Background(), `SELECT purchase_order, email, phone_number,
-name, address, city, postal_code, created_at, payment_status
+	if err := os.db.QueryRow(context.Background(), `SELECT id, purchase_order, email, phone_number,
+name, address, city, postal_code, created_at, sync_status, locked_at
 FROM store_orders
-WHERE id = $1`, id).Scan(&order.PurchaseOrder, &order.Email, &order.Phone,
-		&order.Name, &order.Address, &order.City, &order.PostalCode, &order.CreatedAt, &order.PaymentStatus); err != nil {
+WHERE id = $1`, id).Scan(&order.Id, &order.PurchaseOrder, &order.Email, &order.Phone,
+		&order.Name, &order.Address, &order.City, &order.PostalCode, &order.CreatedAt, &order.SyncStatus, &order.LockedAt); err != nil {
 		return checkout.Order{}, echo.NewHTTPError(http.StatusNotFound, "Orden no encontrada")
 	}
-	order.Id = id
 	return order, nil
 }
 
@@ -122,16 +121,4 @@ WHERE order_id = $1`, order.Id)
 	}
 
 	return products, nil
-}
-
-func (os Order) CancelOrder(order checkout.Order) error {
-	sql := `UPDATE store_orders SET payment_status = 'CANCELLED' WHERE id = $1`
-	c, err := os.db.Exec(context.Background(), sql, order.Id)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	if c.RowsAffected() != 1 {
-		return echo.NewHTTPError(http.StatusNotFound, "Order not found")
-	}
-	return nil
 }

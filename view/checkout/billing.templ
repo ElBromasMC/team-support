@@ -4,7 +4,7 @@ import (
 	"alc/model/checkout"
 )
 
-templ BillingForm(order checkout.Order) {
+templ BillingForm(order checkout.Order, msg string) {
 	<nav class="text-3xl">
 		<span class="font-semibold">Facturación</span>
 		<span>
@@ -14,8 +14,12 @@ templ BillingForm(order checkout.Order) {
 		</span>
 		<span class="font-semibold text-gray-400">Pago</span>
 	</nav>
+	if len(msg) > 0 {
+		<div class="mt-4 font-semibold text-red-600">
+			{ msg }
+		</div>
+	}
 	<form
-		class="mt-4"
 		action="/checkout/orders"
 		method="post"
 	>

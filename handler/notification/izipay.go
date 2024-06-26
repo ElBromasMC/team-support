@@ -41,13 +41,13 @@ func (h *Handler) HandleIzipayPayNotification(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden)
 	}
 
+	// Check context mode
+	if form.Get("vads_ctx_mode") != string(h.PaymentService.GetMode()) {
+		return c.NoContent(http.StatusOK)
+	}
+
 	switch form.Get("vads_url_check_src") {
 	case "PAY", "BATCH_AUTO":
-		// Check context mode
-		if form.Get("vads_ctx_mode") != string(h.PaymentService.GetMode()) {
-			return c.NoContent(http.StatusOK)
-		}
-
 		// Get order uuid
 		orderId, err := uuid.FromString(form.Get("vads_order_id"))
 		if err != nil {

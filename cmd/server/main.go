@@ -157,7 +157,16 @@ func main() {
 	g5.GET("", ph.HandleCheckoutShow)
 	g5.POST("/orders", ph.HandleCheckoutOrderInsertion)
 	g5.GET("/orders/:orderID/payment", ph.HandleCheckoutPaymentShow)
+	g5.POST("/orders/:orderID/payment", func(c echo.Context) error {
+		orderId := c.Param("orderID")
+		fail := c.QueryParam("fail")
+		return c.Redirect(http.StatusSeeOther, "/checkout/orders/"+orderId+"/payment?fail="+fail)
+	})
 	g5.POST("/orders/:orderID/preview", ph.HandleCheckoutOrderPreview)
+	g5.GET("/orders/:orderID/preview", func(c echo.Context) error {
+		orderId := c.Param("orderID")
+		return c.Redirect(http.StatusTemporaryRedirect, "/checkout/orders/"+orderId)
+	})
 	g5.GET("/orders/:orderID", ph.HandleCheckoutOrderShow)
 
 	// Notification group

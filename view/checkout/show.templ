@@ -10,7 +10,7 @@ import (
 	"alc/view/layout"
 )
 
-templ Show(items []cart.Item) {
+templ Show(items []cart.Item, msg string) {
 	@layout.Base("Checkout") {
 		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
 			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:px-9">
@@ -21,9 +21,9 @@ templ Show(items []cart.Item) {
 					<!-- Checkout form -->
 					<div class="lg:col-span-1">
 						if user, ok := auth.GetUser(ctx); ok {
-							@BillingForm(checkout.Order{Email: user.Email})
+							@BillingForm(checkout.Order{Email: user.Email}, msg)
 						} else {
-							@BillingForm(checkout.Order{})
+							@BillingForm(checkout.Order{}, msg)
 						}
 					</div>
 					<hr class="border-gray-400 lg:hidden"/>

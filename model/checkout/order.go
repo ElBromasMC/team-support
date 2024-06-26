@@ -11,23 +11,12 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-type OrderStatus string
+type OrderSyncStatus string
 
 const (
-	Pendiente    OrderStatus = "PENDIENTE"
-	EnProceso    OrderStatus = "EN PROCESO"
-	PorConfirmar OrderStatus = "POR CONFIRMAR"
-	Entregado    OrderStatus = "ENTREGADO"
-	Cancelado    OrderStatus = "CANCELADO"
-)
-
-type OrderPaymentStatus string
-
-const (
-	Pending    OrderPaymentStatus = "PENDING"
-	Processing OrderPaymentStatus = "PROCESSING"
-	Completed  OrderPaymentStatus = "COMPLETED"
-	Cancelled  OrderPaymentStatus = "CANCELLED"
+	Pending   OrderSyncStatus = "PENDING"
+	Completed OrderSyncStatus = "COMPLETED"
+	Failed    OrderSyncStatus = "FAILED"
 )
 
 type Order struct {
@@ -41,8 +30,19 @@ type Order struct {
 	PostalCode    string
 	AssignedTo    auth.User
 	CreatedAt     time.Time
-	PaymentStatus OrderPaymentStatus
+	SyncStatus    OrderSyncStatus
+	LockedAt      time.Time
 }
+
+type OrderStatus string
+
+const (
+	Pendiente    OrderStatus = "PENDIENTE"
+	EnProceso    OrderStatus = "EN PROCESO"
+	PorConfirmar OrderStatus = "POR CONFIRMAR"
+	Entregado    OrderStatus = "ENTREGADO"
+	Cancelado    OrderStatus = "CANCELADO"
+)
 
 type OrderProduct struct {
 	Id              int

@@ -21,6 +21,20 @@ func NewTransactionService(db *pgxpool.Pool) Transaction {
 	}
 }
 
+func (ts Transaction) GetTransaction(order checkout.Order) (transaction.Transaction, error) {
+	var trans transaction.Transaction
+	sql := `SELECT id, status, amount,
+	platform, created_at, updated_at, trans_id, trans_uuid
+	FROM store_transactions
+	WHERE order_id = $1`
+	if err := ts.db.QueryRow(context.Background(), sql, order.Id).Scan(&trans.Id, &trans.Status, &trans.Amount,
+		&trans.Platform, &trans.CreatedAt, &trans.UpdatedAt, &trans.TransId, &trans.TransUuid); err != nil {
+		return transaction.Transaction{}, echo.NewHTTPError(http.StatusNotFound, "Transacción no encontrada")
+	}
+	trans.Order = order
+	return trans, nil
+}
+
 func (ts Transaction) InsertTransaction(order checkout.Order, amount int, platform string) (transaction.Transaction, error) {
 	var trans transaction.Transaction
 	sql := `INSERT INTO store_transactions
@@ -35,15 +49,6 @@ func (ts Transaction) InsertTransaction(order checkout.Order, amount int, platfo
 	}
 	trans.Order = order
 	return trans, nil
-}
-
-func (ts Transaction) NumberOfTransactions(order checkout.Order) (int, error) {
-	var number int
-	sql := `SELECT COUNT(*) FROM store_transactions WHERE order_id = $1`
-	if err := ts.db.QueryRow(context.Background(), sql, order.Id).Scan(&number); err != nil {
-		return 0, echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	return number, nil
 }
 
 func (ts Transaction) UpdateTransaction(orderId uuid.UUID, transId string, transUuid string, status transaction.TransactionStatus) error {

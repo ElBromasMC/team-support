@@ -2,13 +2,12 @@ package checkout
 
 import (
 	"fmt"
-	"alc/config"
 	"alc/view/layout"
 	"alc/model/checkout"
 	"alc/model/payment"
 )
 
-templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields []payment.FormData, ntrans int, fail bool) {
+templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields []payment.FormData, fail bool) {
 	@layout.Base("Pago") {
 		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
 			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:px-9">
@@ -18,7 +17,7 @@ templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields
 					</div>
 					<!-- Payment form -->
 					<section class="lg:col-span-1">
-						@PaymentForm(fields, ntrans, fail)
+						@PaymentForm(fields, fail)
 					</section>
 					<hr class="border-gray-400 lg:hidden"/>
 					<!-- Order summary -->
@@ -64,7 +63,7 @@ templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields
 	}
 }
 
-templ PaymentForm(fields []payment.FormData, ntrans int, fail bool) {
+templ PaymentForm(fields []payment.FormData, fail bool) {
 	<nav class="text-3xl">
 		<span class="font-semibold text-gray-400">Facturación</span>
 		<span>
@@ -77,7 +76,6 @@ templ PaymentForm(fields []payment.FormData, ntrans int, fail bool) {
 	<div class="mt-4">
 		<h2 class="mt-2 font-bold text-2xl">
 			<span>Pago</span>
-			<span class="text-red-600">{ fmt.Sprintf("(%d intentos restantes)", config.MAX_TRANSACTIONS - ntrans) }</span>
 		</h2>
 		<p class="mt-2 text-lg">
 			Luego de hacer click en "Pagar ahora", se le mostrará la pasarela de pagos Izipay para completar su compra de forma segura.
