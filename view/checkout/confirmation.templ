@@ -1,0 +1,21 @@
+package checkout
+
+import (
+	"alc/model/checkout"
+)
+
+templ ConfirmationPage(order checkout.Order) {
+	<h1>Hello from confirmation!</h1>
+	<p>
+		<span>Check your email: </span>
+		<span>{ order.Email }</span>
+	</p>
+}
+
+templ ConfirmationEmail(order checkout.Order, products []checkout.OrderProduct, hostname string) {
+	<h1>Confirmation email</h1>
+	<p>
+		<span>Hi, test confirmation email</span>
+		<a href={ templ.URL("https://" + hostname + "/checkout/orders/" + order.Id.String() + "/payment") }>Continue</a>
+	</p>
+}

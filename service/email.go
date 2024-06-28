@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/wneessen/go-mail"
 )
 
@@ -12,4 +14,8 @@ func NewEmailService(client *mail.Client) Email {
 	return Email{
 		client: client,
 	}
+}
+
+func (es Email) DialAndSend(ctx context.Context, ml ...*mail.Msg) error {
+	return es.client.DialAndSendWithContext(ctx, ml...)
 }
