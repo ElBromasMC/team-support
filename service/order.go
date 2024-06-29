@@ -2,6 +2,7 @@ package service
 
 import (
 	"alc/model/checkout"
+	"alc/model/store"
 	"context"
 	"net/http"
 
@@ -84,8 +85,8 @@ WHERE id = $1`, id).Scan(&order.Id, &order.PurchaseOrder, &order.Email, &order.P
 }
 
 func (os Order) GetOrderProducts(order checkout.Order) ([]checkout.OrderProduct, error) {
-	rows, err := os.db.Query(context.Background(), `SELECT quantity, details, product_type, product_category, product_item,
-product_name, product_price, product_details, status, updated_at
+	rows, err := os.db.Query(context.Background(), `SELECT id, quantity, details, product_type, product_category, product_item,
+product_name, product_price, product_details, status, updated_at, product_id
 FROM order_products
 WHERE order_id = $1`, order.Id)
 	if err != nil {
@@ -95,14 +96,16 @@ WHERE order_id = $1`, order.Id)
 
 	products, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (checkout.OrderProduct, error) {
 		var product checkout.OrderProduct
+		var productID *int
+
 		product.Details = make(map[string]string)
 		product.ProductDetails = make(map[string]string)
 
 		var hstoreDetails pgtype.Hstore
 		var hstoreProductDetails pgtype.Hstore
 
-		err := row.Scan(&product.Quantity, &hstoreDetails, &product.ProductType, &product.ProductCategory, &product.ProductItem,
-			&product.ProductName, &product.ProductPrice, &hstoreProductDetails, &product.Status, &product.UpdatedAt)
+		err := row.Scan(&product.Id, &product.Quantity, &hstoreDetails, &product.ProductType, &product.ProductCategory, &product.ProductItem,
+			&product.ProductName, &product.ProductPrice, &hstoreProductDetails, &product.Status, &product.UpdatedAt, &productID)
 		product.Order = order
 		for key, value := range hstoreDetails {
 			if value != nil {
@@ -114,6 +117,17 @@ WHERE order_id = $1`, order.Id)
 				product.ProductDetails[key] = *value
 			}
 		}
+
+		// Query and attach product
+		sql := `SELECT id, name, price, slug, stock
+		FROM store_products
+		WHERE id = $1`
+		var storeProduct store.Product
+		if err := os.db.QueryRow(context.Background(), sql, productID).Scan(&storeProduct.Id,
+			&storeProduct.Name, &storeProduct.Price, &storeProduct.Slug, &storeProduct.Stock); err == nil {
+			product.Product = storeProduct
+		}
+
 		return product, err
 	})
 	if err != nil {

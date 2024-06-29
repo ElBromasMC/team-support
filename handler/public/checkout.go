@@ -7,16 +7,13 @@ import (
 	"alc/model/payment"
 	"alc/model/transaction"
 	view "alc/view/checkout"
-	"context"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/a-h/templ"
 	"github.com/gofrs/uuid/v5"
 	"github.com/labstack/echo/v4"
-	"github.com/wneessen/go-mail"
 )
 
 // GET "/checkout?msg"
@@ -79,41 +76,8 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 	}
 	order.Id = orderID
 
-	// Remove cart cookie
-	// sess, _ := session.Get(cart.SessionName, c)
-	// sess.Options = &sessions.Options{
-	// 	Path:     "/",
-	// 	MaxAge:   -1,
-	// 	Secure:   true,
-	// 	HttpOnly: false,
-	// 	SameSite: http.SameSiteStrictMode,
-	// }
-	// if err := sess.Save(c.Request(), c.Response()); err != nil {
-	// 	c.Logger().Debug("Error removing cart session: ", err)
-	// 	return echo.NewHTTPError(http.StatusInternalServerError)
-	// }
-
-	// Send confirmation email to client
-	msg := mail.NewMsg()
-	if err := msg.From("no-reply@teamsupportperu.com"); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	if err := msg.To(order.Email); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Email no válido")
-	}
-	msg.Subject("Order Payment Test")
-
-	body, err := templ.ToGoHTML(context.Background(), view.ConfirmationEmail(order, products, "localhost:8080"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	msg.SetBodyString(mail.TypeTextHTML, string(body))
-
-	if err := h.EmailService.DialAndSend(context.Background(), msg); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError)
-	}
-
-	return c.Redirect(http.StatusSeeOther, "/checkout/confirmation")
+	// Redirect to the next step
+	return c.Redirect(http.StatusFound, "/checkout/orders/"+order.Id.String()+"/payment")
 }
 
 // GET "/checkout/orders/:orderID/payment?fail"
@@ -150,6 +114,19 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		}
 
 		// Check product availability
+		for _, product := range products {
+			msg := "Los productos solicitados ya no están disponibles"
+			// Check product existence
+			if product.Product.Id == 0 {
+				return c.Redirect(http.StatusFound, "/checkout?msg="+url.QueryEscape(msg))
+			}
+			// Check stock
+			if product.Product.Stock != nil {
+				if product.Quantity > *product.Product.Stock {
+					return c.Redirect(http.StatusFound, "/checkout?msg="+url.QueryEscape(msg))
+				}
+			}
+		}
 
 		// Create and attach transaction
 		trans, err = h.TransactionService.InsertTransaction(order, checkout.CalculateAmount(products), "IZIPAY")
@@ -173,6 +150,19 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		}
 
 		// Check product availability
+		for _, product := range products {
+			msg := "Los productos solicitados ya no están disponibles"
+			// Check product existence
+			if product.Product.Id == 0 {
+				return c.Redirect(http.StatusFound, "/checkout?msg="+url.QueryEscape(msg))
+			}
+			// Check stock
+			if product.Product.Stock != nil {
+				if product.Quantity > *product.Product.Stock {
+					return c.Redirect(http.StatusFound, "/checkout?msg="+url.QueryEscape(msg))
+				}
+			}
+		}
 	}
 
 	// Generate the form fields
