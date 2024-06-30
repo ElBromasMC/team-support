@@ -34,6 +34,7 @@ SMTP_PASS=<password>
 WEBSERVER_HOSTNAME=www.domain.tld
 IZIPAY_STOREID=
 IZIPAY_APIKEY=
+COMPANY_EMAIL=
 ```
 
 ### Load env variables
@@ -65,4 +66,5 @@ SMTP_USER=<username>
 SMTP_PASS=<password>
 IZIPAY_STOREID=
 IZIPAY_APIKEY=
+COMPANY_EMAIL=
 ```

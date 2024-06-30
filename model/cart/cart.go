@@ -47,6 +47,10 @@ func (item Item) IsValid() error {
 	return nil
 }
 
+func (i Item) CalculateSubtotal() int {
+	return i.Product.Price * i.Quantity
+}
+
 func (i Item) ToRequest() ItemRequest {
 	return ItemRequest{
 		ProductId: i.Product.Id,
@@ -58,4 +62,12 @@ func (i Item) ToRequest() ItemRequest {
 func GetItems(ctx context.Context) []Item {
 	items, _ := ctx.Value(ItemsKey{}).([]Item)
 	return items
+}
+
+func CalculateAmount(items []Item) int {
+	amount := 0
+	for _, i := range items {
+		amount += i.CalculateSubtotal()
+	}
+	return amount
 }

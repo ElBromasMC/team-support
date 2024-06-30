@@ -83,7 +83,7 @@ templ Tracking(order checkout.Order, products []checkout.OrderProduct) {
 									}
 									<div class="text-sm text-navy">
 										<span class="font-bold">Subtotal:</span>
-										<span>{ ToUSD(p.ProductPrice * p.Quantity) }</span>
+										<span>{ ToUSD(p.CalculateSubtotal()) }</span>
 									</div>
 								</li>
 							}
@@ -91,7 +91,7 @@ templ Tracking(order checkout.Order, products []checkout.OrderProduct) {
 						<div class="mt-3">
 							<div class="flex justify-between text-2xl">
 								<span class="font-semibold">Total:</span>
-								<span>{ ToUSD(TotalProductPrice(products)) }</span>
+								<span>{ ToUSD(checkout.CalculateAmount(products)) }</span>
 							</div>
 						</div>
 					</section>

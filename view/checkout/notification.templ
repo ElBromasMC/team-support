@@ -1,0 +1,243 @@
+package checkout
+
+import (
+	"fmt"
+	"alc/model/checkout"
+	"encoding/json"
+)
+
+templ ClientSuccessNotification(order checkout.Order, products []checkout.OrderProduct, hostname string) {
+	@EmailLayout("Confirmación de la orden", hostname) {
+		<div class="content">
+			<h1>Confirmación de la orden</h1>
+			<p>
+				Gracias por su compra. Su pedido se ha procesado correctamente. A continuación encontrará los detalles de su pedido:
+			</p>
+			@ClientSummary(order, products)
+			<div class="order-status">
+				<h2>Consulta el estado de tu orden</h2>
+				<p>Puede comprobar el estado de su pedido en cualquier momento haciendo clic en el siguiente botón:</p>
+				<a href={ templ.URL("https://" + hostname + "/checkout/orders/" + order.Id.String()) } class="button">Comprobar el estado</a>
+			</div>
+			<div class="contact-us">
+				<h2>Contáctenos</h2>
+				<p>Si tiene alguna duda sobre su pedido, póngase en contacto con nuestro equipo de atención al cliente.</p>
+				<p><a href="mailto:ventas@teamsupportperu.com">ventas@teamsupportperu.com</a></p>
+			</div>
+		</div>
+	}
+}
+
+templ ClientErrorNotification(order checkout.Order, products []checkout.OrderProduct, hostname string) {
+	@EmailLayout("Error al procesar la orden", hostname) {
+		<div class="content">
+			<h1>Error al procesar la orden</h1>
+			<p>
+				Lamentamos informarle de que se ha producido un problema al procesar su pedido.
+				Por favor, revise los detalles a continuación y póngase en contacto con nuestro
+				equipo de atención al cliente para obtener ayuda.
+			</p>
+			<div class="contact-us">
+				<h2>Contáctenos</h2>
+				<p>Póngase en contacto con nuestro equipo de atención al cliente.</p>
+				<p><a href="mailto:ventas@teamsupportperu.com">ventas@teamsupportperu.com</a></p>
+			</div>
+			@ClientSummary(order, products)
+			<div class="order-status">
+				<h2>Consulta el estado de tu orden</h2>
+				<p>Puede comprobar el estado de su pedido en cualquier momento haciendo clic en el siguiente botón:</p>
+				<a href={ templ.URL("https://" + hostname + "/checkout/orders/" + order.Id.String()) } class="button">Comprobar el estado</a>
+			</div>
+		</div>
+	}
+}
+
+templ CompanySuccessNotification(order checkout.Order, products []checkout.OrderProduct, hostname string, transUuid string, transDate string) {
+	@EmailLayout("Orden procesada exitosamente", hostname) {
+		<div class="content">
+			<h1>Orden procesada exitosamente</h1>
+			@CompanySummary(order, products, transUuid, transDate)
+		</div>
+	}
+}
+
+templ CompanyErrorNotification(order checkout.Order, products []checkout.OrderProduct, hostname string, transUuid string, transDate string) {
+	@EmailLayout("Error al procesar la orden", hostname) {
+		<div class="content">
+			<h1>Error al procesar la orden</h1>
+			<p>
+				Info: Al momento de procesar el stock se detectó una inconsistencia (Stock insuficiente o producto no existente)
+			</p>
+			@CompanySummary(order, products, transUuid, transDate)
+		</div>
+	}
+}
+
+templ ClientSummary(order checkout.Order, products []checkout.OrderProduct) {
+	<div class="order-details">
+		<h2>Resumen del pedido</h2>
+		<p>
+			<strong>Número de orden:</strong>
+			<span>{ fmt.Sprintf("%d", order.PurchaseOrder) }</span>
+		</p>
+		<p>
+			<strong>Fecha de la orden:</strong>
+			<span>{ GetTime(order.CreatedAt) }</span>
+		</p>
+		<p>
+			<strong>Nombre del cliente:</strong>
+			<span>{ order.Name }</span>
+		</p>
+		<p>
+			<strong>Email:</strong>
+			<span>{ order.Email }</span>
+		</p>
+	</div>
+	<div class="order-products">
+		<h2>Productos del pedido</h2>
+		<table class="order-details" width="100%">
+			<thead>
+				<tr>
+					<th>Nombre</th>
+					<th>Cantidad</th>
+					<th>Precio</th>
+					<th>Detalles</th>
+					<th>Subtotal</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, p := range products {
+					<tr>
+						<td>{ p.ProductItem + " - " + p.ProductName }</td>
+						<td>{ fmt.Sprintf("%d", p.Quantity) }</td>
+						<td>{ ToUSD(p.ProductPrice) }</td>
+						<td>
+							if details, err := json.Marshal(p.Details); err == nil {
+								{ string(details) }
+							}
+						</td>
+						<td>{ ToUSD(p.CalculateSubtotal()) }</td>
+					</tr>
+				}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="4">Total</th>
+					<th>{ ToUSD(checkout.CalculateAmount(products)) }</th>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+}
+
+templ CompanySummary(order checkout.Order, products []checkout.OrderProduct, transUuid string, transDate string) {
+	<div class="transaction-details">
+		<h2>Resumen de la transacción</h2>
+		<p>
+			<strong>Id de la transacción:</strong>
+			<span>{ transUuid }</span>
+		</p>
+		<p>
+			<strong>Fecha de la transacción:</strong>
+			<span>{ transDate }</span>
+		</p>
+	</div>
+	<div class="order-details">
+		<h2>Resumen de la orden</h2>
+		<p>
+			<strong>Id en el sistema:</strong>
+			<span>{ order.Id.String() }</span>
+		</p>
+		<p>
+			<strong>Número de orden:</strong>
+			<span>{ fmt.Sprintf("%d", order.PurchaseOrder) }</span>
+		</p>
+		<p>
+			<strong>Email:</strong>
+			<span>{ order.Email }</span>
+		</p>
+		<p>
+			<strong>Teléfono:</strong>
+			<span>{ order.Phone }</span>
+		</p>
+		<p>
+			<strong>Nombre del cliente:</strong>
+			<span>{ order.Name }</span>
+		</p>
+		<p>
+			<strong>Dirección:</strong>
+			<span>{ order.Address }</span>
+		</p>
+		<p>
+			<strong>Ciudad:</strong>
+			<span>{ order.City }</span>
+		</p>
+		<p>
+			<strong>Código postal:</strong>
+			<span>{ order.PostalCode }</span>
+		</p>
+		<p>
+			<strong>Fecha de la orden:</strong>
+			<span>{ GetTime(order.CreatedAt) }</span>
+		</p>
+	</div>
+	<div class="order-products">
+		<h2>Productos del pedido</h2>
+		<table class="order-details" width="100%">
+			<thead>
+				<tr>
+					<th>Tipo</th>
+					<th>Nombre</th>
+					<th>Cantidad</th>
+					<th>Precio</th>
+					<th>Detalles</th>
+					<th>Subtotal</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, p := range products {
+					<tr>
+						<td>{ string(p.ProductType) }</td>
+						<td>{ p.ProductCategory + " - " + p.ProductItem + " - " + p.ProductName }</td>
+						<td>{ fmt.Sprintf("%d", p.Quantity) }</td>
+						<td>{ ToUSD(p.ProductPrice) }</td>
+						<td>
+							if details, err := json.Marshal(p.Details); err == nil {
+								{ string(details) }
+							}
+						</td>
+						<td>{ ToUSD(p.CalculateSubtotal()) }</td>
+					</tr>
+				}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="4">Total</th>
+					<th>{ ToUSD(checkout.CalculateAmount(products)) }</th>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+}
+
+templ EmailLayout(title string, hostname string) {
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<meta charset="UTF-8"/>
+			<title>{ title }</title>
+		</head>
+		<body>
+			<div class="container">
+				<div class="header">
+					<img src="https://www.teamsupportperu.com/static/img/logo1.png" alt="Team Support Services"/>
+				</div>
+				{ children... }
+				<div class="footer">
+					<p>&copy; 2024 TeamSupport. Todos los derechos reservados.</p>
+					<p><a href={ templ.URL("https://" + hostname + "/") }>Visítanos</a></p>
+				</div>
+			</div>
+		</body>
+	</html>
+}

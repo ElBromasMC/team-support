@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS store_orders (
     assigned_to UUID,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     sync_status order_sync_status NOT NULL DEFAULT 'PENDING',
-    locked_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '30 minutes',
+    locked_at TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '15 minutes',
     UNIQUE(purchase_order),
     FOREIGN KEY (assigned_to) REFERENCES users(user_id) ON DELETE SET NULL
 );
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS order_products (
     AUTHORISED: The transaction has been approved but the funds have not yet been transferred, it can be cancelled by the system.
     COMPLETED: The transaction has been successfully completed, and the funds have been transferred.
     FAILED: The transaction did not go through due to various reasons such as insufficient funds, declined by the bank, or other errors.
-    CANCELLED: The transaction was cancelled by the user or by the system before completion.
+    CANCELLED: The transaction was cancelled by the system before completion.
 */
 CREATE TYPE transaction_status AS ENUM ('PENDING', 'AUTHORISED', 'COMPLETED', 'FAILED', 'CANCELLED');
 
@@ -287,43 +287,9 @@ EXECUTE PROCEDURE trigger_set_timestamp();
 -- END;
 -- $$ LANGUAGE plpgsql;
 
--- CREATE OR REPLACE FUNCTION trigger_update_payment_status()
--- RETURNS TRIGGER AS $$
--- DECLARE
---     all_status transaction_status[];
--- BEGIN
---     -- Fetch the statuses of all related transactions for the order
---     SELECT ARRAY_AGG(status) INTO all_status
---     FROM store_transactions
---     WHERE order_id = NEW.order_id;
-
---     -- Determine the new payment status based on transaction statuses
---     IF 'COMPLETED' = ANY(all_status) THEN
---         UPDATE store_orders SET payment_status = 'COMPLETED'
---         WHERE id = NEW.order_id AND payment_status != 'COMPLETED';
---     ELSIF 'AUTHORISED' = ANY(all_status) THEN
---         UPDATE store_orders SET payment_status = 'PROCESSING'
---         WHERE id = NEW.order_id AND payment_status != 'PROCESSING';
---     ELSE
---         UPDATE store_orders SET payment_status = 'PENDING'
---         WHERE id = NEW.order_id AND payment_status != 'PENDING'
---         AND payment_status != 'CANCELLED';
---     END IF;
-
---     RETURN NEW;
--- END;
--- $$ LANGUAGE plpgsql;
-
 -- -- Order triggers
 -- CREATE OR REPLACE TRIGGER update_product_stock
 -- AFTER UPDATE ON store_orders
 -- FOR EACH ROW
 -- WHEN (OLD.payment_status IS DISTINCT FROM NEW.payment_status AND NEW.payment_status = 'COMPLETED')
 -- EXECUTE FUNCTION trigger_update_stock();
-
--- -- Transaction triggers
--- CREATE OR REPLACE TRIGGER update_order_payment_status
--- AFTER UPDATE ON store_transactions
--- FOR EACH ROW
--- WHEN (OLD.status IS DISTINCT FROM NEW.status)
--- EXECUTE FUNCTION trigger_update_payment_status();

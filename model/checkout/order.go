@@ -93,10 +93,14 @@ func (order Order) Normalize() (Order, error) {
 	return order, nil
 }
 
+func (p OrderProduct) CalculateSubtotal() int {
+	return p.ProductPrice * p.Quantity
+}
+
 func CalculateAmount(products []OrderProduct) int {
 	amount := 0
 	for _, product := range products {
-		amount += product.ProductPrice * product.Quantity
+		amount += product.CalculateSubtotal()
 	}
 	return amount
 }

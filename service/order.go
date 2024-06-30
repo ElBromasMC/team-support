@@ -24,53 +24,6 @@ func NewOrderService(db *pgxpool.Pool) Order {
 }
 
 // Order management
-func (os Order) InsertOrderProducts(order checkout.Order, products []checkout.OrderProduct) (uuid.UUID, error) {
-	tx, err := os.db.Begin(context.Background())
-	if err != nil {
-		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	defer tx.Rollback(context.Background())
-
-	// Insert order
-	var orderID uuid.UUID
-	if err := tx.QueryRow(context.Background(), `INSERT INTO store_orders (email, phone_number, name, address, city, postal_code)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id`, order.Email, order.Phone, order.Name, order.Address, order.City, order.PostalCode).Scan(&orderID); err != nil {
-		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new order")
-	}
-
-	for _, product := range products {
-		if product.Product.Id == 0 {
-			return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
-		}
-
-		// Insert product
-		hstoreDetails := make(pgtype.Hstore, len(product.Details))
-		for key, val := range product.Details {
-			valCopy := val
-			hstoreDetails[key] = &valCopy
-		}
-
-		hstoreProductDetails := make(pgtype.Hstore, len(product.ProductDetails))
-		for key, val := range product.ProductDetails {
-			valCopy := val
-			hstoreProductDetails[key] = &valCopy
-		}
-
-		if _, err := tx.Exec(context.Background(), `INSERT INTO order_products (order_id, quantity, details,
-product_type, product_category, product_item, product_name, product_price, product_details, product_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, orderID, product.Quantity, hstoreDetails,
-			product.ProductType, product.ProductCategory, product.ProductItem, product.ProductName, product.ProductPrice, hstoreProductDetails, product.Product.Id); err != nil {
-			return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
-		}
-	}
-
-	if err := tx.Commit(context.Background()); err != nil {
-		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
-	}
-
-	return orderID, nil
-}
 
 func (os Order) GetOrderById(id uuid.UUID) (checkout.Order, error) {
 	var order checkout.Order
@@ -83,6 +36,20 @@ WHERE id = $1`, id).Scan(&order.Id, &order.PurchaseOrder, &order.Email, &order.P
 	}
 	return order, nil
 }
+
+func (os Order) UpdateOrderStatus(id uuid.UUID, status checkout.OrderSyncStatus) error {
+	sql := `UPDATE store_orders SET sync_status = $1 WHERE id = $2`
+	c, err := os.db.Exec(context.Background(), sql, status, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	if c.RowsAffected() != 1 {
+		return echo.NewHTTPError(http.StatusNotFound, "Orden no encontrada")
+	}
+	return nil
+}
+
+// Order products management
 
 func (os Order) GetOrderProducts(order checkout.Order) ([]checkout.OrderProduct, error) {
 	rows, err := os.db.Query(context.Background(), `SELECT id, quantity, details, product_type, product_category, product_item,
@@ -135,4 +102,85 @@ WHERE order_id = $1`, order.Id)
 	}
 
 	return products, nil
+}
+
+func (os Order) InsertOrderProducts(order checkout.Order, products []checkout.OrderProduct) (uuid.UUID, error) {
+	tx, err := os.db.Begin(context.Background())
+	if err != nil {
+		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer tx.Rollback(context.Background())
+
+	// Insert order
+	var orderID uuid.UUID
+	if err := tx.QueryRow(context.Background(), `INSERT INTO store_orders (email, phone_number, name, address, city, postal_code)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id`, order.Email, order.Phone, order.Name, order.Address, order.City, order.PostalCode).Scan(&orderID); err != nil {
+		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new order")
+	}
+
+	for _, product := range products {
+		if product.Product.Id == 0 {
+			return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+
+		// Insert product
+		hstoreDetails := make(pgtype.Hstore, len(product.Details))
+		for key, val := range product.Details {
+			valCopy := val
+			hstoreDetails[key] = &valCopy
+		}
+
+		hstoreProductDetails := make(pgtype.Hstore, len(product.ProductDetails))
+		for key, val := range product.ProductDetails {
+			valCopy := val
+			hstoreProductDetails[key] = &valCopy
+		}
+
+		if _, err := tx.Exec(context.Background(), `INSERT INTO order_products (order_id, quantity, details,
+product_type, product_category, product_item, product_name, product_price, product_details, product_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, orderID, product.Quantity, hstoreDetails,
+			product.ProductType, product.ProductCategory, product.ProductItem, product.ProductName, product.ProductPrice, hstoreProductDetails, product.Product.Id); err != nil {
+			return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+	}
+
+	if err := tx.Commit(context.Background()); err != nil {
+		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return orderID, nil
+}
+
+func (os Order) UpdateProductsStock(order checkout.Order, products []checkout.OrderProduct) error {
+	// Start transaction
+	tx, err := os.db.Begin(context.Background())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer tx.Rollback(context.Background())
+
+	// Update stock
+	for _, product := range products {
+		if product.Product.Id == 0 {
+			return echo.NewHTTPError(http.StatusNotFound, "Producto no encontrado")
+		}
+		if product.Product.Stock != nil {
+			sql := `UPDATE store_products SET stock = stock - $1 WHERE id = $2 AND stock - $1 >= 0`
+			c, err := os.db.Exec(context.Background(), sql, product.Quantity, product.Product.Id)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError)
+			}
+			if c.RowsAffected() != 1 {
+				return echo.NewHTTPError(http.StatusNotFound, "Stock inválido")
+			}
+		}
+	}
+
+	// Commit transaction
+	if err := tx.Commit(context.Background()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return nil
 }

@@ -45,6 +45,7 @@ services:
       - WEBSERVER_HOSTNAME=${WEBSERVER_HOSTNAME}
       - IZIPAY_STOREID=${IZIPAY_STOREID}
       - IZIPAY_APIKEY=${IZIPAY_APIKEY}
+      - COMPANY_EMAIL=${COMPANY_EMAIL}
     networks:
       - http_network
       - store_network

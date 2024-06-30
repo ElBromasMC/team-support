@@ -63,7 +63,7 @@ func main() {
 	// Initialize services
 	ps := service.NewPublicService(dbpool)
 	as := service.NewAdminService(ps)
-	ms := service.NewEmailService(client)
+	ms := service.NewEmailService(client, os.Getenv("SMTP_USER"), os.Getenv("COMPANY_EMAIL"), os.Getenv("WEBSERVER_HOSTNAME"))
 	us := service.NewAuthService(dbpool)
 	ds := service.NewDeviceService(dbpool)
 	ors := service.NewOrderService(dbpool)
