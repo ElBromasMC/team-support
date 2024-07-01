@@ -1,0 +1,45 @@
+package checkout
+
+import (
+	"fmt"
+	"alc/model/checkout"
+	"alc/view/layout"
+)
+
+templ PreviewPage(order checkout.Order, products []checkout.OrderProduct, transUuid string) {
+	@layout.Base(fmt.Sprintf("%d", order.PurchaseOrder)) {
+		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
+			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:min-h-[45rem] lg:px-9">
+				<section class="grid gap-6 lg:grid-cols-2 lg:gap-x-12">
+					<h1 class="text-4xl font-semibold lg:col-span-2">Vista previa</h1>
+					<section class="space-y-6">
+						<p>
+							Gracias por su compra, su pedido ha sido procesado correctamente.
+							Le llegará la confirmación de compra al correo electrónico proporcionado.
+						</p>
+						<!-- Transaction information -->
+						<div>
+							<h2 class="text-2xl font-bold">Información de la transacción</h2>
+							<ul class="list-disc list-inside text-xl">
+								<li>
+									<span class="font-bold">Estado:</span>
+									<span>Exitoso</span>
+								</li>
+								<li>
+									<span class="font-bold">Identificador:</span>
+									<span>{ transUuid }</span>
+								</li>
+							</ul>
+						</div>
+						@OrderInformation(order)
+					</section>
+					<hr class="border-gray-400 lg:hidden"/>
+					<section class="filter grayscale">
+						<!-- Products information -->
+						@OrderProducts(products)
+					</section>
+				</section>
+			</div>
+		</main>
+	}
+}

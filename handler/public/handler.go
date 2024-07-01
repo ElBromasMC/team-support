@@ -11,4 +11,5 @@ type Handler struct {
 	OrderService       service.Order
 	TransactionService service.Transaction
 	PaymentService     service.Payment
+	DeviceService      service.Device
 }

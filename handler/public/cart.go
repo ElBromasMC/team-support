@@ -39,7 +39,8 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
-	if err := item.IsValid(); err != nil {
+	item, err = item.Normalize()
+	if err != nil {
 		if err.Error() == "quantity exceeds current stock" {
 			return echo.NewHTTPError(http.StatusBadRequest, "La cantidad seleccionada supera al stock")
 		} else {
@@ -47,6 +48,16 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 		}
 	}
 
+	// Check device registration
+	if item.Product.Item.Category.Type == store.GarantiaType {
+		valid, err := h.DeviceService.CheckDeviceStatus(item.Details["Serie"])
+		if err != nil {
+			return err
+		}
+		if !valid {
+			return echo.NewHTTPError(http.StatusBadRequest, "La serie no se encuentra registrada")
+		}
+	}
 	// Get cart items
 	items := cart.GetItems(c.Request().Context())
 
@@ -76,7 +87,7 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 
 	// Validate new items
 	for _, i := range items {
-		if err := i.IsValid(); err != nil {
+		if _, err := i.Normalize(); err != nil {
 			if err.Error() == "quantity exceeds current stock" {
 				return echo.NewHTTPError(http.StatusBadRequest, "La cantidad seleccionada supera al stock")
 			} else {

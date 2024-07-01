@@ -4,6 +4,8 @@ import (
 	"alc/model/store"
 	"context"
 	"errors"
+	"strings"
+	"unicode"
 )
 
 const SessionName = "cart"
@@ -22,40 +24,53 @@ type ItemRequest struct {
 	Details   map[string]string
 }
 
-func (item Item) IsValid() error {
+func (item Item) Normalize() (Item, error) {
 	if item.Product.Item.Category.Type == store.GarantiaType {
 		if item.Quantity != 1 {
-			return errors.New("invalid quantity for warranty")
+			return Item{}, errors.New("invalid quantity for warranty")
 		}
 		serie, ok := item.Details["Serie"]
 		if !ok {
-			return errors.New("missing 'Serie' for warranty")
+			return Item{}, errors.New("missing 'Serie' for warranty")
 		}
+		// Remove spaces and uppercase serial
+		serie = strings.Map(func(r rune) rune {
+			if unicode.IsSpace(r) {
+				return -1
+			}
+			return unicode.ToUpper(r)
+		}, serie)
+
+		// Validate serial
 		if !(12 <= len(serie) && len(serie) <= 15) {
-			return errors.New("invalid 'Serie' for warranty")
+			return Item{}, errors.New("invalid 'Serie' for warranty")
 		}
+
+		// Attach normalized serial
+		item.Details["Serie"] = serie
 	} else {
 		if item.Quantity < 1 {
-			return errors.New("invalid quantity for store item")
+			return Item{}, errors.New("invalid quantity for store item")
 		}
 		if item.Product.Stock != nil {
 			if item.Quantity > *item.Product.Stock {
-				return errors.New("quantity exceeds current stock")
+				return Item{}, errors.New("quantity exceeds current stock")
 			}
 		}
 	}
-	return nil
+
+	return item, nil
 }
 
-func (i Item) CalculateSubtotal() int {
-	return i.Product.Price * i.Quantity
+func (item Item) CalculateSubtotal() int {
+	return item.Product.Price * item.Quantity
 }
 
-func (i Item) ToRequest() ItemRequest {
+func (item Item) ToRequest() ItemRequest {
 	return ItemRequest{
-		ProductId: i.Product.Id,
-		Quantity:  i.Quantity,
-		Details:   i.Details,
+		ProductId: item.Product.Id,
+		Quantity:  item.Quantity,
+		Details:   item.Details,
 	}
 }
 

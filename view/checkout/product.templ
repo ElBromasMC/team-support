@@ -1,0 +1,98 @@
+package checkout
+
+import (
+	"fmt"
+	"path"
+	"alc/model/checkout"
+	"alc/model/cart"
+	"alc/config"
+)
+
+templ CartProducts(items []cart.Item) {
+	<h2 class="font-bold text-2xl">
+		Resumen del pedido
+		<span>{ fmt.Sprintf("(%d)", TotalProducts(items)) }</span>
+	</h2>
+	<!-- Cart items -->
+	<ul class="space-y-3 mt-3">
+		for _, i := range items {
+			<li class="grid grid-cols-7 gap-x-3 p-2 border">
+				<div class="col-span-2">
+					if i.Product.Item.Img.Id != 0 {
+						<img
+							class="w-full aspect-square object-cover"
+							src={ path.Join(config.IMAGES_PATH, i.Product.Item.Img.Filename) }
+							alt={ i.Product.Item.Name }
+						/>
+					} else {
+						<img class="w-full aspect-square object-cover" src="/static/img/noimage.png" alt="No image"/>
+					}
+				</div>
+				<div class="flex flex-col justify-center col-span-5">
+					<h3 class="font-bold text-sm">{ i.Product.Item.Name + " - " + i.Product.Name }</h3>
+					<div class="text-sm text-livid">
+						<span class="font-bold">Precio:</span>
+						<span>{ ToUSD(i.Product.Price) }</span>
+					</div>
+					<div class="text-sm text-livid">
+						<span class="font-bold">Cantidad:</span>
+						<span>{ fmt.Sprintf("%d", i.Quantity) }</span>
+					</div>
+					for key, value := range i.Details {
+						<div class="text-sm text-livid">
+							<span class="font-bold">{ key + ":" }</span>
+							<span>{ value }</span>
+						</div>
+					}
+					<div class="text-sm text-navy">
+						<span class="font-bold">Subtotal:</span>
+						<span>{ ToUSD(i.CalculateSubtotal()) }</span>
+					</div>
+				</div>
+			</li>
+		}
+	</ul>
+	<div class="mt-3">
+		<div class="flex justify-between text-2xl">
+			<span class="font-semibold">Total:</span>
+			<span>{ ToUSD(cart.CalculateAmount(items)) }</span>
+		</div>
+	</div>
+}
+
+templ OrderProducts(products []checkout.OrderProduct) {
+	<h2 class="text-2xl font-bold">Información del pedido</h2>
+	<ul class="space-y-3 mt-3">
+		for _, p := range products {
+			<li class="p-2 border-2">
+				<h3 class="font-bold text-sm">
+					{ p.ProductCategory + " - " + p.ProductItem + " - " + p.ProductName }
+				</h3>
+				<div class="text-sm text-livid">
+					<span class="font-bold">Precio:</span>
+					<span>{ ToUSD(p.ProductPrice) }</span>
+				</div>
+				<div class="text-sm text-livid">
+					<span class="font-bold">Cantidad:</span>
+					<span>{ fmt.Sprintf("%d", p.Quantity) }</span>
+				</div>
+				for key, value := range p.Details {
+					<div class="text-sm text-livid">
+						<span class="font-bold">{ key + ":" }</span>
+						<span>{ value }</span>
+					</div>
+				}
+				<div class="text-sm text-navy">
+					<span class="font-bold">Subtotal:</span>
+					<span>{ ToUSD(p.CalculateSubtotal()) }</span>
+				</div>
+			</li>
+		}
+	</ul>
+	<div class="mt-3">
+		<div class="flex justify-between text-2xl">
+			<span class="font-semibold">Total:</span>
+			<span>{ ToUSD(checkout.CalculateAmount(products)) }</span>
+		</div>
+	</div>
+}

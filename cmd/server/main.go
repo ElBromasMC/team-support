@@ -78,6 +78,7 @@ func main() {
 		OrderService:       ors,
 		TransactionService: ts,
 		PaymentService:     pys,
+		DeviceService:      ds,
 	}
 
 	ah := admin.Handler{
@@ -91,6 +92,8 @@ func main() {
 	nh := notification.Handler{
 		TransactionService: ts,
 		PaymentService:     pys,
+		OrderService:       ors,
+		EmailService:       ms,
 	}
 
 	// Middleware

@@ -6,7 +6,7 @@ import (
 	"alc/view/layout"
 )
 
-templ Tracking(order checkout.Order, products []checkout.OrderProduct) {
+templ TrackingPage(order checkout.Order, products []checkout.OrderProduct) {
 	@layout.Base(fmt.Sprintf("%d", order.PurchaseOrder)) {
 		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
 			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:min-h-[45rem] lg:px-9">
@@ -14,86 +14,12 @@ templ Tracking(order checkout.Order, products []checkout.OrderProduct) {
 					<h1 class="text-4xl font-semibold lg:col-span-2">Seguimiento</h1>
 					<!-- Order information -->
 					<section class="space-y-6">
-						<!-- Order information -->
-						<div>
-							<h2 class="text-2xl font-bold">Información de la orden</h2>
-							<ul class="list-disc list-inside text-xl">
-								<li>
-									<span class="font-bold">Número de orden:</span>
-									<span>{ fmt.Sprintf("%d", order.PurchaseOrder) }</span>
-								</li>
-								<li>
-									<span class="font-bold">Creado el:</span>
-									switch Formatted := GetTime(order.CreatedAt); 0 {
-										default:
-											<time datetime={ Formatted }>{ Formatted }</time>
-									}
-								</li>
-							</ul>
-						</div>
-						<!-- User information -->
-						<div>
-							<h2 class="text-2xl font-bold">Información del usuario</h2>
-							<ul class="list-disc list-inside text-xl">
-								<li>
-									<span class="font-bold">Email:</span>
-									<span>{ order.Email }</span>
-								</li>
-							</ul>
-						</div>
-						<!-- Customer service -->
-						<div>
-							<h2 class="text-2xl font-bold">Servicio al cliente</h2>
-							<ul class="text-xl">
-								<li>
-									<a class="text-azure hover:text-livid" href="mailto:ventas@teamsupportperu.com">
-										<svg class="inline w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M2 5.6V18c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V5.6l-.9.7-7.9 6a2 2 0 0 1-2.4 0l-8-6-.8-.7Z"></path>
-											<path d="M20.7 4.1A2 2 0 0 0 20 4H4a2 2 0 0 0-.6.1l.7.6 7.9 6 7.9-6 .8-.6Z"></path>
-										</svg>
-										ventas@teamsupportperu.com
-									</a>
-								</li>
-							</ul>
-						</div>
+						@OrderInformation(order)
 					</section>
 					<hr class="border-gray-400 lg:hidden"/>
 					<!-- Products information -->
 					<section class="filter grayscale">
-						<h2 class="text-2xl font-bold">Información del pedido</h2>
-						<ul class="space-y-3 mt-3">
-							for _, p := range products {
-								<li class="p-2 border-2">
-									<h3 class="font-bold text-sm">
-										{ p.ProductCategory + " - " + p.ProductItem + " - " + p.ProductName }
-									</h3>
-									<div class="text-sm text-livid">
-										<span class="font-bold">Precio:</span>
-										<span>{ ToUSD(p.ProductPrice) }</span>
-									</div>
-									<div class="text-sm text-livid">
-										<span class="font-bold">Cantidad:</span>
-										<span>{ fmt.Sprintf("%d", p.Quantity) }</span>
-									</div>
-									for key, value := range p.Details {
-										<div class="text-sm text-livid">
-											<span class="font-bold">{ key + ":" }</span>
-											<span>{ value }</span>
-										</div>
-									}
-									<div class="text-sm text-navy">
-										<span class="font-bold">Subtotal:</span>
-										<span>{ ToUSD(p.CalculateSubtotal()) }</span>
-									</div>
-								</li>
-							}
-						</ul>
-						<div class="mt-3">
-							<div class="flex justify-between text-2xl">
-								<span class="font-semibold">Total:</span>
-								<span>{ ToUSD(checkout.CalculateAmount(products)) }</span>
-							</div>
-						</div>
+						@OrderProducts(products)
 					</section>
 				</section>
 			</div>

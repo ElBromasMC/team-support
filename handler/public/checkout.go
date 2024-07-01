@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid/v5"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -26,7 +28,7 @@ func (h *Handler) HandleCheckoutShow(c echo.Context) error {
 	if len(items) == 0 {
 		return c.Redirect(http.StatusFound, "/store")
 	}
-	return util.Render(c, http.StatusOK, view.Show(items, msg))
+	return util.Render(c, http.StatusOK, view.BillingPage(items, msg))
 }
 
 // POST "/checkout/orders"
@@ -184,8 +186,13 @@ func (h *Handler) HandleCheckoutOrderPreview(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Datos inválidos")
 	}
 
-	// Query order
+	// Query order and products
 	order, err := h.OrderService.GetOrderById(orderID)
+	if err != nil {
+		return err
+	}
+
+	products, err := h.OrderService.GetOrderProducts(order)
 	if err != nil {
 		return err
 	}
@@ -217,8 +224,20 @@ func (h *Handler) HandleCheckoutOrderPreview(c echo.Context) error {
 	}
 
 	// Collect data
+	transUuid := form.Get("vads_trans_uuid")
 
-	return c.NoContent(http.StatusOK)
+	// Remove cart cookie
+	sess, _ := session.Get(cart.SessionName, c)
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   -1,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteStrictMode,
+	}
+	sess.Save(c.Request(), c.Response())
+
+	return util.Render(c, http.StatusOK, view.PreviewPage(order, products, transUuid))
 }
 
 // GET "/checkout/orders/:orderID"
@@ -253,5 +272,5 @@ func (h *Handler) HandleCheckoutOrderShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, view.Tracking(order, products))
+	return util.Render(c, http.StatusOK, view.TrackingPage(order, products))
 }

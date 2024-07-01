@@ -1,0 +1,51 @@
+package checkout
+
+import (
+	"fmt"
+	"alc/model/checkout"
+)
+
+templ OrderInformation(order checkout.Order) {
+	<!-- Order information -->
+	<div>
+		<h2 class="text-2xl font-bold">Información de la orden</h2>
+		<ul class="list-disc list-inside text-xl">
+			<li>
+				<span class="font-bold">Número de orden:</span>
+				<span>{ fmt.Sprintf("%d", order.PurchaseOrder) }</span>
+			</li>
+			<li>
+				<span class="font-bold">Creado el:</span>
+				switch Formatted := GetTime(order.CreatedAt); 0 {
+					default:
+						<time datetime={ Formatted }>{ Formatted }</time>
+				}
+			</li>
+		</ul>
+	</div>
+	<!-- User information -->
+	<div>
+		<h2 class="text-2xl font-bold">Información del usuario</h2>
+		<ul class="list-disc list-inside text-xl">
+			<li>
+				<span class="font-bold">Email:</span>
+				<span>{ order.Email }</span>
+			</li>
+		</ul>
+	</div>
+	<!-- Customer service -->
+	<div>
+		<h2 class="text-2xl font-bold">Servicio al cliente</h2>
+		<ul class="text-xl">
+			<li>
+				<a class="text-azure hover:text-livid" href="mailto:ventas@teamsupportperu.com">
+					<svg class="inline w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M2 5.6V18c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2V5.6l-.9.7-7.9 6a2 2 0 0 1-2.4 0l-8-6-.8-.7Z"></path>
+						<path d="M20.7 4.1A2 2 0 0 0 20 4H4a2 2 0 0 0-.6.1l.7.6 7.9 6 7.9-6 .8-.6Z"></path>
+					</svg>
+					ventas@teamsupportperu.com
+				</a>
+			</li>
+		</ul>
+	</div>
+}

@@ -1,8 +1,38 @@
 package checkout
 
 import (
+	"alc/model/auth"
+	"alc/model/cart"
+	"alc/view/layout"
 	"alc/model/checkout"
 )
+
+templ BillingPage(items []cart.Item, msg string) {
+	@layout.Base("Checkout") {
+		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
+			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:px-9">
+				<section class="grid gap-6 lg:grid-cols-2 lg:gap-x-12">
+					<div class="flex gap-4 items-center lg:col-span-2">
+						<h1 class="text-4xl font-semibold">Checkout</h1>
+					</div>
+					<!-- Checkout form -->
+					<div class="lg:col-span-1">
+						if user, ok := auth.GetUser(ctx); ok {
+							@BillingForm(checkout.Order{Email: user.Email}, msg)
+						} else {
+							@BillingForm(checkout.Order{}, msg)
+						}
+					</div>
+					<hr class="border-gray-400 lg:hidden"/>
+					<!-- Cart summary -->
+					<div class="lg:col-span-1">
+						@CartProducts(items)
+					</div>
+				</section>
+			</div>
+		</main>
+	}
+}
 
 templ BillingForm(order checkout.Order, msg string) {
 	<nav class="text-3xl">
@@ -15,7 +45,7 @@ templ BillingForm(order checkout.Order, msg string) {
 		<span class="font-semibold text-gray-400">Pago</span>
 	</nav>
 	if len(msg) > 0 {
-		<div class="mt-4 font-semibold text-red-600">
+		<div class="mt-4 text-lg font-semibold text-red-600">
 			{ msg }
 		</div>
 	}
@@ -27,7 +57,7 @@ templ BillingForm(order checkout.Order, msg string) {
 		<div class="mt-4 space-y-2">
 			<h2 class="font-bold text-2xl">Contacto</h2>
 			<div>
-				<label for="email">Correo electrónico:</label>
+				<label for="email">Correo electrónico: <strong class="font-semibold text-azure">(Obligatorio)</strong></label>
 				<input
 					id="email"
 					class="block p-2 w-full border rounded-md border-slate-500"
@@ -104,6 +134,15 @@ templ BillingForm(order checkout.Order, msg string) {
 					/>
 				</div>
 			</div>
+		</div>
+		<!-- Payment information -->
+		<div class="mt-4 space-y-2">
+			<h2 class="font-bold text-2xl">Pago</h2>
+			<p class="text-lg">
+				Luego de hacer clic en "Siguiente", pasará a la etapa de pago.
+				Verifique que su correo esté escrito correctamente.
+				<span>Tendrá un tiempo máximo de</span> <strong class="font-semibold text-red-600">10 minutos</strong>.
+			</p>
 		</div>
 		<div class="mt-4">
 			<button class="w-full p-2 border bg-azure border-azure rounded-xl text-lg font-bold text-chalky" type="submit">
