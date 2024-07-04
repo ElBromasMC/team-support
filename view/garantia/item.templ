@@ -1,11 +1,11 @@
 package garantia
 
 import (
-	"fmt"
-	"path"
 	"alc/config"
 	"alc/model/store"
 	"alc/view/layout"
+	"fmt"
+	"path"
 )
 
 script HandleProductChange() {
@@ -115,12 +115,12 @@ templ ShowItem(item store.Item, products []store.Product) {
 					<div class="space-y-3">
 						<h4 class="text-2xl font-bold text-navy">Requisitos:</h4>
 						<ul class="list-disc list-inside font-semibold text-lg text-navy">
-							<li>Tu equipo TUF ASUS debió ser comprado en Perú</li>
-							<li>Tu equipo TUF ASUS debe tener máximo 6 meses de haber sido adquirido</li>
-							<li>Tu equipo TUF ASUS debe tener la garantía estándar vigente</li>
+							<li>Tu equipo ASUS debió ser comprado en Perú</li>
+							<li>Tu equipo ASUS debe tener máximo 6 meses de haber sido adquirido</li>
+							<li>Tu equipo ASUS debe tener la garantía estándar vigente</li>
 						</ul>
 						<p class="text-lg text-navy italic">No cumplir con estos requisitos impedirá que tu paquete de garantía extendida pueda ser activado.</p>
-						<p>Paquete de garantía extendida para equipos TUF con protección contra daño accidental y protección de batería. Agrega al carrito de compras el paquete de tiempo por el cual deseas proteger tu equipo y sus principales componentes.</p>
+						<p>{ item.Description }</p>
 						<p>Consulta términos y condiciones <a class="font-semibold text-azure hover:text-livid" href="https://www.asus.com/co/support/article/1121/" target="_blank">aquí</a></p>
 					</div>
 					<!-- Informacion de contacto -->
