@@ -100,6 +100,9 @@ CREATE TABLE IF NOT EXISTS store_products (
     stock INT,
     details HSTORE NOT NULL DEFAULT ''::hstore,
     slug VARCHAR(255) NOT NULL,
+    part_number TEXT UNIQUE NOT NULL DEFAULT CONCAT('TEAM-', UPPER(generate_random_string(9))),
+    accept_before_six_months BOOLEAN NOT NULL,
+    accept_after_six_months BOOLEAN NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(item_id, slug),
@@ -142,6 +145,8 @@ CREATE TABLE IF NOT EXISTS store_devices (
     id SERIAL PRIMARY KEY,
     serie VARCHAR(25) UNIQUE NOT NULL,
     valid BOOLEAN NOT NULL,
+    is_before_six_months BOOLEAN NOT NULL,
+    is_after_six_months BOOLEAN NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

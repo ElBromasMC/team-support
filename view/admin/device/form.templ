@@ -23,6 +23,13 @@ templ InsertionForm() {
 			<label>Serie:</label>
 			<input class="block w-full border border-livid" type="text" name="serial" required/>
 		</div>
+		<div>
+			<label>Está dentro de los 6 meses:</label>
+			<select class="block w-full border border-livid" name="is-before" required>
+				<option value="NO">NO</option>
+				<option value="SI">SI</option>
+			</select>
+		</div>
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Guardar</button>
 			<button class="font-bold text-azure" type="reset">Reiniciar</button>

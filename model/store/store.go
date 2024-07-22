@@ -2,7 +2,10 @@ package store
 
 import (
 	"alc/model/auth"
+	"errors"
+	"strings"
 	"time"
+	"unicode"
 )
 
 type Image struct {
@@ -38,13 +41,16 @@ type Item struct {
 }
 
 type Product struct {
-	Id      int               `json:"id"`
-	Item    Item              `json:"item"`
-	Name    string            `json:"name"`
-	Price   int               `json:"price"` // Stored in USD cents
-	Stock   *int              `json:"stock"`
-	Details map[string]string `json:"details"`
-	Slug    string            `json:"slug"`
+	Id                    int               `json:"id"`
+	Item                  Item              `json:"item"`
+	Name                  string            `json:"name"`
+	Price                 int               `json:"price"` // Stored in USD cents
+	Stock                 *int              `json:"stock"`
+	Details               map[string]string `json:"details"`
+	PartNumber            string            `json:"-"`
+	AcceptBeforeSixMonths bool              `json:"-"`
+	AcceptAfterSixMonths  bool              `json:"-"`
+	Slug                  string            `json:"slug"`
 }
 
 type ProductDiscount struct {
@@ -75,11 +81,13 @@ type ItemComment struct {
 
 // Serial management
 type Device struct {
-	Id        int
-	Serie     string
-	Valid     bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Id                int
+	Serie             string
+	Valid             bool
+	IsBeforeSixMonths bool
+	IsAfterSixMonths  bool
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 type DeviceHistory struct {
@@ -87,6 +95,54 @@ type DeviceHistory struct {
 	Device   Device
 	IssuedBy string
 	IssuedAt time.Time
+}
+
+func (product Product) Normalize() (Product, error) {
+	// Trim name
+	product.Name = strings.TrimSpace(product.Name)
+
+	// Remove spaces and uppercase part number
+	product.PartNumber = strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1
+		}
+		return unicode.ToUpper(r)
+	}, product.PartNumber)
+
+	if len(product.Name) == 0 {
+		return Product{}, errors.New("invalid name")
+	}
+	if product.Price < 0 {
+		return Product{}, errors.New("invalid price")
+	}
+	if product.Stock != nil {
+		if *product.Stock < 0 {
+			return Product{}, errors.New("invalid stock")
+		}
+	}
+	// if len(product.PartNumber) == 0 {
+	// 	return Product{}, errors.New("invalid part number")
+	// }
+
+	return product, nil
+}
+
+func (device Device) Normalize() (Device, error) {
+	// Remove spaces and uppercase serial
+	device.Serie = strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1
+		}
+		return unicode.ToUpper(r)
+	}, device.Serie)
+
+	// Validate serial
+	if !(12 <= len(device.Serie) && len(device.Serie) <= 15) {
+		return Device{}, errors.New("invalid serial length")
+	}
+
+	return device, nil
+
 }
 
 func (t Type) ToSlug() string {

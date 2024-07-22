@@ -22,7 +22,7 @@ func NewDeviceService(db *pgxpool.Pool) Device {
 }
 
 func (ds Device) GetDevices(valid bool) ([]store.Device, error) {
-	sql := `SELECT id, serie, created_at, updated_at
+	sql := `SELECT id, serie, created_at, updated_at, is_before_six_months, is_after_six_months
 	FROM store_devices
 	WHERE valid = $1`
 	rows, err := ds.db.Query(context.Background(), sql, valid)
@@ -33,7 +33,8 @@ func (ds Device) GetDevices(valid bool) ([]store.Device, error) {
 
 	devices, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Device, error) {
 		var device store.Device
-		if err := row.Scan(&device.Id, &device.Serie, &device.CreatedAt, &device.UpdatedAt); err != nil {
+		if err := row.Scan(&device.Id, &device.Serie, &device.CreatedAt, &device.UpdatedAt,
+			&device.IsBeforeSixMonths, &device.IsAfterSixMonths); err != nil {
 			return store.Device{}, err
 		}
 		device.Valid = valid
@@ -71,27 +72,32 @@ func (ds Device) GetDeviceHistory(device store.Device) ([]store.DeviceHistory, e
 	return history, nil
 }
 
-func (ds Device) InsertDevice(serial string, email string) error {
+func (ds Device) InsertDevice(email string, device store.Device) error {
 	// Check if exists
 	var exists bool
 	sql := `SELECT EXISTS (
 		SELECT 1 FROM store_devices
 		WHERE serie = $1
 	)`
-	if err := ds.db.QueryRow(context.Background(), sql, serial).Scan(&exists); err != nil {
+	if err := ds.db.QueryRow(context.Background(), sql, device.Serie).Scan(&exists); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	// Insert or reactivate it
+	// Insert or change it
 	var device_id int
 	if !exists {
-		sql := `INSERT INTO store_devices (serie, valid) VALUES ($1, TRUE) RETURNING id`
-		if err := ds.db.QueryRow(context.Background(), sql, serial).Scan(&device_id); err != nil {
+		sql := `INSERT INTO store_devices (serie, valid, is_before_six_months, is_after_six_months)
+		VALUES ($1, $2, $3, $4) RETURNING id`
+		if err := ds.db.QueryRow(context.Background(), sql, device.Serie, device.Valid,
+			device.IsBeforeSixMonths, device.IsAfterSixMonths).Scan(&device_id); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	} else {
-		sql := `UPDATE store_devices SET valid = TRUE WHERE serie = $1 RETURNING id`
-		if err := ds.db.QueryRow(context.Background(), sql, serial).Scan(&device_id); err != nil {
+		sql := `UPDATE store_devices
+		SET valid = $1, is_before_six_months = $2, is_after_six_months = $3
+		WHERE serie = $4 RETURNING id`
+		if err := ds.db.QueryRow(context.Background(), sql, device.Valid,
+			device.IsBeforeSixMonths, device.IsAfterSixMonths, device.Serie).Scan(&device_id); err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
@@ -105,15 +111,18 @@ func (ds Device) InsertDevice(serial string, email string) error {
 	return nil
 }
 
-func (ds Device) CheckDeviceStatus(serial string) (bool, error) {
-	var valid bool
-	sql := `SELECT valid FROM store_devices WHERE serie = $1`
-	if err := ds.db.QueryRow(context.Background(), sql, serial).Scan(&valid); err != nil {
+func (ds Device) GetDevice(serial string) (store.Device, error) {
+	var device store.Device
+	sql := `SELECT id, serie, created_at, updated_at, is_before_six_months, is_after_six_months, valid
+	FROM store_devices
+	WHERE serie = $1`
+	if err := ds.db.QueryRow(context.Background(), sql, serial).Scan(&device.Id, &device.Serie, &device.CreatedAt,
+		&device.UpdatedAt, &device.IsBeforeSixMonths, &device.IsAfterSixMonths, &device.Valid); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return false, nil
+			return store.Device{}, echo.NewHTTPError(http.StatusNotFound, "La serie no se encuentra registrada")
 		} else {
-			return false, echo.NewHTTPError(http.StatusInternalServerError)
+			return store.Device{}, echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
-	return valid, nil
+	return device, nil
 }

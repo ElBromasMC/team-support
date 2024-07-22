@@ -65,6 +65,21 @@ func (h *Handler) HandleProductInsertion(c echo.Context) error {
 		}
 		p.Stock = &stockInt
 	}
+	if c.FormValue("accept-before") == "SI" {
+		p.AcceptBeforeSixMonths = true
+	} else {
+		p.AcceptBeforeSixMonths = false
+	}
+	if c.FormValue("accept-after") == "SI" {
+		p.AcceptAfterSixMonths = true
+	} else {
+		p.AcceptAfterSixMonths = false
+	}
+	p.PartNumber = c.FormValue("part-number")
+	p, err = p.Normalize()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Producto inválido")
+	}
 
 	// Query data
 	t, err := h.AdminService.GetType(typeSlug)
@@ -113,6 +128,25 @@ func (h *Handler) HandleProductUpdate(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid price")
 	}
 	p.Price = int(math.Round(priceFloat * 100))
+
+	if c.FormValue("accept-before") == "SI" {
+		p.AcceptBeforeSixMonths = true
+	} else {
+		p.AcceptBeforeSixMonths = false
+	}
+	if c.FormValue("accept-after") == "SI" {
+		p.AcceptAfterSixMonths = true
+	} else {
+		p.AcceptAfterSixMonths = false
+	}
+	p.PartNumber = c.FormValue("part-number")
+	p, err = p.Normalize()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Producto inválido")
+	}
+	if len(p.PartNumber) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "'Part Number' inválido")
+	}
 
 	// Query data
 	t, err := h.AdminService.GetType(typeSlug)

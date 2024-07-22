@@ -201,10 +201,22 @@ func (as Admin) InsertProduct(product store.Product) (int, error) {
 	}
 
 	var id int
-	if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products (item_id, name, price, details, slug, stock)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug, product.Stock).Scan(&id); err != nil {
-		return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting product into database")
+	if len(product.PartNumber) == 0 {
+		if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products
+		(item_id, name, price, details, slug, stock, accept_before_six_months, accept_after_six_months)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug,
+			product.Stock, product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths).Scan(&id); err != nil {
+			return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting product into database")
+		}
+	} else {
+		if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products
+		(item_id, name, price, details, slug, stock, part_number, accept_before_six_months, accept_after_six_months)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug,
+			product.Stock, product.PartNumber, product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths).Scan(&id); err != nil {
+			return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting product into database")
+		}
 	}
 	return id, nil
 }
@@ -217,8 +229,10 @@ func (as Admin) UpdateProduct(id int, product store.Product) error {
 	}
 
 	if _, err := as.DB.Exec(context.Background(), `UPDATE store_products
-SET name = $1, price = $2, details = $3, slug = $4
-WHERE id = $5`, product.Name, product.Price, hstoreDetails, product.Slug, id); err != nil {
+	SET name = $1, price = $2, details = $3, slug = $4,
+	part_number = $5, accept_before_six_months = $6, accept_after_six_months = $7
+	WHERE id = $8`, product.Name, product.Price, hstoreDetails, product.Slug, product.PartNumber,
+		product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths, id); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
 	}
 

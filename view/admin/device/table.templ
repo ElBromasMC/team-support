@@ -20,6 +20,7 @@ templ Table(devices []store.Device) {
 				<th scope="col">Serie</th>
 				<th scope="col">Creado el</th>
 				<th scope="col">Actualizado el</th>
+				<th scope="col">Está dentro de los 6 meses</th>
 				<th scope="col">Acciones</th>
 			</tr>
 		</thead>
@@ -29,6 +30,13 @@ templ Table(devices []store.Device) {
 					<td>{ device.Serie }</td>
 					<td>{ GetTime(device.CreatedAt) }</td>
 					<td>{ GetTime(device.UpdatedAt) }</td>
+					<td>
+						if device.IsBeforeSixMonths {
+							SI
+						} else {
+							NO
+						}
+					</td>
 					<td>
 						<!-- Control buttons -->
 						<button

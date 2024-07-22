@@ -15,6 +15,11 @@ templ Table(item store.Item, products []store.Product) {
 				if item.Category.Type == store.StoreType {
 					<th scope="col">Stock</th>
 				}
+				if item.Category.Type == store.GarantiaType {
+					<th scope="col">Acepta dentro de los 6 meses</th>
+					<th scope="col">Acepta después de los 6 meses</th>
+				}
+				<th scope="col">PN</th>
 				<th scope="col">Detalles</th>
 				<th scope="col">Acciones</th>
 			</tr>
@@ -31,6 +36,23 @@ templ Table(item store.Item, products []store.Product) {
 							<td>No aplica</td>
 						}
 					}
+					if item.Category.Type == store.GarantiaType {
+						<td>
+							if p.AcceptBeforeSixMonths {
+								SI
+							} else {
+								NO
+							}
+						</td>
+						<td>
+							if p.AcceptAfterSixMonths {
+								SI
+							} else {
+								NO
+							}
+						</td>
+					}
+					<td>{ p.PartNumber }</td>
 					<td>
 						for key, value := range p.Details {
 							<div>{ fmt.Sprintf("%s: %s", key, value) }</div>

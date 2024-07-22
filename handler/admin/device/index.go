@@ -3,10 +3,9 @@ package device
 import (
 	"alc/handler/util"
 	"alc/model/auth"
+	"alc/model/store"
 	"alc/view/admin/device"
 	"net/http"
-	"strings"
-	"unicode"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,19 +20,19 @@ func (h *Handler) HandleIndexShow(c echo.Context) error {
 
 func (h *Handler) HandleInsertion(c echo.Context) error {
 	// Parsing request
-	serial := c.FormValue("serial")
-
-	// Remove spaces and uppercase serial
-	serial = strings.Map(func(r rune) rune {
-		if unicode.IsSpace(r) {
-			return -1
-		}
-		return unicode.ToUpper(r)
-	}, serial)
-
-	// Validate serial
-	if !(12 <= len(serial) && len(serial) <= 15) {
-		return echo.NewHTTPError(http.StatusBadRequest, "La serie debe tener entre 12 a 15 caracteres")
+	var dev store.Device
+	dev.Serie = c.FormValue("serial")
+	dev.Valid = true
+	if c.FormValue("is-before") == "SI" {
+		dev.IsBeforeSixMonths = true
+		dev.IsAfterSixMonths = false
+	} else {
+		dev.IsBeforeSixMonths = false
+		dev.IsAfterSixMonths = true
+	}
+	dev, err := dev.Normalize()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "La serie debe tener entre 12 y 15 caracteres")
 	}
 
 	// Query data
@@ -43,7 +42,7 @@ func (h *Handler) HandleInsertion(c echo.Context) error {
 	}
 
 	// Insert device
-	h.DeviceService.InsertDevice(serial, user.Email)
+	h.DeviceService.InsertDevice(user.Email, dev)
 
 	// Get updated devices
 	devices, err := h.DeviceService.GetDevices(true)
