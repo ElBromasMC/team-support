@@ -1,10 +1,10 @@
 package product
 
 import (
-	"path"
 	"alc/model/store"
-	"alc/view/layout"
 	"alc/view/component"
+	"alc/view/layout"
+	"path"
 )
 
 templ Show(item store.Item, products []store.Product) {
@@ -68,7 +68,11 @@ templ Show(item store.Item, products []store.Product) {
 				<span class="font-semibold text-azure"><a href="/admin/tienda">Tienda</a></span>
 				@component.IconRight()
 				<span class="font-semibold text-azure">
-					<a href={ templ.URL(path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories")) }>{ type2Title(item.Category.Type) }</a>
+					<a href={ templ.URL(path.Join("/admin/tienda/type", item.Category.Type.ToSlug())) }>{ item.Category.Type.ToTitle() }</a>
+				</span>
+				@component.IconRight()
+				<span class="font-semibold text-azure">
+					<a href={ templ.URL(path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories")) }>Carga manual</a>
 				</span>
 				@component.IconRight()
 				<span class="font-semibold text-azure">
@@ -94,13 +98,5 @@ templ Show(item store.Item, products []store.Product) {
 				@Table(item, products)
 			</div>
 		</main>
-	}
-}
-
-func type2Title(t store.Type) string {
-	if t == store.GarantiaType {
-		return "Garantías"
-	} else {
-		return "Tienda"
 	}
 }

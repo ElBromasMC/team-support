@@ -1,0 +1,42 @@
+package bulk
+
+import (
+	"alc/model/store"
+	"alc/view/component"
+	"alc/view/layout"
+	"path"
+)
+
+templ Show(t store.Type) {
+	@layout.BaseAdmin("Carga masiva") {
+		<main>
+			<!-- Navigation -->
+			<div>
+				<span class="font-semibold text-azure"><a href="/admin">Administración</a></span>
+				@component.IconRight()
+				<span class="font-semibold text-azure"><a href="/admin/tienda">Tienda</a></span>
+				@component.IconRight()
+				<span class="font-semibold text-azure">
+					<a href={ templ.URL(path.Join("/admin/tienda/type", t.ToSlug())) }>{ t.ToTitle() }</a>
+				</span>
+				@component.IconRight()
+				<span class="text-livid">Carga masiva</span>
+			</div>
+			<!-- Title -->
+			<h1 class="mt-3 font-bold text-3xl">Carga masiva</h1>
+			<!-- Control buttons -->
+			<div class="mt-6 space-y-2">
+				if t == store.GarantiaType {
+					<a
+						class="block font-semibold text-azure"
+						href={ templ.URL(path.Join("/admin/tienda/type", t.ToSlug(), "bulk-load/asus")) }
+					>ASUS</a>
+				}
+				<a
+					class="block font-semibold text-azure"
+					href={ templ.URL(path.Join("/admin/tienda/type", t.ToSlug(), "bulk-load/products")) }
+				>Productos</a>
+			</div>
+		</main>
+	}
+}

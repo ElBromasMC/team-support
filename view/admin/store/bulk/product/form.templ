@@ -1,0 +1,26 @@
+package product
+
+import (
+	"alc/model/store"
+	"path"
+)
+
+templ InsertionForm(t store.Type) {
+	<form
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
+		autocomplete="off"
+		hx-post={ string(templ.URL(path.Join("/admin/tienda/type", t.ToSlug(), "bulk-load/products/preview"))) }
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+		hx-on::after-request="this.reset();"
+	>
+		<div>
+			<label>Archivo csv:</label>
+			<input class="block" type="file" accept="text/csv" name="products" required/>
+		</div>
+		<div class="flex gap-6 !mt-3">
+			<button class="font-bold text-azure" type="submit">Vista previa</button>
+		</div>
+	</form>
+}

@@ -47,9 +47,9 @@ type Product struct {
 	Price                 int               `json:"price"` // Stored in USD cents
 	Stock                 *int              `json:"stock"`
 	Details               map[string]string `json:"details"`
-	PartNumber            string            `json:"-"`
-	AcceptBeforeSixMonths bool              `json:"-"`
-	AcceptAfterSixMonths  bool              `json:"-"`
+	PartNumber            string            `json:"partNumber"`
+	AcceptBeforeSixMonths bool              `json:"acceptBefore"`
+	AcceptAfterSixMonths  bool              `json:"acceptAfter"`
 	Slug                  string            `json:"slug"`
 }
 
@@ -150,5 +150,13 @@ func (t Type) ToSlug() string {
 		return "garantia"
 	} else {
 		return "store"
+	}
+}
+
+func (t Type) ToTitle() string {
+	if t == GarantiaType {
+		return "Garantías"
+	} else {
+		return "Tienda"
 	}
 }

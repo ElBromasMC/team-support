@@ -1,0 +1,62 @@
+package product
+
+import (
+	"alc/model/store"
+	"alc/view/component"
+	"alc/view/layout"
+	"path"
+)
+
+templ Show(t store.Type) {
+	@layout.BaseAdmin("Productos") {
+		<main>
+			<!-- Dialogs -->
+			<div>
+				<!-- New item dialog -->
+				<dialog
+					class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+					hx-on::after-swap="this.showModal();"
+					hx-on::after-request="this.close();"
+				>
+					<form class="flex justify-between" method="dialog">
+						<h2 class="font-bold text-2xl">Cargar productos</h2>
+						<button class="font-bold text-azure" type="submit">Salir</button>
+					</form>
+					<div id="insert-item-form"></div>
+				</dialog>
+			</div>
+			<!-- Navigation -->
+			<div>
+				<span class="font-semibold text-azure"><a href="/admin">Administración</a></span>
+				@component.IconRight()
+				<span class="font-semibold text-azure"><a href="/admin/tienda">Tienda</a></span>
+				@component.IconRight()
+				<span class="font-semibold text-azure">
+					<a href={ templ.URL(path.Join("/admin/tienda/type", t.ToSlug())) }>{ t.ToTitle() }</a>
+				</span>
+				@component.IconRight()
+				<span class="font-semibold text-azure">
+					<a href={ templ.URL(path.Join("/admin/tienda/type", t.ToSlug(), "bulk-load")) }>Carga masiva</a>
+				</span>
+				@component.IconRight()
+				<span class="text-livid">
+					Productos
+				</span>
+			</div>
+			<!-- Title -->
+			<h1 class="mt-3 font-bold text-3xl">Productos</h1>
+			<!-- Control buttons -->
+			<div>
+				<button
+					class="font-semibold text-azure"
+					hx-get={ string(templ.URL(path.Join("/admin/tienda/type", t.ToSlug(), "bulk-load/products/insert"))) }
+					hx-target="#insert-item-form"
+				>
+					Cargar productos
+				</button>
+			</div>
+			<!-- Items show table -->
+			<div id="table-items"></div>
+		</main>
+	}
+}

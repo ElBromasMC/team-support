@@ -4,6 +4,7 @@ import (
 	"alc/config"
 	"alc/model/store"
 	"context"
+	"errors"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/gosimple/slug"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
@@ -33,11 +36,13 @@ func (as Admin) InsertCategory(cat store.Category) (int, error) {
 		imgId = &cat.Img.Id
 	}
 
+	slug := slug.Make(cat.Name)
+
 	// Insert new category
 	var id int
 	if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_categories (type, name, description, img_id, slug)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id`, cat.Type, cat.Name, cat.Description, imgId, cat.Slug).Scan(&id); err != nil {
+RETURNING id`, cat.Type, cat.Name, cat.Description, imgId, slug).Scan(&id); err != nil {
 		return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new category into database")
 	}
 	return id, nil
@@ -61,10 +66,12 @@ func (as Admin) UpdateCategory(id int, uptCat store.Category) error {
 		imgId = &uptCat.Img.Id
 	}
 
+	slug := slug.Make(uptCat.Name)
+
 	// Update category
 	if _, err := as.DB.Exec(context.Background(), `UPDATE store_categories
 SET name = $1, description = $2, img_id = $3, slug = $4
-WHERE id = $5`, uptCat.Name, uptCat.Description, imgId, uptCat.Slug, id); err != nil {
+WHERE id = $5`, uptCat.Name, uptCat.Description, imgId, slug, id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the category into database")
 	}
 
@@ -120,14 +127,38 @@ func (as Admin) InsertItem(item store.Item) (int, error) {
 		largeimgId = &item.LargeImg.Id
 	}
 
+	slug := slug.Make(item.Name)
+
 	// Insert new item
 	var id int
 	if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_items (category_id, name, description, long_description, img_id, largeimg_id, slug)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id`, item.Category.Id, item.Name, item.Description, item.LongDescription, imgId, largeimgId, item.Slug).Scan(&id); err != nil {
+RETURNING id`, item.Category.Id, item.Name, item.Description, item.LongDescription, imgId, largeimgId, slug).Scan(&id); err != nil {
 		return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new item into database")
 	}
 	return id, nil
+}
+
+func (as Admin) InsertItemIfNotExists(cat store.Category, name string) (int, error) {
+	var productId int
+	slug := slug.Make(name)
+	sql := `SELECT id FROM store_items WHERE category_id = $1 AND slug = $2`
+	err := as.DB.QueryRow(context.Background(), sql, cat.Id, slug).Scan(&productId)
+	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return 0, err
+		}
+		item := store.Item{
+			Category: cat,
+			Name:     name,
+			Slug:     slug,
+		}
+		productId, err = as.InsertItem(item)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return productId, nil
 }
 
 func (as Admin) UpdateItem(id int, uptItem store.Item) error {
@@ -160,10 +191,12 @@ func (as Admin) UpdateItem(id int, uptItem store.Item) error {
 		largeimgId = &uptItem.LargeImg.Id
 	}
 
+	slug := slug.Make(uptItem.Name)
+
 	// Update item
 	if _, err := as.DB.Exec(context.Background(), `UPDATE store_items
 SET name = $1, description = $2, long_description = $3, img_id = $4, largeimg_id = $5, slug = $6
-WHERE id = $7`, uptItem.Name, uptItem.Description, uptItem.LongDescription, imgId, largeimgId, uptItem.Slug, id); err != nil {
+WHERE id = $7`, uptItem.Name, uptItem.Description, uptItem.LongDescription, imgId, largeimgId, slug, id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the item into database")
 	}
 
@@ -200,22 +233,24 @@ func (as Admin) InsertProduct(product store.Product) (int, error) {
 		hstoreDetails[key] = &valCopy
 	}
 
+	slug := slug.Make(product.Name)
+
 	var id int
 	if len(product.PartNumber) == 0 {
 		if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products
 		(item_id, name, price, details, slug, stock, accept_before_six_months, accept_after_six_months)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug,
+		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, slug,
 			product.Stock, product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths).Scan(&id); err != nil {
-			return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting product into database")
+			return 0, echo.NewHTTPError(http.StatusConflict, "El producto ya existe")
 		}
 	} else {
 		if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products
 		(item_id, name, price, details, slug, stock, part_number, accept_before_six_months, accept_after_six_months)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug,
+		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, slug,
 			product.Stock, product.PartNumber, product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths).Scan(&id); err != nil {
-			return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting product into database")
+			return 0, echo.NewHTTPError(http.StatusConflict, "El producto ya existe")
 		}
 	}
 	return id, nil
@@ -228,10 +263,12 @@ func (as Admin) UpdateProduct(id int, product store.Product) error {
 		hstoreDetails[key] = &valCopy
 	}
 
+	slug := slug.Make(product.Name)
+
 	if _, err := as.DB.Exec(context.Background(), `UPDATE store_products
 	SET name = $1, price = $2, details = $3, slug = $4,
 	part_number = $5, accept_before_six_months = $6, accept_after_six_months = $7
-	WHERE id = $8`, product.Name, product.Price, hstoreDetails, product.Slug, product.PartNumber,
+	WHERE id = $8`, product.Name, product.Price, hstoreDetails, slug, product.PartNumber,
 		product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths, id); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
 	}
