@@ -1,10 +1,10 @@
 package category
 
 import (
-	"path"
 	"alc/config"
 	"alc/model/store"
 	"alc/view/admin"
+	"path"
 )
 
 templ Table(t store.Type, cats []store.Category) {
@@ -12,6 +12,7 @@ templ Table(t store.Type, cats []store.Category) {
 		<thead>
 			<tr class="border-b border-black text-left">
 				<th scope="col">Nombre</th>
+				<th scope="col">Slug</th>
 				<th class="w-72" scope="col">Descripción</th>
 				<th scope="col">Imagen</th>
 				<th scope="col">Acciones</th>
@@ -26,6 +27,7 @@ templ Table(t store.Type, cats []store.Category) {
 							href={ templ.URL(path.Join("/admin/tienda/type", c.Type.ToSlug(), "categories", c.Slug, "items")) }
 						>{ c.Name }</a>
 					</td>
+					<td>{ c.Slug }</td>
 					<td>{ c.Description }</td>
 					<td>
 						if c.Img.Id != 0 {
