@@ -66,12 +66,10 @@ func (as Admin) UpdateCategory(id int, uptCat store.Category) error {
 		imgId = &uptCat.Img.Id
 	}
 
-	slug := slug.Make(uptCat.Name)
-
 	// Update category
 	if _, err := as.DB.Exec(context.Background(), `UPDATE store_categories
-SET name = $1, description = $2, img_id = $3, slug = $4
-WHERE id = $5`, uptCat.Name, uptCat.Description, imgId, slug, id); err != nil {
+SET name = $1, description = $2, img_id = $3
+WHERE id = $4`, uptCat.Name, uptCat.Description, imgId, id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the category into database")
 	}
 
@@ -191,12 +189,10 @@ func (as Admin) UpdateItem(id int, uptItem store.Item) error {
 		largeimgId = &uptItem.LargeImg.Id
 	}
 
-	slug := slug.Make(uptItem.Name)
-
 	// Update item
 	if _, err := as.DB.Exec(context.Background(), `UPDATE store_items
-SET name = $1, description = $2, long_description = $3, img_id = $4, largeimg_id = $5, slug = $6
-WHERE id = $7`, uptItem.Name, uptItem.Description, uptItem.LongDescription, imgId, largeimgId, slug, id); err != nil {
+SET name = $1, description = $2, long_description = $3, img_id = $4, largeimg_id = $5
+WHERE id = $6`, uptItem.Name, uptItem.Description, uptItem.LongDescription, imgId, largeimgId, id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the item into database")
 	}
 
@@ -263,12 +259,10 @@ func (as Admin) UpdateProduct(id int, product store.Product) error {
 		hstoreDetails[key] = &valCopy
 	}
 
-	slug := slug.Make(product.Name)
-
 	if _, err := as.DB.Exec(context.Background(), `UPDATE store_products
-	SET name = $1, price = $2, details = $3, slug = $4,
-	part_number = $5, accept_before_six_months = $6, accept_after_six_months = $7
-	WHERE id = $8`, product.Name, product.Price, hstoreDetails, slug, product.PartNumber,
+	SET name = $1, price = $2, details = $3,
+	part_number = $4, accept_before_six_months = $5, accept_after_six_months = $6
+	WHERE id = $7`, product.Name, product.Price, hstoreDetails, product.PartNumber,
 		product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths, id); err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "Product not found")
 	}

@@ -189,12 +189,16 @@ func main() {
 	g31.GET("/type/:typeSlug", sh.HandleStoreTypeShow)
 
 	g31.GET("/type/:typeSlug/bulk-load", sh.HandleBulkLoaderShow)
+
 	g31.GET("/type/:typeSlug/bulk-load/products", sh.HandleBulkLoaderProductsShow)
 	g31.POST("/type/:typeSlug/bulk-load/products", sh.HandleBulkLoaderProductsInsertion)
 	g31.POST("/type/:typeSlug/bulk-load/products/preview", sh.HandleBulkLoaderProductsPreview)
 	g31.GET("/type/:typeSlug/bulk-load/products/insert", sh.HandleBulkLoaderProductsInsertionFormShow)
 
 	g31.GET("/type/:typeSlug/bulk-load/asus", sh.HandleBulkLoaderAsusShow)
+	g31.POST("/type/:typeSlug/bulk-load/asus", sh.HandleBulkLoaderAsusInsertion)
+	g31.POST("/type/:typeSlug/bulk-load/asus/preview", sh.HandleBulkLoaderAsusPreview)
+	g31.GET("/type/:typeSlug/bulk-load/asus/insert", sh.HandleBulkLoaderAsusInsertionFormShow)
 
 	g31.GET("/type/:typeSlug/categories", sh.HandleCategoriesShow)
 	g31.POST("/type/:typeSlug/categories", sh.HandleCategoryInsertion)
