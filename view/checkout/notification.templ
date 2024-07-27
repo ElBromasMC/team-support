@@ -1,9 +1,9 @@
 package checkout
 
 import (
-	"fmt"
 	"alc/model/checkout"
 	"encoding/json"
+	"fmt"
 )
 
 templ ClientSuccessNotification(order checkout.Order, products []checkout.OrderProduct, hostname string) {
@@ -99,6 +99,7 @@ templ ClientSummary(order checkout.Order, products []checkout.OrderProduct) {
 			<thead>
 				<tr>
 					<th>Nombre</th>
+					<th>PN</th>
 					<th>Cantidad</th>
 					<th>Precio</th>
 					<th>Detalles</th>
@@ -109,6 +110,7 @@ templ ClientSummary(order checkout.Order, products []checkout.OrderProduct) {
 				for _, p := range products {
 					<tr>
 						<td>{ p.ProductItem + " - " + p.ProductName }</td>
+						<td>{ p.ProductPartNumber }</td>
 						<td>{ fmt.Sprintf("%d", p.Quantity) }</td>
 						<td>{ ToUSD(p.ProductPrice) }</td>
 						<td>
@@ -188,6 +190,7 @@ templ CompanySummary(order checkout.Order, products []checkout.OrderProduct, tra
 				<tr>
 					<th>Tipo</th>
 					<th>Nombre</th>
+					<th>PN</th>
 					<th>Cantidad</th>
 					<th>Precio</th>
 					<th>Detalles</th>
@@ -199,6 +202,7 @@ templ CompanySummary(order checkout.Order, products []checkout.OrderProduct, tra
 					<tr>
 						<td>{ string(p.ProductType) }</td>
 						<td>{ p.ProductCategory + " - " + p.ProductItem + " - " + p.ProductName }</td>
+						<td>{ p.ProductPartNumber }</td>
 						<td>{ fmt.Sprintf("%d", p.Quantity) }</td>
 						<td>{ ToUSD(p.ProductPrice) }</td>
 						<td>
@@ -212,7 +216,7 @@ templ CompanySummary(order checkout.Order, products []checkout.OrderProduct, tra
 			</tbody>
 			<tfoot>
 				<tr>
-					<th colspan="4">Total</th>
+					<th colspan="6">Total</th>
 					<th>{ ToUSD(checkout.CalculateAmount(products)) }</th>
 				</tr>
 			</tfoot>

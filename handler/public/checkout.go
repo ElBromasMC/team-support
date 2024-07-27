@@ -58,15 +58,16 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 	products := make([]checkout.OrderProduct, 0, len(items))
 	for _, i := range items {
 		p := checkout.OrderProduct{
-			Quantity:        i.Quantity,
-			Details:         i.Details,
-			Product:         i.Product,
-			ProductType:     i.Product.Item.Category.Type,
-			ProductCategory: i.Product.Item.Category.Name,
-			ProductItem:     i.Product.Item.Name,
-			ProductName:     i.Product.Name,
-			ProductPrice:    i.Product.Price,
-			ProductDetails:  i.Product.Details,
+			Quantity:          i.Quantity,
+			Details:           i.Details,
+			Product:           i.Product,
+			ProductType:       i.Product.Item.Category.Type,
+			ProductCategory:   i.Product.Item.Category.Name,
+			ProductItem:       i.Product.Item.Name,
+			ProductName:       i.Product.Name,
+			ProductPrice:      i.Product.Price,
+			ProductDetails:    i.Product.Details,
+			ProductPartNumber: i.Product.PartNumber,
 		}
 		products = append(products, p)
 	}

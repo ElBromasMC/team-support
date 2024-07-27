@@ -45,19 +45,20 @@ const (
 )
 
 type OrderProduct struct {
-	Id              int
-	Order           Order
-	Quantity        int
-	Details         map[string]string
-	Product         store.Product
-	ProductType     store.Type
-	ProductCategory string
-	ProductItem     string
-	ProductName     string
-	ProductPrice    int
-	ProductDetails  map[string]string
-	Status          OrderStatus
-	UpdatedAt       time.Time
+	Id                int
+	Order             Order
+	Quantity          int
+	Details           map[string]string
+	Product           store.Product
+	ProductType       store.Type
+	ProductCategory   string
+	ProductItem       string
+	ProductName       string
+	ProductPrice      int
+	ProductDetails    map[string]string
+	ProductPartNumber string
+	Status            OrderStatus
+	UpdatedAt         time.Time
 }
 
 func (order Order) Normalize() (Order, error) {

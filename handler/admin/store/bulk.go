@@ -407,13 +407,6 @@ func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
 			}
 			product.Price = int(math.Round(priceFloat * 100))
 
-			// Normalize data
-			product.Name = "TEMP_NAME"
-			product, err = product.Normalize()
-			if err != nil {
-				continue
-			}
-
 			// Get category
 			catName, ok := config.ASUS_CODES[productCode]
 			if !ok {
@@ -458,6 +451,12 @@ func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
 			product.Item.Name = strings.Join(itemName, " + ")
 			product.Slug = slug.Make(strings.Join(productSlug, "-"))
 			product.Name = strings.Join(productName, " + ")
+
+			// Normalize data
+			product, err = product.Normalize()
+			if err != nil {
+				continue
+			}
 
 			products = append(products, product)
 		}

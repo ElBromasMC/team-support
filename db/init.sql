@@ -200,6 +200,7 @@ CREATE TABLE IF NOT EXISTS order_products (
     product_name VARCHAR(255) NOT NULL,
     product_price INT NOT NULL,
     product_details HSTORE NOT NULL DEFAULT ''::hstore,
+    product_part_number TEXT NOT NULL,
     status order_status NOT NULL DEFAULT 'PENDIENTE',
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (order_id) REFERENCES store_orders(id) ON DELETE CASCADE,
