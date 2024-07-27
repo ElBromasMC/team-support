@@ -48,6 +48,22 @@ RETURNING id`, cat.Type, cat.Name, cat.Description, imgId, slug).Scan(&id); err 
 	return id, nil
 }
 
+func (as Admin) InsertCategoryIfNotExists(t store.Type, slug string, name string) (int, error) {
+	var categoryId int
+	sql := `SELECT id FROM store_categories WHERE type = $1 AND slug = $2`
+	err := as.DB.QueryRow(context.Background(), sql, t, slug).Scan(&categoryId)
+	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return 0, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+		sql1 := `INSERT INTO store_categories (type, slug, name) VALUES ($1, $2, $3) RETURNING id`
+		if err := as.DB.QueryRow(context.Background(), sql1, t, slug, name).Scan(&categoryId); err != nil {
+			return 0, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+	}
+	return categoryId, nil
+}
+
 func (as Admin) UpdateCategory(id int, uptCat store.Category) error {
 	cat, err := as.GetCategoryById(id)
 	if err != nil {
@@ -137,23 +153,17 @@ RETURNING id`, item.Category.Id, item.Name, item.Description, item.LongDescripti
 	return id, nil
 }
 
-func (as Admin) InsertItemIfNotExists(cat store.Category, name string) (int, error) {
+func (as Admin) InsertItemIfNotExists(cat store.Category, slug string, name string) (int, error) {
 	var productId int
-	slug := slug.Make(name)
 	sql := `SELECT id FROM store_items WHERE category_id = $1 AND slug = $2`
 	err := as.DB.QueryRow(context.Background(), sql, cat.Id, slug).Scan(&productId)
 	if err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
-			return 0, err
+			return 0, echo.NewHTTPError(http.StatusInternalServerError)
 		}
-		item := store.Item{
-			Category: cat,
-			Name:     name,
-			Slug:     slug,
-		}
-		productId, err = as.InsertItem(item)
-		if err != nil {
-			return 0, err
+		sql1 := `INSERT INTO store_items (category_id, slug, name) VALUES ($1, $2, $3) RETURNING id`
+		if err := as.DB.QueryRow(context.Background(), sql1, cat.Id, slug, name).Scan(&productId); err != nil {
+			return 0, echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
 	return productId, nil
@@ -245,6 +255,34 @@ func (as Admin) InsertProduct(product store.Product) (int, error) {
 		(item_id, name, price, details, slug, stock, part_number, accept_before_six_months, accept_after_six_months)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, slug,
+			product.Stock, product.PartNumber, product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths).Scan(&id); err != nil {
+			return 0, echo.NewHTTPError(http.StatusConflict, "El producto ya existe")
+		}
+	}
+	return id, nil
+}
+
+func (as Admin) InsertProductWithSlug(product store.Product) (int, error) {
+	hstoreDetails := make(pgtype.Hstore, len(product.Details))
+	for key, val := range product.Details {
+		valCopy := val
+		hstoreDetails[key] = &valCopy
+	}
+
+	var id int
+	if len(product.PartNumber) == 0 {
+		if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products
+		(item_id, name, price, details, slug, stock, accept_before_six_months, accept_after_six_months)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug,
+			product.Stock, product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths).Scan(&id); err != nil {
+			return 0, echo.NewHTTPError(http.StatusConflict, "El producto ya existe")
+		}
+	} else {
+		if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_products
+		(item_id, name, price, details, slug, stock, part_number, accept_before_six_months, accept_after_six_months)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		RETURNING id`, product.Item.Id, product.Name, product.Price, hstoreDetails, product.Slug,
 			product.Stock, product.PartNumber, product.AcceptBeforeSixMonths, product.AcceptAfterSixMonths).Scan(&id); err != nil {
 			return 0, echo.NewHTTPError(http.StatusConflict, "El producto ya existe")
 		}

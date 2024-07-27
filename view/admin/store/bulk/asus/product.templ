@@ -1,0 +1,36 @@
+package asus
+
+import (
+	"alc/model/store"
+	"path"
+)
+
+templ Preview(t store.Type, products []store.Product, encProducts []byte) {
+	@Table(products)
+	<div>
+		<form
+			enctype="multipart/form-data"
+			autocomplete="off"
+			hx-target="#table-items"
+			hx-post={ string(templ.URL(path.Join("/admin/tienda/type", t.ToSlug(), "bulk-load/asus"))) }
+			hx-encoding="multipart/form-data"
+		>
+			<input type="hidden" name="products" value={ string(encProducts) }/>
+			<button
+				class="font-semibold text-azure"
+				type="submit"
+			>
+				Enviar
+			</button>
+		</form>
+	</div>
+}
+
+templ ErrorsShow(t store.Type, products []store.Product, errors []error) {
+	if len(products) > 0 {
+		<p class="font-semibold text-red-600">Hubo un error al cargar los siguientes productos:</p>
+		@TableErrors(products, errors)
+	} else {
+		<p class="font-semibold text-green-600">Se cargaron los productos exitosamente.</p>
+	}
+}

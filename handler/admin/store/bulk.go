@@ -1,6 +1,7 @@
 package store
 
 import (
+	"alc/config"
 	"alc/handler/util"
 	"alc/model/store"
 	"alc/view/admin/store/bulk"
@@ -15,6 +16,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/gosimple/slug"
 	"github.com/labstack/echo/v4"
 )
 
@@ -86,7 +88,7 @@ func (h *Handler) HandleBulkLoaderProductsInsertion(c echo.Context) error {
 		}
 
 		// Insert item if not exists
-		itemId, err := h.AdminService.InsertItemIfNotExists(product.Item.Category, product.Item.Name)
+		itemId, err := h.AdminService.InsertItemIfNotExists(product.Item.Category, slug.Make(product.Item.Name), product.Item.Name)
 		if err != nil {
 			productErrors = append(productErrors, product)
 			errors = append(errors, err)
@@ -223,7 +225,12 @@ func (h *Handler) HandleBulkLoaderProductsInsertionFormShow(c echo.Context) erro
 
 // ASUS
 
-func parseServiceContent(input string) map[string]int {
+type servicePair struct {
+	Key   string
+	Value int
+}
+
+func parseServiceContent(input string) []servicePair {
 	// Remove spaces and uppercase the input
 	input = strings.Map(func(r rune) rune {
 		if unicode.IsSpace(r) {
@@ -231,7 +238,7 @@ func parseServiceContent(input string) map[string]int {
 		}
 		return unicode.ToUpper(r)
 	}, input)
-	result := make(map[string]int)
+	var result []servicePair
 	pairs := strings.Split(input, ";")
 	for _, pair := range pairs {
 		parts := strings.Split(pair, "-")
@@ -244,7 +251,10 @@ func parseServiceContent(input string) map[string]int {
 		if err != nil {
 			continue
 		}
-		result[tag] = value
+		result = append(result, servicePair{
+			Key:   tag,
+			Value: value,
+		})
 	}
 	return result
 }
@@ -267,7 +277,71 @@ func (h *Handler) HandleBulkLoaderAsusShow(c echo.Context) error {
 }
 
 func (h *Handler) HandleBulkLoaderAsusInsertion(c echo.Context) error {
-	return nil
+	// Parsing request
+	typeSlug := c.Param("typeSlug")
+	productsJson := c.FormValue("products")
+
+	// Query data
+	t, err := h.AdminService.GetType(typeSlug)
+	if err != nil {
+		return err
+	}
+
+	var products []store.Product
+	if t == store.GarantiaType {
+	} else {
+		return nil
+	}
+
+	// Decode the products
+	if err := json.Unmarshal([]byte(productsJson), &products); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Productos no válidos")
+	}
+
+	// Insert the products
+	productErrors := make([]store.Product, 0, len(products))
+	errors := make([]error, 0, len(products))
+	for _, product := range products {
+		// Normalize data
+		product, err := product.Normalize()
+		if err != nil {
+			productErrors = append(productErrors, product)
+			errors = append(errors, err)
+			continue
+		}
+		if len(product.Item.Name) == 0 {
+			productErrors = append(productErrors, product)
+			errors = append(errors, fmt.Errorf("debe proporcionar el item"))
+			continue
+		}
+
+		// Insert category if not exists
+		categoryId, err := h.AdminService.InsertCategoryIfNotExists(t, product.Item.Category.Slug, product.Item.Category.Name)
+		if err != nil {
+			productErrors = append(productErrors, product)
+			errors = append(errors, err)
+			continue
+		}
+		product.Item.Category.Id = categoryId
+
+		// Insert item if not exists
+		itemId, err := h.AdminService.InsertItemIfNotExists(product.Item.Category, product.Item.Slug, product.Item.Name)
+		if err != nil {
+			productErrors = append(productErrors, product)
+			errors = append(errors, err)
+			continue
+		}
+		product.Item.Id = itemId
+
+		// Insert the product
+		if _, err := h.AdminService.InsertProductWithSlug(product); err != nil {
+			productErrors = append(productErrors, product)
+			errors = append(errors, err)
+			continue
+		}
+	}
+
+	return util.Render(c, http.StatusOK, asus.ErrorsShow(t, productErrors, errors))
 }
 
 func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
@@ -303,55 +377,87 @@ func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
 		}
 
 		products = make([]store.Product, 0, len(records))
+	RowLoop:
 		for _, row := range records {
 			// Parsing data
-			categorySlug := strings.ToLower(strings.TrimSpace(row[0]))
-			itemName := strings.TrimSpace(row[1])
+			productCode := strings.ToUpper(strings.TrimSpace(row[0]))
+			serviceContent := strings.TrimSpace(row[1])
 
 			var product store.Product
-			product.Name = row[2]
-			product.PartNumber = row[3]
-
-			acceptBefore := strings.ToUpper(strings.TrimSpace(row[4]))
-			acceptAfter := strings.ToUpper(strings.TrimSpace(row[5]))
+			acceptBefore := strings.ToUpper(strings.TrimSpace(row[2]))
+			acceptAfter := strings.ToUpper(strings.TrimSpace(row[3]))
 			if acceptBefore == "SI" {
 				product.AcceptBeforeSixMonths = true
-			} else {
+			} else if acceptBefore == "NO" {
 				product.AcceptBeforeSixMonths = false
+			} else {
+				continue
 			}
 			if acceptAfter == "SI" {
 				product.AcceptAfterSixMonths = true
-			} else {
+			} else if acceptAfter == "NO" {
 				product.AcceptAfterSixMonths = false
+			} else {
+				continue
 			}
-
-			priceFloat, err := strconv.ParseFloat(row[6], 64)
+			product.PartNumber = row[4]
+			priceFloat, err := strconv.ParseFloat(row[5], 64)
 			if err != nil {
 				continue
 			}
 			product.Price = int(math.Round(priceFloat * 100))
 
-			// Query data
-			cat, err := h.AdminService.GetCategory(t, categorySlug)
-			if err != nil {
-				continue
-			}
-			i := store.Item{
-				Category: cat,
-				Name:     itemName,
-			}
-
-			// Attach data
-			product.Item = i
-
 			// Normalize data
+			product.Name = "TEMP_NAME"
 			product, err = product.Normalize()
 			if err != nil {
 				continue
 			}
-			if len(product.Item.Name) == 0 {
+
+			// Get category
+			catName, ok := config.ASUS_CODES[productCode]
+			if !ok {
 				continue
 			}
+			product.Item.Category.Type = t
+			product.Item.Category.Slug = slug.Make(productCode)
+			product.Item.Category.Name = catName
+
+			// Get item and product
+			serviceContentMap := parseServiceContent(serviceContent)
+			if len(serviceContentMap) == 0 {
+				continue
+			}
+			itemSlug := make([]string, 0, len(serviceContentMap))
+			itemName := make([]string, 0, len(serviceContentMap))
+			productSlug := make([]string, 0, len(serviceContentMap))
+			productName := make([]string, 0, len(serviceContentMap))
+			for i, content := range serviceContentMap {
+				key := content.Key
+				value := content.Value
+				longName, ok := config.ASUS_LONGNAMES[key]
+				if !ok {
+					continue RowLoop
+				}
+				shortName, ok := config.ASUS_SHORTNAMES[key]
+				if !ok {
+					continue RowLoop
+				}
+				// Item
+				itemSlug = append(itemSlug, key)
+				if i == 0 {
+					itemName = append(itemName, longName)
+				} else {
+					itemName = append(itemName, shortName)
+				}
+				// Product
+				productSlug = append(productSlug, fmt.Sprintf("%d", value))
+				productName = append(productName, fmt.Sprintf("%s %d meses", shortName, value))
+			}
+			product.Item.Slug = slug.Make(strings.Join(itemSlug, "-"))
+			product.Item.Name = strings.Join(itemName, " + ")
+			product.Slug = slug.Make(strings.Join(productSlug, "-"))
+			product.Name = strings.Join(productName, " + ")
 
 			products = append(products, product)
 		}
@@ -365,7 +471,7 @@ func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error al codificar los productos")
 	}
 
-	return util.Render(c, http.StatusOK, product.Preview(t, products, encProducts))
+	return util.Render(c, http.StatusOK, asus.Preview(t, products, encProducts))
 }
 
 func (h *Handler) HandleBulkLoaderAsusInsertionFormShow(c echo.Context) error {

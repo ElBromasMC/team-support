@@ -1,0 +1,82 @@
+package asus
+
+import (
+	"alc/model/store"
+	"fmt"
+)
+
+templ Table(products []store.Product) {
+	<table class="table-auto w-full">
+		<thead>
+			<tr class="border-b border-black text-left">
+				<th scope="col">Fila</th>
+				<th scope="col">Categoría</th>
+				<th scope="col">Item</th>
+				<th scope="col">Producto</th>
+				<th scope="col">PN</th>
+				<th scope="col">Dentro 6 meses</th>
+				<th scope="col">Después 6 meses</th>
+				<th scope="col">Precio</th>
+			</tr>
+		</thead>
+		<tbody>
+			for i, product := range products {
+				<tr class="border-b border-black">
+					<td class="font-semibold">{ fmt.Sprintf("%d", i + 1) }</td>
+					<td>{ product.Item.Category.Name }</td>
+					<td>{ product.Item.Name }</td>
+					<td>{ product.Name }</td>
+					if len(product.PartNumber) == 0 {
+						<td class="font-semibold text-yellow-500">
+							[AUTOGENERADO]
+						</td>
+					} else {
+						<td>
+							{ product.PartNumber }
+						</td>
+					}
+					<td>
+						if product.AcceptBeforeSixMonths {
+							SI
+						} else {
+							NO
+						}
+					</td>
+					<td>
+						if product.AcceptAfterSixMonths {
+							SI
+						} else {
+							NO
+						}
+					</td>
+					<td>{ fmt.Sprintf("US$%.2f", float64(product.Price)/100.0) }</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+templ TableErrors(products []store.Product, errors []error) {
+	<table class="table-auto w-full">
+		<thead>
+			<tr class="border-b border-black text-left">
+				<th scope="col">Fila</th>
+				<th scope="col">Categoría</th>
+				<th scope="col">Item</th>
+				<th scope="col">Producto</th>
+				<th scope="col">Error</th>
+			</tr>
+		</thead>
+		<tbody>
+			for i, product := range products {
+				<tr class="border-b border-black">
+					<td class="font-semibold">{ fmt.Sprintf("%d", i + 1) }</td>
+					<td>{ product.Item.Category.Name }</td>
+					<td>{ product.Item.Name }</td>
+					<td>{ product.Name }</td>
+					<td>{ errors[i].Error() }</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
