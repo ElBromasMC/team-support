@@ -369,7 +369,7 @@ func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
 
 	var products []store.Product
 	if t == store.GarantiaType {
-		reader.FieldsPerRecord = 6
+		reader.FieldsPerRecord = 7
 
 		records, err := reader.ReadAll()
 		if err != nil {
@@ -382,6 +382,11 @@ func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
 			// Parsing data
 			productCode := strings.ToUpper(strings.TrimSpace(row[0]))
 			serviceContent := strings.TrimSpace(row[1])
+			stdPeriodStr := strings.TrimSuffix(strings.ToUpper(strings.TrimSpace(row[6])), "M")
+			stdPeriod, err := strconv.Atoi(stdPeriodStr)
+			if err != nil {
+				continue
+			}
 
 			var product store.Product
 			acceptBefore := strings.ToUpper(strings.TrimSpace(row[2]))
@@ -449,8 +454,8 @@ func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
 			}
 			product.Item.Slug = slug.Make(strings.Join(itemSlug, "-"))
 			product.Item.Name = strings.Join(itemName, " + ")
-			product.Slug = slug.Make(strings.Join(productSlug, "-"))
-			product.Name = strings.Join(productName, " + ")
+			product.Slug = slug.Make(strings.Join(productSlug, "-") + fmt.Sprintf("_%d", stdPeriod))
+			product.Name = strings.Join(productName, " + ") + fmt.Sprintf(" (%d meses)", stdPeriod)
 
 			// Normalize data
 			product, err = product.Normalize()
