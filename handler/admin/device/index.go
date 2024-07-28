@@ -6,6 +6,7 @@ import (
 	"alc/model/store"
 	"alc/view/admin/device"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -54,7 +55,32 @@ func (h *Handler) HandleInsertion(c echo.Context) error {
 }
 
 func (h *Handler) HandleDeactivation(c echo.Context) error {
-	return nil
+	// Parse request
+	deviceId := c.Param("deviceId")
+	id, err := strconv.Atoi(deviceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id no válido")
+	}
+
+	// Query data
+	dev, err := h.DeviceService.GetDeviceById(id)
+	if err != nil {
+		return err
+	}
+
+	// Desactivate device
+	if err := h.DeviceService.DesactivateDevice(dev); err != nil {
+		return err
+	}
+
+	// Get updated devices
+	devices, err := h.DeviceService.GetDevices(true)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, device.Table(devices))
+
 }
 
 func (h *Handler) HandleInsertionFormShow(c echo.Context) error {
@@ -62,9 +88,40 @@ func (h *Handler) HandleInsertionFormShow(c echo.Context) error {
 }
 
 func (h *Handler) HandleHistoryShow(c echo.Context) error {
-	return nil
+	// Parse request
+	deviceId := c.Param("deviceId")
+	id, err := strconv.Atoi(deviceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id no válido")
+	}
+
+	// Query data
+	dev, err := h.DeviceService.GetDeviceById(id)
+	if err != nil {
+		return err
+	}
+
+	history, err := h.DeviceService.GetDeviceHistory(dev)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, device.History(history))
 }
 
 func (h *Handler) HandleDeactivationFormShow(c echo.Context) error {
-	return nil
+	// Parse request
+	deviceId := c.Param("deviceId")
+	id, err := strconv.Atoi(deviceId)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id no válido")
+	}
+
+	// Query data
+	dev, err := h.DeviceService.GetDeviceById(id)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, device.DesactivationForm(dev))
 }

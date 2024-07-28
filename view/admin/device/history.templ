@@ -1,0 +1,20 @@
+package device
+
+import "alc/model/store"
+
+templ History(history []store.DeviceHistory) {
+	<ul class="divide-y">
+		for _, item := range history {
+			<li>
+				<p>
+					<span class="font-semibold">Modificado por:</span>
+					<span>{ item.IssuedBy }</span>
+				</p>
+				<p>
+					<span class="font-semibold">A las:</span>
+					<span>{ GetTime(item.IssuedAt) }</span>
+				</p>
+			</li>
+		}
+	</ul>
+}

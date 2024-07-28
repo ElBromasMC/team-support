@@ -2,8 +2,8 @@ package device
 
 import (
 	"alc/model/store"
-	"alc/view/layout"
 	"alc/view/component"
+	"alc/view/layout"
 )
 
 templ Show(devices []store.Device) {
@@ -37,7 +37,7 @@ templ Show(devices []store.Device) {
 					</div>
 					<button class="font-bold text-azure" type="submit">Salir</button>
 				</form>
-				<div id="desactivation-error-message" class="min-h-6"></div>
+				<div id="desactivation-error-message" class="min-h-6 font-semibold text-red-600"></div>
 				<div id="desactivate-item-form"></div>
 			</dialog>
 			<!-- Item history -->

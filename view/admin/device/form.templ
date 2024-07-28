@@ -2,8 +2,8 @@ package device
 
 import (
 	"alc/model/store"
-	"path"
 	"fmt"
+	"path"
 )
 
 templ InsertionForm() {
@@ -18,7 +18,7 @@ templ InsertionForm() {
 		hx-target-error="find .insertion-error-message"
 		hx-indicator="#insertion-indicator"
 	>
-		<div class="insertion-error-message min-h-6"></div>
+		<div class="insertion-error-message min-h-6 font-semibold text-red-600"></div>
 		<div class="!mt-0">
 			<label>Serie:</label>
 			<input class="block w-full border border-livid" type="text" name="serial" required/>

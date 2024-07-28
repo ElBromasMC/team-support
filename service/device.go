@@ -21,6 +21,8 @@ func NewDeviceService(db *pgxpool.Pool) Device {
 	}
 }
 
+// Device management
+
 func (ds Device) GetDevices(valid bool) ([]store.Device, error) {
 	sql := `SELECT id, serie, created_at, updated_at, is_before_six_months, is_after_six_months
 	FROM store_devices
@@ -47,29 +49,36 @@ func (ds Device) GetDevices(valid bool) ([]store.Device, error) {
 	return devices, nil
 }
 
-func (ds Device) GetDeviceHistory(device store.Device) ([]store.DeviceHistory, error) {
-	sql := `SELECT id, issued_by, issued_at
-	FROM store_devices_history
-	WHERE device_id = $1`
-	rows, err := ds.db.Query(context.Background(), sql, device.Id)
-	if err != nil {
-		return []store.DeviceHistory{}, echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	defer rows.Close()
-
-	history, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.DeviceHistory, error) {
-		var h store.DeviceHistory
-		if err := row.Scan(&h.Id, &h.IssuedBy, &h.IssuedAt); err != nil {
-			return store.DeviceHistory{}, err
+func (ds Device) GetDevice(serial string) (store.Device, error) {
+	var device store.Device
+	sql := `SELECT id, serie, created_at, updated_at, is_before_six_months, is_after_six_months, valid
+	FROM store_devices
+	WHERE serie = $1`
+	if err := ds.db.QueryRow(context.Background(), sql, serial).Scan(&device.Id, &device.Serie, &device.CreatedAt,
+		&device.UpdatedAt, &device.IsBeforeSixMonths, &device.IsAfterSixMonths, &device.Valid); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return store.Device{}, echo.NewHTTPError(http.StatusNotFound, "La serie no se encuentra registrada")
+		} else {
+			return store.Device{}, echo.NewHTTPError(http.StatusInternalServerError)
 		}
-		h.Device = device
-		return h, nil
-	})
-	if err != nil {
-		return []store.DeviceHistory{}, echo.NewHTTPError(http.StatusInternalServerError)
 	}
+	return device, nil
+}
 
-	return history, nil
+func (ds Device) GetDeviceById(id int) (store.Device, error) {
+	var device store.Device
+	sql := `SELECT id, serie, created_at, updated_at, is_before_six_months, is_after_six_months, valid
+	FROM store_devices
+	WHERE id = $1`
+	if err := ds.db.QueryRow(context.Background(), sql, id).Scan(&device.Id, &device.Serie, &device.CreatedAt,
+		&device.UpdatedAt, &device.IsBeforeSixMonths, &device.IsAfterSixMonths, &device.Valid); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return store.Device{}, echo.NewHTTPError(http.StatusNotFound, "La serie no se encuentra registrada")
+		} else {
+			return store.Device{}, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+	}
+	return device, nil
 }
 
 func (ds Device) InsertDevice(email string, device store.Device) error {
@@ -111,18 +120,42 @@ func (ds Device) InsertDevice(email string, device store.Device) error {
 	return nil
 }
 
-func (ds Device) GetDevice(serial string) (store.Device, error) {
-	var device store.Device
-	sql := `SELECT id, serie, created_at, updated_at, is_before_six_months, is_after_six_months, valid
-	FROM store_devices
-	WHERE serie = $1`
-	if err := ds.db.QueryRow(context.Background(), sql, serial).Scan(&device.Id, &device.Serie, &device.CreatedAt,
-		&device.UpdatedAt, &device.IsBeforeSixMonths, &device.IsAfterSixMonths, &device.Valid); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return store.Device{}, echo.NewHTTPError(http.StatusNotFound, "La serie no se encuentra registrada")
-		} else {
-			return store.Device{}, echo.NewHTTPError(http.StatusInternalServerError)
-		}
+func (ds Device) DesactivateDevice(device store.Device) error {
+	sql := `UPDATE store_devices SET valid = FALSE WHERE id = $1`
+	c, err := ds.db.Exec(context.Background(), sql, device.Id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	return device, nil
+	if c.RowsAffected() < 1 {
+		return echo.NewHTTPError(http.StatusNotFound, "Dispositivo no encontrado")
+	}
+	return nil
+}
+
+// Device history management
+
+func (ds Device) GetDeviceHistory(device store.Device) ([]store.DeviceHistory, error) {
+	sql := `SELECT id, issued_by, issued_at
+	FROM store_devices_history
+	WHERE device_id = $1
+	ORDER BY issued_at DESC`
+	rows, err := ds.db.Query(context.Background(), sql, device.Id)
+	if err != nil {
+		return []store.DeviceHistory{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer rows.Close()
+
+	history, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.DeviceHistory, error) {
+		var h store.DeviceHistory
+		if err := row.Scan(&h.Id, &h.IssuedBy, &h.IssuedAt); err != nil {
+			return store.DeviceHistory{}, err
+		}
+		h.Device = device
+		return h, nil
+	})
+	if err != nil {
+		return []store.DeviceHistory{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return history, nil
 }
