@@ -455,7 +455,7 @@ func (h *Handler) HandleBulkLoaderAsusPreview(c echo.Context) error {
 			product.Item.Slug = slug.Make(strings.Join(itemSlug, "-"))
 			product.Item.Name = strings.Join(itemName, " + ")
 			product.Slug = slug.Make(strings.Join(productSlug, "-") + fmt.Sprintf("_%d", stdPeriod))
-			product.Name = strings.Join(productName, " + ") + fmt.Sprintf(" (%d meses)", stdPeriod)
+			product.Name = strings.Join(productName, " + ") + fmt.Sprintf(" (Total: %d meses)", stdPeriod)
 
 			// Normalize data
 			product, err = product.Normalize()
