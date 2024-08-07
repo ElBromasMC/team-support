@@ -11,6 +11,7 @@ import (
 type Image struct {
 	Id       int    `json:"id"`
 	Filename string `json:"filename"`
+	Index    int    `json:"index"`
 }
 
 type Type string

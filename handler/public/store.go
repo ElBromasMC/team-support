@@ -112,6 +112,10 @@ func (h *Handler) HandleStoreItemShow(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	imgs, err := h.PublicService.GetItemImages(item)
+	if err != nil {
+		return err
+	}
 
-	return util.Render(c, http.StatusOK, view.Item(item, products))
+	return util.Render(c, http.StatusOK, view.Item(item, products, imgs))
 }

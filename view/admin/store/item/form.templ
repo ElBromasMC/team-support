@@ -1,8 +1,10 @@
 package item
 
 import (
-	"path"
+	"alc/config"
 	"alc/model/store"
+	"fmt"
+	"path"
 )
 
 templ InsertionForm(cat store.Category) {
@@ -32,10 +34,12 @@ templ InsertionForm(cat store.Category) {
 				<label>Descripción larga:</label>
 				<textarea class="block resize-none w-full h-36 border border-livid" name="longDescription"></textarea>
 			</div>
-			<div>
-				<label>Imagen:</label>
-				<input class="block" type="file" name="largeImg" accept="image/png, image/jpeg, image/webp"/>
-			</div>
+			<!--
+				<div>
+					<label>Imagen:</label>
+					<input class="block" type="file" name="largeImg" accept="image/png, image/jpeg, image/webp"/>
+				</div>
+			-->
 		}
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Guardar</button>
@@ -70,10 +74,12 @@ templ UpdateForm(item store.Item) {
 				<label>Descripción larga:</label>
 				<textarea class="block resize-none w-full h-36 border border-livid" name="longDescription">{ item.LongDescription }</textarea>
 			</div>
-			<div>
-				<label>Imagen:</label>
-				<input class="block" type="file" name="largeImg" accept="image/png, image/jpeg, image/webp"/>
-			</div>
+			<!--
+				<div>
+					<label>Imagen:</label>
+					<input class="block" type="file" name="largeImg" accept="image/png, image/jpeg, image/webp"/>
+				</div>
+			-->
 		}
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Actualizar</button>
@@ -98,4 +104,57 @@ templ DeletionForm(item store.Item) {
 			<button class="font-bold text-azure" type="submit">Sí</button>
 		</div>
 	</form>
+}
+
+templ ModifyImagesForm(item store.Item, imgs []store.Image) {
+	<div
+		class="mt-3 space-y-2"
+	>
+		<ul class="grid grid-cols-3 gap-3">
+			for _, img := range imgs {
+				<li class="relative w-36 aspect-[7/4] border border-navy rounded overflow-hidden">
+					<div class="absolute w-full p-1 flex justify-end">
+						<form
+							enctype="multipart/form-data"
+							hx-delete={ path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories", item.Category.Slug, "items", item.Slug, "images") }
+							hx-target="#modify-item-images-form"
+							hx-indicator="#item-images-indicator"
+							hx-encoding="multipart/form-data"
+						>
+							<input type="hidden" name="Id" value={ fmt.Sprintf("%d", img.Id) } required/>
+							<button class="relative flex items-center justify-center" type="submit">
+								<svg class="w-4 h-4 z-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
+								</svg>
+								<div class="absolute -inset-y-[0.1rem] aspect-square rounded-full bg-gray-300"></div>
+							</button>
+						</form>
+					</div>
+					<img
+						class="relative w-full h-full object-cover -z-10"
+						src={ path.Join(config.IMAGES_PATH, img.Filename) }
+					/>
+				</li>
+			}
+			<li class="w-36 aspect-[7/4] border border-navy rounded overflow-hidden">
+				<label class="w-full h-full flex justify-center items-center cursor-pointer text-navy hover:text-livid" for="img-add">
+					<svg class="w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"></path>
+					</svg>
+				</label>
+				<input
+					id="img-add"
+					class="hidden"
+					type="file"
+					accept="image/png, image/jpeg, image/webp"
+					multiple
+					name="imgs"
+					hx-patch={ path.Join("/admin/tienda/type", item.Category.Type.ToSlug(), "categories", item.Category.Slug, "items", item.Slug, "images") }
+					hx-target="#modify-item-images-form"
+					hx-indicator="#item-images-indicator"
+					hx-encoding="multipart/form-data"
+				/>
+			</li>
+		</ul>
+	</div>
 }

@@ -5,6 +5,7 @@ import (
 	"alc/model/store"
 	"alc/view/admin/store/item"
 	"net/http"
+	"strconv"
 
 	"github.com/gosimple/slug"
 	"github.com/labstack/echo/v4"
@@ -251,4 +252,129 @@ func (h *Handler) HandleItemDeletionFormShow(c echo.Context) error {
 	}
 
 	return util.Render(c, http.StatusOK, item.DeletionForm(i))
+}
+
+// Images management
+
+func (h *Handler) HandleItemImagesModification(c echo.Context) error {
+	// Parsing request
+	typeSlug := c.Param("typeSlug")
+	categorySlug := c.Param("categorySlug")
+	itemSlug := c.Param("itemSlug")
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		return err
+	}
+	files, ok := form.File["imgs"]
+	if !ok {
+		return echo.NewHTTPError(http.StatusBadRequest, "Debe proporcionar imágenes")
+	}
+
+	// Query data
+	t, err := h.AdminService.GetType(typeSlug)
+	if err != nil {
+		return err
+	}
+	cat, err := h.AdminService.GetCategory(t, categorySlug)
+	if err != nil {
+		return err
+	}
+	i, err := h.AdminService.GetItem(cat, itemSlug)
+	if err != nil {
+		return err
+	}
+	maxIndex, err := h.AdminService.GetMaxIndex(i)
+	if err != nil {
+		return err
+	}
+
+	// Upload the images
+	imgs := make([]store.Image, 0, len(files))
+	for i, file := range files {
+		img, err := h.AdminService.InsertImage(file)
+		if err != nil {
+			continue
+		}
+		img.Index = (maxIndex + 1) + i
+		imgs = append(imgs, img)
+	}
+	err = h.AdminService.ModifyItemImages(i, imgs)
+	if err != nil {
+		return err
+	}
+
+	// Get updated images
+	imgs, err = h.AdminService.GetItemImages(i)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, item.ModifyImagesForm(i, imgs))
+}
+
+func (h *Handler) HandleItemImageDeletion(c echo.Context) error {
+	// Parsing request
+	typeSlug := c.Param("typeSlug")
+	categorySlug := c.Param("categorySlug")
+	itemSlug := c.Param("itemSlug")
+	idStr := c.FormValue("Id")
+	imgId, err := strconv.Atoi(idStr)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Id no válido")
+	}
+
+	// Query data
+	t, err := h.AdminService.GetType(typeSlug)
+	if err != nil {
+		return err
+	}
+	cat, err := h.AdminService.GetCategory(t, categorySlug)
+	if err != nil {
+		return err
+	}
+	i, err := h.AdminService.GetItem(cat, itemSlug)
+	if err != nil {
+		return err
+	}
+
+	// Delete image
+	if err := h.AdminService.RemoveImage(imgId); err != nil {
+		return err
+	}
+
+	// Get updated images
+	imgs, err := h.AdminService.GetItemImages(i)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, item.ModifyImagesForm(i, imgs))
+}
+
+func (h *Handler) HandleItemImagesFormShow(c echo.Context) error {
+	// Parsing request
+	typeSlug := c.Param("typeSlug")
+	categorySlug := c.Param("categorySlug")
+	itemSlug := c.Param("itemSlug")
+
+	// Query data
+	t, err := h.AdminService.GetType(typeSlug)
+	if err != nil {
+		return err
+	}
+	cat, err := h.AdminService.GetCategory(t, categorySlug)
+	if err != nil {
+		return err
+	}
+	i, err := h.AdminService.GetItem(cat, itemSlug)
+	if err != nil {
+		return err
+	}
+	imgs, err := h.AdminService.GetItemImages(i)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, item.ModifyImagesForm(i, imgs))
 }

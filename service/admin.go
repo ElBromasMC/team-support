@@ -230,6 +230,60 @@ WHERE id = $1 RETURNING img_id, largeimg_id`, id).Scan(&imgId, &largeimgId); err
 	return nil
 }
 
+// Item images management
+
+func (as Admin) GetMaxIndex(item store.Item) (int, error) {
+	sql := `SELECT MAX(index) FROM item_images WHERE item_id = $1`
+	var maxIndex *int
+	err := as.DB.QueryRow(context.Background(), sql, item.Id).Scan(&maxIndex)
+	if err != nil {
+		return 0, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	if maxIndex == nil {
+		return -1, nil
+	}
+	return *maxIndex, nil
+}
+
+func (as Admin) ModifyItemImages(item store.Item, imgs []store.Image) error {
+	tx, err := as.DB.Begin(context.Background())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer tx.Rollback(context.Background())
+
+	for _, img := range imgs {
+		sql := `SELECT EXISTS (
+			SELECT 1 FROM item_images
+			WHERE item_id = $1 AND image_id = $2
+		)`
+		var exists bool
+		if err := tx.QueryRow(context.Background(), sql, item.Id, img.Id).Scan(&exists); err != nil {
+			return echo.NewHTTPError(http.StatusInternalServerError)
+		}
+		if !exists {
+			sql1 := `INSERT INTO item_images (item_id, image_id, index)
+			VALUES ($1, $2, $3)`
+			if _, err := tx.Exec(context.Background(), sql1, item.Id, img.Id, img.Index); err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError)
+			}
+		} else {
+			sql2 := `UPDATE item_images
+			SET index = $1
+			WHERE item_id = $2 AND image_id = $3`
+			if _, err := tx.Exec(context.Background(), sql2, img.Index, item.Id, img.Id); err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError)
+			}
+		}
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return nil
+}
+
 // Product management
 
 func (as Admin) InsertProduct(product store.Product) (int, error) {

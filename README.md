@@ -39,7 +39,9 @@ COMPANY_EMAIL=
 
 ### Load env variables
 ```shell
-$ export $(grep -v '^#' .env | xargs -d '\n')
+$ set -a
+$ source .env
+$ set +a
 ```
 
 ### Live reload

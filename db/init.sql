@@ -91,6 +91,15 @@ CREATE TABLE IF NOT EXISTS store_items (
 );
 CREATE INDEX idx_items_name ON store_items USING gin (name gin_trgm_ops);
 
+CREATE TABLE IF NOT EXISTS item_images (
+    item_id INT NOT NULL,
+    image_id INT NOT NULL,
+    index INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (item_id, image_id),
+    FOREIGN KEY (item_id) REFERENCES store_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE
+);
+
 -- Product management
 CREATE TABLE IF NOT EXISTS store_products (
     id SERIAL PRIMARY KEY,

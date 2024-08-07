@@ -215,6 +215,9 @@ func main() {
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/insert", sh.HandleItemInsertionFormShow)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/update", sh.HandleItemUpdateFormShow)
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/delete", sh.HandleItemDeletionFormShow)
+	g31.PATCH("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/images", sh.HandleItemImagesModification)
+	g31.DELETE("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/images", sh.HandleItemImageDeletion)
+	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/images", sh.HandleItemImagesFormShow)
 
 	g31.GET("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products", sh.HandleProductsShow)
 	g31.POST("/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products", sh.HandleProductInsertion)

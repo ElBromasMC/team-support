@@ -1,11 +1,11 @@
 package store
 
 import (
-	"fmt"
-	"path"
+	"alc/config"
 	"alc/model/store"
 	"alc/view/layout"
-	"alc/config"
+	"fmt"
+	"path"
 )
 
 script HandleProductChange() {
@@ -21,7 +21,7 @@ script HandleProductChange() {
 	productSelect.addEventListener("change", handler);
 }
 
-templ Item(item store.Item, products []store.Product) {
+templ Item(item store.Item, products []store.Product, imgs []store.Image) {
 	@layout.BasePage(item.Name) {
 		<main>
 			<div class="grid gap-9 px-4 py-9 max-w-7xl mx-auto lg:grid-cols-[3fr_2fr] lg:gap-12">
@@ -48,7 +48,7 @@ templ Item(item store.Item, products []store.Product) {
 					</span>
 				</div>
 				<!-- Imagen -->
-				<div class="lg:col-span-1">
+				<!--
 					<img
 						class="w-full aspect-[7/4] object-cover rounded-3xl shadow-[rgba(0,0,0,0.24)_0px_3px_8px]"
 						if item.LargeImg.Id != 0 {
@@ -58,7 +58,21 @@ templ Item(item store.Item, products []store.Product) {
 							src="/static/img/noimage.png"
 						}
 					/>
-				</div>
+				-->
+				<my-carousel
+					class="lg:col-span-1 aspect-[7/4] rounded-3xl shadow-[rgba(0,0,0,0.24)_0px_3px_8px] overflow-hidden"
+					controls
+					indicator
+					autoplay="6000"
+				>
+					for _, img := range imgs {
+						<img
+							class="w-full h-full object-cover"
+							src={ path.Join(config.IMAGES_PATH, img.Filename) }
+							alt={ item.Slug }
+						/>
+					}
+				</my-carousel>
 				<!-- Producto -->
 				<div class="space-y-6 lg:col-span-1 lg:row-span-2">
 					<h2 class="text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>

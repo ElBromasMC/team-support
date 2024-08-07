@@ -310,6 +310,31 @@ WHERE si.id = $1`, id).Scan(&item.Name, &item.Description, &item.LongDescription
 	return item, nil
 }
 
+// Item images management
+
+func (ps Public) GetItemImages(i store.Item) ([]store.Image, error) {
+	sql := `SELECT i.id, i.filename, iti.index FROM images AS i
+	JOIN item_images AS iti ON i.id = iti.image_id
+	JOIN store_items AS it ON iti.item_id = it.id
+	WHERE it.id = $1
+	ORDER BY iti.index ASC, i.id ASC`
+	rows, err := ps.DB.Query(context.Background(), sql, i.Id)
+	if err != nil {
+		return []store.Image{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	defer rows.Close()
+
+	imgs, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (store.Image, error) {
+		var img store.Image
+		err := row.Scan(&img.Id, &img.Filename, &img.Index)
+		return img, err
+	})
+	if err != nil {
+		return []store.Image{}, echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return imgs, nil
+}
+
 // Check
 func (ps Public) GetProducts(item store.Item) ([]store.Product, error) {
 	rows, err := ps.DB.Query(context.Background(), `SELECT id, name, price, details, slug, stock,
