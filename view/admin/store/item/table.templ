@@ -53,13 +53,15 @@ templ Table(cat store.Category, items []store.Item) {
 						>
 							Editar
 						</button>
-						<button
-							class="block font-semibold text-azure"
-							hx-get={ path.Join("/admin/tienda/type", i.Category.Type.ToSlug(), "categories", i.Category.Slug, "items", i.Slug, "images") }
-							hx-target="#modify-item-images-form"
-						>
-							Editar imágenes
-						</button>
+						if cat.Type == store.StoreType {
+							<button
+								class="block font-semibold text-azure"
+								hx-get={ path.Join("/admin/tienda/type", i.Category.Type.ToSlug(), "categories", i.Category.Slug, "items", i.Slug, "images") }
+								hx-target="#modify-item-images-form"
+							>
+								Editar imágenes
+							</button>
+						}
 						<button
 							class="block font-semibold text-azure"
 							hx-get={ path.Join("/admin/tienda/type", i.Category.Type.ToSlug(), "categories", i.Category.Slug, "items", i.Slug, "delete") }
