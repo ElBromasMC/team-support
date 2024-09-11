@@ -6,7 +6,7 @@ Team Support Peru webpage
 ### Prerequisites
 * Go
 * Node and npm
-* PostgreSQL
+* Docker compose
 * [Air](https://github.com/cosmtrek/air#installation)
 * [Templ](https://templ.guide/quick-start/installation)
 * inotify-tools
@@ -16,25 +16,27 @@ Team Support Peru webpage
 $ npm install
 ```
 
-### Initialize the required tables
-```shell
-$ psql -d <database_name> -U <username> -f ./db/init.sql
-```
-
 ### .env file example
 ```
 ENV=development
-DATABASE_URL=postgres://<username>:<password>@localhost:5432/<database_name>
+WEBSERVER_HOSTNAME=www.domain.tld
+DB_NAME=
+DB_PASSWORD=
+DATABASE_URL=postgres://postgres:${DB_PASSWORD}@localhost:5432/${DB_NAME}
 SESSION_KEY=mysecretkey
 PORT=8080
 REL=1
 SMTP_HOSTNAME=mail.example.com
 SMTP_USER=<username>
 SMTP_PASS=<password>
-WEBSERVER_HOSTNAME=www.domain.tld
 IZIPAY_STOREID=
 IZIPAY_APIKEY=
 COMPANY_EMAIL=
+```
+
+### Initialize the required tables
+```shell
+$ docker compose -f docker-compose.dev.yml up -d
 ```
 
 ### Load env variables
