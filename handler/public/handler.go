@@ -12,4 +12,5 @@ type Handler struct {
 	TransactionService service.Transaction
 	PaymentService     service.Payment
 	DeviceService      service.Device
+	CurrencyService    service.Currency
 }

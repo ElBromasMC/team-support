@@ -41,11 +41,19 @@ type Item struct {
 	Slug            string   `json:"slug"`
 }
 
+type Currency string
+
+const (
+	USD Currency = "USD"
+	PEN Currency = "PEN"
+)
+
 type Product struct {
 	Id                    int               `json:"id"`
 	Item                  Item              `json:"item"`
 	Name                  string            `json:"name"`
-	Price                 int               `json:"price"` // Stored in USD cents
+	Price                 int               `json:"price"`
+	Currency              Currency          `json:"currency"`
 	Stock                 *int              `json:"stock"`
 	Details               map[string]string `json:"details"`
 	PartNumber            string            `json:"partNumber"`

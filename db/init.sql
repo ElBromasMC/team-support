@@ -101,11 +101,15 @@ CREATE TABLE IF NOT EXISTS item_images (
 );
 
 -- Product management
+
+CREATE TYPE store_currency AS ENUM ('USD', 'PEN');
+
 CREATE TABLE IF NOT EXISTS store_products (
     id SERIAL PRIMARY KEY,
     item_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     price INT NOT NULL,
+    currency store_currency NOT NULL DEFAULT 'USD',
     stock INT,
     details HSTORE NOT NULL DEFAULT ''::hstore,
     slug VARCHAR(255) NOT NULL,
@@ -208,6 +212,7 @@ CREATE TABLE IF NOT EXISTS order_products (
     product_item VARCHAR(255) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     product_price INT NOT NULL,
+    product_currency store_currency NOT NULL DEFAULT 'USD',
     product_details HSTORE NOT NULL DEFAULT ''::hstore,
     product_part_number TEXT NOT NULL,
     status order_status NOT NULL DEFAULT 'PENDIENTE',
@@ -230,6 +235,7 @@ CREATE TABLE IF NOT EXISTS store_transactions (
     order_id UUID NOT NULL,
     status transaction_status NOT NULL DEFAULT 'PENDING',
     amount INT NOT NULL,
+    currency store_currency NOT NULL DEFAULT 'USD',
     platform VARCHAR(255) NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -51,11 +51,19 @@ func (h *Handler) HandleProductInsertion(c echo.Context) error {
 
 	var p store.Product
 	p.Name = c.FormValue("name")
+
+	// Get price and currency
 	priceFloat, err := strconv.ParseFloat(c.FormValue("price"), 64)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Precio inválido")
 	}
+	currency, err := h.CurrencyService.GetCurrency(c.FormValue("currency"))
+	if err != nil {
+		return err
+	}
 	p.Price = int(math.Round(priceFloat * 100))
+	p.Currency = currency
+
 	stockInt, err := strconv.Atoi(c.FormValue("stock"))
 	if err != nil {
 		p.Stock = nil
@@ -123,11 +131,18 @@ func (h *Handler) HandleProductUpdate(c echo.Context) error {
 
 	var p store.Product
 	p.Name = c.FormValue("name")
+
+	// Get price and currency
 	priceFloat, err := strconv.ParseFloat(c.FormValue("price"), 64)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid price")
 	}
+	currency, err := h.CurrencyService.GetCurrency(c.FormValue("currency"))
+	if err != nil {
+		return err
+	}
 	p.Price = int(math.Round(priceFloat * 100))
+	p.Currency = currency
 
 	if c.FormValue("accept-before") == "SI" {
 		p.AcceptBeforeSixMonths = true

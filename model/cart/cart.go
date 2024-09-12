@@ -62,10 +62,6 @@ func (item Item) Normalize() (Item, error) {
 	return item, nil
 }
 
-func (item Item) CalculateSubtotal() int {
-	return item.Product.Price * item.Quantity
-}
-
 func (item Item) ToRequest() ItemRequest {
 	return ItemRequest{
 		ProductId: item.Product.Id,
@@ -77,12 +73,4 @@ func (item Item) ToRequest() ItemRequest {
 func GetItems(ctx context.Context) []Item {
 	items, _ := ctx.Value(ItemsKey{}).([]Item)
 	return items
-}
-
-func CalculateAmount(items []Item) int {
-	amount := 0
-	for _, i := range items {
-		amount += i.CalculateSubtotal()
-	}
-	return amount
 }

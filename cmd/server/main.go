@@ -69,6 +69,7 @@ func main() {
 	ors := service.NewOrderService(dbpool)
 	ts := service.NewTransactionService(dbpool)
 	pys := service.NewPaymentService(mode, os.Getenv("IZIPAY_STOREID"), os.Getenv("IZIPAY_APIKEY"), os.Getenv("WEBSERVER_HOSTNAME"))
+	cs := service.NewCurrencyService(dbpool)
 
 	// Initialize handlers
 	ph := public.Handler{
@@ -79,12 +80,14 @@ func main() {
 		TransactionService: ts,
 		PaymentService:     pys,
 		DeviceService:      ds,
+		CurrencyService:    cs,
 	}
 
 	ah := admin.Handler{
-		AdminService:  as,
-		AuthService:   us,
-		DeviceService: ds,
+		AdminService:    as,
+		AuthService:     us,
+		DeviceService:   ds,
+		CurrencyService: cs,
 	}
 	sh := store.Handler(ah)
 	uh := user.Handler(ah)
@@ -94,6 +97,7 @@ func main() {
 		PaymentService:     pys,
 		OrderService:       ors,
 		EmailService:       ms,
+		CurrencyService:    cs,
 	}
 
 	// Middleware

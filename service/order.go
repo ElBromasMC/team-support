@@ -53,7 +53,7 @@ func (os Order) UpdateOrderStatus(id uuid.UUID, status checkout.OrderSyncStatus)
 
 func (os Order) GetOrderProducts(order checkout.Order) ([]checkout.OrderProduct, error) {
 	rows, err := os.db.Query(context.Background(), `SELECT id, quantity, details, product_type, product_category, product_item,
-product_name, product_price, product_details, status, updated_at, product_id, product_part_number
+product_name, product_price, product_details, status, updated_at, product_id, product_part_number, product_currency
 FROM order_products
 WHERE order_id = $1`, order.Id)
 	if err != nil {
@@ -72,7 +72,8 @@ WHERE order_id = $1`, order.Id)
 		var hstoreProductDetails pgtype.Hstore
 
 		err := row.Scan(&product.Id, &product.Quantity, &hstoreDetails, &product.ProductType, &product.ProductCategory, &product.ProductItem,
-			&product.ProductName, &product.ProductPrice, &hstoreProductDetails, &product.Status, &product.UpdatedAt, &productID, &product.ProductPartNumber)
+			&product.ProductName, &product.ProductPrice, &hstoreProductDetails, &product.Status, &product.UpdatedAt, &productID, &product.ProductPartNumber,
+			&product.ProductCurrency)
 		product.Order = order
 		for key, value := range hstoreDetails {
 			if value != nil {
@@ -86,12 +87,12 @@ WHERE order_id = $1`, order.Id)
 		}
 
 		// Query and attach product
-		sql := `SELECT id, name, price, slug, stock
+		sql := `SELECT id, name, price, slug, stock, currency
 		FROM store_products
 		WHERE id = $1`
 		var storeProduct store.Product
 		if err := os.db.QueryRow(context.Background(), sql, productID).Scan(&storeProduct.Id,
-			&storeProduct.Name, &storeProduct.Price, &storeProduct.Slug, &storeProduct.Stock); err == nil {
+			&storeProduct.Name, &storeProduct.Price, &storeProduct.Slug, &storeProduct.Stock, &storeProduct.Currency); err == nil {
 			product.Product = storeProduct
 		}
 
@@ -138,9 +139,10 @@ RETURNING id`, order.Email, order.Phone, order.Name, order.Address, order.City, 
 		}
 
 		if _, err := tx.Exec(context.Background(), `INSERT INTO order_products (order_id, quantity, details,
-product_type, product_category, product_item, product_name, product_price, product_details, product_id, product_part_number)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, orderID, product.Quantity, hstoreDetails,
-			product.ProductType, product.ProductCategory, product.ProductItem, product.ProductName, product.ProductPrice, hstoreProductDetails, product.Product.Id, product.ProductPartNumber); err != nil {
+product_type, product_category, product_item, product_name, product_price, product_details, product_id, product_part_number, product_currency)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, orderID, product.Quantity, hstoreDetails,
+			product.ProductType, product.ProductCategory, product.ProductItem, product.ProductName, product.ProductPrice,
+			hstoreProductDetails, product.Product.Id, product.ProductPartNumber, product.ProductCurrency); err != nil {
 			return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}

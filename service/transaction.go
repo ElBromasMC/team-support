@@ -2,6 +2,7 @@ package service
 
 import (
 	"alc/model/checkout"
+	"alc/model/store"
 	"alc/model/transaction"
 	"context"
 	"net/http"
@@ -24,27 +25,27 @@ func NewTransactionService(db *pgxpool.Pool) Transaction {
 func (ts Transaction) GetTransaction(order checkout.Order) (transaction.Transaction, error) {
 	var trans transaction.Transaction
 	sql := `SELECT id, status, amount,
-	platform, created_at, updated_at, trans_id, trans_uuid
+	platform, created_at, updated_at, trans_id, trans_uuid, currency
 	FROM store_transactions
 	WHERE order_id = $1`
 	if err := ts.db.QueryRow(context.Background(), sql, order.Id).Scan(&trans.Id, &trans.Status, &trans.Amount,
-		&trans.Platform, &trans.CreatedAt, &trans.UpdatedAt, &trans.TransId, &trans.TransUuid); err != nil {
+		&trans.Platform, &trans.CreatedAt, &trans.UpdatedAt, &trans.TransId, &trans.TransUuid, &trans.Currency); err != nil {
 		return transaction.Transaction{}, echo.NewHTTPError(http.StatusNotFound, "Transacción no encontrada")
 	}
 	trans.Order = order
 	return trans, nil
 }
 
-func (ts Transaction) InsertTransaction(order checkout.Order, amount int, platform string) (transaction.Transaction, error) {
+func (ts Transaction) InsertTransaction(order checkout.Order, amount int, currency store.Currency, platform string) (transaction.Transaction, error) {
 	var trans transaction.Transaction
 	sql := `INSERT INTO store_transactions
-	(order_id, amount, platform)
+	(order_id, amount, platform, currency)
 	VALUES
-	($1, $2, $3)
+	($1, $2, $3, $4)
 	RETURNING
-	id, status, amount, platform, created_at, updated_at, trans_id`
-	if err := ts.db.QueryRow(context.Background(), sql, order.Id, amount, platform).Scan(&trans.Id, &trans.Status,
-		&trans.Amount, &trans.Platform, &trans.CreatedAt, &trans.UpdatedAt, &trans.TransId); err != nil {
+	id, status, amount, platform, created_at, updated_at, trans_id, currency`
+	if err := ts.db.QueryRow(context.Background(), sql, order.Id, amount, platform, currency).Scan(&trans.Id, &trans.Status,
+		&trans.Amount, &trans.Platform, &trans.CreatedAt, &trans.UpdatedAt, &trans.TransId, &trans.Currency); err != nil {
 		return transaction.Transaction{}, echo.NewHTTPError(http.StatusInternalServerError, "Error desconocido, recargue la página")
 	}
 	trans.Order = order

@@ -55,6 +55,7 @@ type OrderProduct struct {
 	ProductItem       string
 	ProductName       string
 	ProductPrice      int
+	ProductCurrency   store.Currency
 	ProductDetails    map[string]string
 	ProductPartNumber string
 	Status            OrderStatus
@@ -92,16 +93,4 @@ func (order Order) Normalize() (Order, error) {
 	}
 
 	return order, nil
-}
-
-func (p OrderProduct) CalculateSubtotal() int {
-	return p.ProductPrice * p.Quantity
-}
-
-func CalculateAmount(products []OrderProduct) int {
-	amount := 0
-	for _, product := range products {
-		amount += product.CalculateSubtotal()
-	}
-	return amount
 }

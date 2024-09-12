@@ -1,6 +1,7 @@
 package public
 
 import (
+	"alc/config"
 	"alc/handler/util"
 	"alc/model/cart"
 	"alc/model/checkout"
@@ -66,6 +67,7 @@ func (h *Handler) HandleCheckoutOrderInsertion(c echo.Context) error {
 			ProductItem:       i.Product.Item.Name,
 			ProductName:       i.Product.Name,
 			ProductPrice:      i.Product.Price,
+			ProductCurrency:   i.Product.Currency,
 			ProductDetails:    i.Product.Details,
 			ProductPartNumber: i.Product.PartNumber,
 		}
@@ -132,7 +134,11 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		}
 
 		// Create and attach transaction
-		trans, err = h.TransactionService.InsertTransaction(order, checkout.CalculateAmount(products), "IZIPAY")
+		amount, err := h.CurrencyService.CalculateOrderProductsAmount(products, config.STORE_CURRENCY)
+		if err != nil {
+			return err
+		}
+		trans, err = h.TransactionService.InsertTransaction(order, amount, config.STORE_CURRENCY, "IZIPAY")
 		if err != nil {
 			return err
 		}
@@ -169,7 +175,10 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 	}
 
 	// Generate the form fields
-	formFields := h.PaymentService.GetPaymentData(order, trans)
+	formFields, err := h.PaymentService.GetPaymentData(order, trans)
+	if err != nil {
+		return err
+	}
 
 	return util.Render(c, http.StatusOK, view.PaymentPage(order, products, formFields, fail))
 }

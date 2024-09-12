@@ -9,4 +9,5 @@ type Handler struct {
 	PaymentService     service.Payment
 	OrderService       service.Order
 	EmailService       service.Email
+	CurrencyService    service.Currency
 }

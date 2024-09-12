@@ -1,6 +1,7 @@
 package service
 
 import (
+	"alc/config"
 	"alc/model/checkout"
 	"alc/model/payment"
 	"alc/model/transaction"
@@ -9,8 +10,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"slices"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Payment struct {
@@ -33,12 +37,17 @@ func (ps Payment) GetMode() payment.Mode {
 	return ps.mode
 }
 
-func (ps Payment) GetPaymentData(order checkout.Order, trans transaction.Transaction) []payment.FormData {
+func (ps Payment) GetPaymentData(order checkout.Order, trans transaction.Transaction) ([]payment.FormData, error) {
+	code, ok := config.CURRENCY_NUMERIC_CODES[trans.Currency]
+	if !ok {
+		return []payment.FormData{}, echo.NewHTTPError(http.StatusInternalServerError, "Unknown currency: "+trans.Currency)
+	}
+
 	formData := []payment.FormData{
 		{Key: "vads_action_mode", Value: "IFRAME"},
 		{Key: "vads_amount", Value: fmt.Sprintf("%d", trans.Amount)},
 		{Key: "vads_ctx_mode", Value: string(ps.mode)},
-		{Key: "vads_currency", Value: "840"},
+		{Key: "vads_currency", Value: code},
 		{Key: "vads_page_action", Value: "PAYMENT"},
 		{Key: "vads_payment_config", Value: "SINGLE"},
 		{Key: "vads_site_id", Value: ps.storeId},
@@ -69,7 +78,7 @@ func (ps Payment) GetPaymentData(order checkout.Order, trans transaction.Transac
 	// Append the signature
 	formData = append(formData, payment.FormData{Key: "signature", Value: signature})
 
-	return formData
+	return formData, nil
 }
 
 // 'formData' must consists of 'vads_...' keys

@@ -97,6 +97,7 @@ func (h *Handler) HandleBulkLoaderProductsInsertion(c echo.Context) error {
 
 		// Attach data
 		product.Item.Id = itemId
+		product.Currency = store.USD
 
 		if _, err := h.AdminService.InsertProduct(product); err != nil {
 			productErrors = append(productErrors, product)
@@ -332,6 +333,7 @@ func (h *Handler) HandleBulkLoaderAsusInsertion(c echo.Context) error {
 			continue
 		}
 		product.Item.Id = itemId
+		product.Currency = store.USD
 
 		// Insert the product
 		if _, err := h.AdminService.InsertProductWithSlug(product); err != nil {
