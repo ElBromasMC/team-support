@@ -1,9 +1,11 @@
 package product 
 
 import (
+	"alc/config"
+	"alc/model/currency"
+	"alc/model/store"
 	"fmt"
 	"path"
-	"alc/model/store"
 )
 
 templ Table(item store.Item, products []store.Product) {
@@ -28,7 +30,7 @@ templ Table(item store.Item, products []store.Product) {
 			for _, p := range products {
 				<tr class="border-b border-black">
 					<td>{ p.Name }</td>
-					<td>{ fmt.Sprintf("US$%.2f", float64(p.Price)/100.0) }</td>
+					<td>{ currency.DisplayPrice(config.CURRENCY_CODES, p.Price, p.Currency) }</td>
 					if item.Category.Type == store.StoreType {
 						if p.Stock != nil {
 							<td>{ fmt.Sprintf("%d", *p.Stock) }</td>

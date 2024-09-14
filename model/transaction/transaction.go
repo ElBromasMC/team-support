@@ -2,7 +2,7 @@ package transaction
 
 import (
 	"alc/model/checkout"
-	"alc/model/store"
+	"alc/model/currency"
 	"time"
 )
 
@@ -23,7 +23,7 @@ type Transaction struct {
 	Order     checkout.Order
 	Status    TransactionStatus
 	Amount    int
-	Currency  store.Currency
+	Currency  currency.Currency
 	Platform  string
 	CreatedAt time.Time
 	UpdatedAt time.Time

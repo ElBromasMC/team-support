@@ -114,7 +114,7 @@ func main() {
 	e.Use(session.Middleware(sessions.NewCookieStore([]byte(key))))
 
 	authMiddleware := middle.Auth(us)
-	cartMiddleware := middle.Cart(ps)
+	cartMiddleware := middle.Cart(ps, cs)
 
 	// Static files
 	static(e)

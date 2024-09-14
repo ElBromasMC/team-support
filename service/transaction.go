@@ -2,7 +2,7 @@ package service
 
 import (
 	"alc/model/checkout"
-	"alc/model/store"
+	"alc/model/currency"
 	"alc/model/transaction"
 	"context"
 	"net/http"
@@ -36,7 +36,7 @@ func (ts Transaction) GetTransaction(order checkout.Order) (transaction.Transact
 	return trans, nil
 }
 
-func (ts Transaction) InsertTransaction(order checkout.Order, amount int, currency store.Currency, platform string) (transaction.Transaction, error) {
+func (ts Transaction) InsertTransaction(order checkout.Order, amount int, currency currency.Currency, platform string) (transaction.Transaction, error) {
 	var trans transaction.Transaction
 	sql := `INSERT INTO store_transactions
 	(order_id, amount, platform, currency)

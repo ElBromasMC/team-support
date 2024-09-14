@@ -1,12 +1,13 @@
 package checkout
 
 import (
-	"fmt"
 	"alc/model/checkout"
+	"alc/model/currency"
 	"alc/view/layout"
+	"fmt"
 )
 
-templ PreviewPage(order checkout.Order, products []checkout.OrderProduct, transUuid string) {
+templ PreviewPage(order checkout.Order, products []checkout.OrderProduct, transUuid string, rate currency.ExchangeRate) {
 	@layout.Base(fmt.Sprintf("%d", order.PurchaseOrder)) {
 		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
 			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:min-h-[45rem] lg:px-9">
@@ -36,7 +37,7 @@ templ PreviewPage(order checkout.Order, products []checkout.OrderProduct, transU
 					<hr class="border-gray-400 lg:hidden"/>
 					<section class="filter grayscale">
 						<!-- Products information -->
-						@OrderProducts(products)
+						@OrderProducts(products, rate)
 					</section>
 				</section>
 			</div>

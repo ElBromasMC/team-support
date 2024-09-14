@@ -1,14 +1,15 @@
 package checkout
 
 import (
+	"alc/config"
+	"alc/model/cart"
+	"alc/model/checkout"
+	"alc/model/currency"
 	"fmt"
 	"path"
-	"alc/model/checkout"
-	"alc/model/cart"
-	"alc/config"
 )
 
-templ CartProducts(items []cart.Item) {
+templ CartProducts(items []cart.Item, rate currency.ExchangeRate) {
 	<h2 class="font-bold text-2xl">
 		Resumen del pedido
 		<span>{ fmt.Sprintf("(%d)", TotalProducts(items)) }</span>
@@ -32,7 +33,13 @@ templ CartProducts(items []cart.Item) {
 					<h3 class="font-bold text-sm">{ i.Product.Item.Name + " - " + i.Product.Name }</h3>
 					<div class="text-sm text-livid">
 						<span class="font-bold">Precio:</span>
-						<span>{ ToUSD(i.Product.Price) }</span>
+						<span>
+							if price, err := i.CalculateIndividualPrice(rate); err != nil {
+								ERROR
+							} else {
+								{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+							}
+						</span>
 					</div>
 					<div class="text-sm text-livid">
 						<span class="font-bold">Cantidad:</span>
@@ -46,7 +53,13 @@ templ CartProducts(items []cart.Item) {
 					}
 					<div class="text-sm text-navy">
 						<span class="font-bold">Subtotal:</span>
-						<span>{ ToUSD(i.CalculateSubtotal()) }</span>
+						<span>
+							if price, err := i.CalculateSubtotal(rate); err != nil {
+								ERROR
+							} else {
+								{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+							}
+						</span>
 					</div>
 				</div>
 			</li>
@@ -55,12 +68,18 @@ templ CartProducts(items []cart.Item) {
 	<div class="mt-3">
 		<div class="flex justify-between text-2xl">
 			<span class="font-semibold">Total:</span>
-			<span>{ ToUSD(cart.CalculateAmount(items)) }</span>
+			<span>
+				if amount, err := cart.CalculateAmount(rate, items); err != nil {
+					ERROR
+				} else {
+					{ currency.DisplayPrice(config.CURRENCY_CODES, amount, rate.To()) }
+				}
+			</span>
 		</div>
 	</div>
 }
 
-templ OrderProducts(products []checkout.OrderProduct) {
+templ OrderProducts(products []checkout.OrderProduct, rate currency.ExchangeRate) {
 	<h2 class="text-2xl font-bold">Información del pedido</h2>
 	<ul class="space-y-3 mt-3">
 		for _, p := range products {
@@ -70,7 +89,13 @@ templ OrderProducts(products []checkout.OrderProduct) {
 				</h3>
 				<div class="text-sm text-livid">
 					<span class="font-bold">Precio:</span>
-					<span>{ ToUSD(p.ProductPrice) }</span>
+					<span>
+						if price, err := p.CalculateIndividualPrice(rate); err != nil {
+							ERROR
+						} else {
+							{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+						}
+					</span>
 				</div>
 				<div class="text-sm text-livid">
 					<span class="font-bold">Cantidad:</span>
@@ -84,7 +109,13 @@ templ OrderProducts(products []checkout.OrderProduct) {
 				}
 				<div class="text-sm text-navy">
 					<span class="font-bold">Subtotal:</span>
-					<span>{ ToUSD(p.CalculateSubtotal()) }</span>
+					<span>
+						if price, err := p.CalculateSubtotal(rate); err != nil {
+							ERROR
+						} else {
+							{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+						}
+					</span>
 				</div>
 			</li>
 		}
@@ -92,7 +123,13 @@ templ OrderProducts(products []checkout.OrderProduct) {
 	<div class="mt-3">
 		<div class="flex justify-between text-2xl">
 			<span class="font-semibold">Total:</span>
-			<span>{ ToUSD(checkout.CalculateAmount(products)) }</span>
+			<span>
+				if amount, err := checkout.CalculateAmount(rate, products); err != nil {
+					ERROR
+				} else {
+					{ currency.DisplayPrice(config.CURRENCY_CODES, amount, rate.To()) }
+				}
+			</span>
 		</div>
 	</div>
 }

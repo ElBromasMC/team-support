@@ -3,6 +3,7 @@ package layout
 import (
 	"alc/model/auth"
 	"alc/model/cart"
+	"alc/model/currency"
 	view "alc/view/cart"
 )
 
@@ -60,7 +61,7 @@ templ Header() {
 				class="ml-auto lg:ml-16"
 				hx-on::after-swap="this.querySelector('#cart-dialog').showModal()"
 			>
-				@view.Show(cart.GetItems(ctx))
+				@view.Show(cart.GetItems(ctx), currency.GetExchangeRate(ctx))
 			</div>
 			if user, ok := auth.GetUser(ctx); !ok {
 				<a class="flex items-center justify-center w-8 h-8 ml-3 text-livid lg:ml-16" href="/login">

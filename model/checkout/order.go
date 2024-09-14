@@ -2,8 +2,10 @@ package checkout
 
 import (
 	"alc/model/auth"
+	"alc/model/currency"
 	"alc/model/store"
 	"errors"
+	"math"
 	"net/mail"
 	"strings"
 	"time"
@@ -55,7 +57,7 @@ type OrderProduct struct {
 	ProductItem       string
 	ProductName       string
 	ProductPrice      int
-	ProductCurrency   store.Currency
+	ProductCurrency   currency.Currency
 	ProductDetails    map[string]string
 	ProductPartNumber string
 	Status            OrderStatus
@@ -93,4 +95,36 @@ func (order Order) Normalize() (Order, error) {
 	}
 
 	return order, nil
+}
+
+// Order product management
+
+func (p OrderProduct) CalculateIndividualPrice(r currency.ExchangeRate) (int, error) {
+	rate, ok := r.Get(p.ProductCurrency)
+	if !ok {
+		return 0, errors.New("invalid currency")
+	}
+	newPrice := float64(p.ProductPrice) * rate
+	return int(math.Round(newPrice)), nil
+}
+
+func (p OrderProduct) CalculateSubtotal(r currency.ExchangeRate) (int, error) {
+	rate, ok := r.Get(p.ProductCurrency)
+	if !ok {
+		return 0, errors.New("invalid currency")
+	}
+	newPrice := float64(p.Quantity) * float64(p.ProductPrice) * rate
+	return int(math.Round(newPrice)), nil
+}
+
+func CalculateAmount(r currency.ExchangeRate, products []OrderProduct) (int, error) {
+	amount := 0
+	for _, product := range products {
+		subtotal, err := product.CalculateSubtotal(r)
+		if err != nil {
+			return 0, err
+		}
+		amount += subtotal
+	}
+	return amount, nil
 }

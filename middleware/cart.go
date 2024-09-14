@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"alc/config"
 	"alc/model/cart"
+	"alc/model/currency"
 	"alc/service"
 	"context"
 
@@ -9,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Cart(ps service.Public) echo.MiddlewareFunc {
+func Cart(ps service.Public, cs service.Currency) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			sess, err := session.Get(cart.SessionName, c)
@@ -41,8 +43,15 @@ func Cart(ps service.Public) echo.MiddlewareFunc {
 				items = append(items, item)
 			}
 
+			// Get exchange rate
+			rate, err := cs.GetExchangeRate(config.STORE_CURRENCY)
+			if err != nil {
+				return err
+			}
+
 			// Attach items to request context
 			ctx := context.WithValue(c.Request().Context(), cart.ItemsKey{}, items)
+			ctx = context.WithValue(ctx, currency.RateKey{}, rate)
 			c.SetRequest(c.Request().WithContext(ctx))
 			return next(c)
 		}

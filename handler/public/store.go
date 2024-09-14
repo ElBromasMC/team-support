@@ -117,5 +117,11 @@ func (h *Handler) HandleStoreItemShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, view.Item(item, products, imgs))
+	// Get exchange rate
+	rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, view.Item(item, products, imgs, rate))
 }

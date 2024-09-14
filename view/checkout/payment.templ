@@ -1,12 +1,13 @@
 package checkout
 
 import (
-	"alc/view/layout"
 	"alc/model/checkout"
+	"alc/model/currency"
 	"alc/model/payment"
+	"alc/view/layout"
 )
 
-templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields []payment.FormData, fail bool) {
+templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields []payment.FormData, fail bool, rate currency.ExchangeRate) {
 	@layout.Base("Pago") {
 		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
 			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:px-9">
@@ -21,7 +22,7 @@ templ PaymentPage(order checkout.Order, products []checkout.OrderProduct, fields
 					<hr class="border-gray-400 lg:hidden"/>
 					<!-- Order summary -->
 					<section class="filter grayscale lg:col-span-1">
-						@OrderProducts(products)
+						@OrderProducts(products, rate)
 					</section>
 				</section>
 			</div>

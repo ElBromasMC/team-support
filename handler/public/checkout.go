@@ -29,7 +29,14 @@ func (h *Handler) HandleCheckoutShow(c echo.Context) error {
 	if len(items) == 0 {
 		return c.Redirect(http.StatusFound, "/store")
 	}
-	return util.Render(c, http.StatusOK, view.BillingPage(items, msg))
+
+	// Get exchange rate
+	rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, view.BillingPage(items, msg, rate))
 }
 
 // POST "/checkout/orders"
@@ -109,6 +116,12 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		return err
 	}
 
+	// Get exchange rate
+	rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
+	if err != nil {
+		return err
+	}
+
 	// Create transaction if not exists
 	trans, err := h.TransactionService.GetTransaction(order)
 	if err != nil {
@@ -134,11 +147,11 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		}
 
 		// Create and attach transaction
-		amount, err := h.CurrencyService.CalculateOrderProductsAmount(products, config.STORE_CURRENCY)
+		amount, err := checkout.CalculateAmount(rate, products)
 		if err != nil {
 			return err
 		}
-		trans, err = h.TransactionService.InsertTransaction(order, amount, config.STORE_CURRENCY, "IZIPAY")
+		trans, err = h.TransactionService.InsertTransaction(order, amount, rate.To(), "IZIPAY")
 		if err != nil {
 			return err
 		}
@@ -180,7 +193,7 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, view.PaymentPage(order, products, formFields, fail))
+	return util.Render(c, http.StatusOK, view.PaymentPage(order, products, formFields, fail, rate))
 }
 
 // POST "/checkout/orders/:orderID/preview"
@@ -203,6 +216,12 @@ func (h *Handler) HandleCheckoutOrderPreview(c echo.Context) error {
 	}
 
 	products, err := h.OrderService.GetOrderProducts(order)
+	if err != nil {
+		return err
+	}
+
+	// Get exchange rate
+	rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
 	if err != nil {
 		return err
 	}
@@ -247,7 +266,7 @@ func (h *Handler) HandleCheckoutOrderPreview(c echo.Context) error {
 	}
 	sess.Save(c.Request(), c.Response())
 
-	return util.Render(c, http.StatusOK, view.PreviewPage(order, products, transUuid))
+	return util.Render(c, http.StatusOK, view.PreviewPage(order, products, transUuid, rate))
 }
 
 // GET "/checkout/orders/:orderID"
@@ -260,6 +279,12 @@ func (h *Handler) HandleCheckoutOrderShow(c echo.Context) error {
 
 	// Query order
 	order, err := h.OrderService.GetOrderById(orderID)
+	if err != nil {
+		return err
+	}
+
+	// Get exchange rate
+	rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
 	if err != nil {
 		return err
 	}
@@ -282,5 +307,5 @@ func (h *Handler) HandleCheckoutOrderShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, view.TrackingPage(order, products))
+	return util.Render(c, http.StatusOK, view.TrackingPage(order, products, rate))
 }

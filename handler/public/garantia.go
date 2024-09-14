@@ -1,6 +1,7 @@
 package public
 
 import (
+	"alc/config"
 	"alc/handler/util"
 	"alc/model/store"
 	"alc/view/garantia"
@@ -55,5 +56,11 @@ func (h *Handler) HandleGarantiaItemShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, garantia.ShowItem(item, products))
+	// Get exchange rate
+	rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
+	if err != nil {
+		return err
+	}
+
+	return util.Render(c, http.StatusOK, garantia.ShowItem(item, products, rate))
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"alc/config"
 	"alc/model/checkout"
 	"alc/model/payment"
 	"alc/model/transaction"
@@ -95,6 +96,12 @@ func (h *Handler) HandleIzipayPayNotification(c echo.Context) error {
 				return c.NoContent(http.StatusOK)
 			}
 
+			// Get exchange rate
+			rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
+			if err != nil {
+				// TODO
+			}
+
 			// Proceed only if the sync status is 'PENDING'
 			if order.SyncStatus != checkout.Pending {
 				return c.NoContent(http.StatusOK)
@@ -114,7 +121,7 @@ func (h *Handler) HandleIzipayPayNotification(c echo.Context) error {
 					return c.NoContent(http.StatusOK)
 				}
 				msg1.Subject(fmt.Sprintf("Error al procesar la orden %d", order.PurchaseOrder))
-				body1, err := templ.ToGoHTML(context.Background(), view.ClientErrorNotification(order, products, h.EmailService.GetWebHostname()))
+				body1, err := templ.ToGoHTML(context.Background(), view.ClientErrorNotification(order, products, h.EmailService.GetWebHostname(), rate))
 				if err != nil {
 					return c.NoContent(http.StatusOK)
 				}
@@ -129,7 +136,7 @@ func (h *Handler) HandleIzipayPayNotification(c echo.Context) error {
 				}
 				msg2.Subject(fmt.Sprintf("Error al procesar la orden %d", order.PurchaseOrder))
 				body2, err := templ.ToGoHTML(context.Background(), view.CompanyErrorNotification(order, products, h.EmailService.GetWebHostname(),
-					transUuid, transDate))
+					transUuid, transDate, rate))
 				if err != nil {
 					return c.NoContent(http.StatusOK)
 				}
@@ -151,7 +158,7 @@ func (h *Handler) HandleIzipayPayNotification(c echo.Context) error {
 					return c.NoContent(http.StatusOK)
 				}
 				msg1.Subject(fmt.Sprintf("Confirmación de la orden %d", order.PurchaseOrder))
-				body1, err := templ.ToGoHTML(context.Background(), view.ClientSuccessNotification(order, products, h.EmailService.GetWebHostname()))
+				body1, err := templ.ToGoHTML(context.Background(), view.ClientSuccessNotification(order, products, h.EmailService.GetWebHostname(), rate))
 				if err != nil {
 					return c.NoContent(http.StatusOK)
 				}
@@ -166,7 +173,7 @@ func (h *Handler) HandleIzipayPayNotification(c echo.Context) error {
 				}
 				msg2.Subject(fmt.Sprintf("Orden %d procesada exitosamente", order.PurchaseOrder))
 				body2, err := templ.ToGoHTML(context.Background(), view.CompanySuccessNotification(order, products, h.EmailService.GetWebHostname(),
-					transUuid, transDate))
+					transUuid, transDate, rate))
 				if err != nil {
 					return c.NoContent(http.StatusOK)
 				}

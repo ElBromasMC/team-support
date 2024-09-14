@@ -1,21 +1,9 @@
 package checkout
 
 import (
-	"alc/config"
 	"alc/model/cart"
-	"alc/model/store"
-	"fmt"
 	"time"
 )
-
-func DisplayPrice(value int, currency store.Currency) string {
-	code, ok := config.CURRENCY_CODES[currency]
-	if !ok {
-		code = ""
-	}
-
-	return fmt.Sprintf("%s %.2f", code, float64(value)/100.0)
-}
 
 func TotalProducts(items []cart.Item) int {
 	count := 0

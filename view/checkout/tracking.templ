@@ -1,12 +1,13 @@
 package checkout
 
 import (
-	"fmt"
 	"alc/model/checkout"
+	"alc/model/currency"
 	"alc/view/layout"
+	"fmt"
 )
 
-templ TrackingPage(order checkout.Order, products []checkout.OrderProduct) {
+templ TrackingPage(order checkout.Order, products []checkout.OrderProduct, rate currency.ExchangeRate) {
 	@layout.Base(fmt.Sprintf("%d", order.PurchaseOrder)) {
 		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
 			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:min-h-[45rem] lg:px-9">
@@ -19,7 +20,7 @@ templ TrackingPage(order checkout.Order, products []checkout.OrderProduct) {
 					<hr class="border-gray-400 lg:hidden"/>
 					<!-- Products information -->
 					<section class="filter grayscale">
-						@OrderProducts(products)
+						@OrderProducts(products, rate)
 					</section>
 				</section>
 			</div>

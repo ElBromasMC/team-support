@@ -1,9 +1,11 @@
 package cart
 
 import (
+	"alc/model/currency"
 	"alc/model/store"
 	"context"
 	"errors"
+	"math"
 	"strings"
 	"unicode"
 )
@@ -73,4 +75,31 @@ func (item Item) ToRequest() ItemRequest {
 func GetItems(ctx context.Context) []Item {
 	items, _ := ctx.Value(ItemsKey{}).([]Item)
 	return items
+}
+
+// Cart item management
+
+func (item Item) CalculateIndividualPrice(r currency.ExchangeRate) (int, error) {
+	return item.Product.CalculateIndividualPrice(r)
+}
+
+func (item Item) CalculateSubtotal(r currency.ExchangeRate) (int, error) {
+	rate, ok := r.Get(item.Product.Currency)
+	if !ok {
+		return 0, errors.New("invalid currency")
+	}
+	newPrice := float64(item.Quantity) * float64(item.Product.Price) * rate
+	return int(math.Round(newPrice)), nil
+}
+
+func CalculateAmount(r currency.ExchangeRate, items []Item) (int, error) {
+	amount := 0
+	for _, item := range items {
+		subtotal, err := item.CalculateSubtotal(r)
+		if err != nil {
+			return 0, err
+		}
+		amount += subtotal
+	}
+	return amount, nil
 }

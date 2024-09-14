@@ -2,6 +2,7 @@ package garantia
 
 import (
 	"alc/config"
+	"alc/model/currency"
 	"alc/model/store"
 	"alc/view/layout"
 	"fmt"
@@ -34,7 +35,7 @@ script HandleProductChange() {
 	});
 }
 
-templ ShowItem(item store.Item, products []store.Product) {
+templ ShowItem(item store.Item, products []store.Product, rate currency.ExchangeRate) {
 	@layout.BasePage(item.Name) {
 		<main>
 			<div class="grid gap-9 px-4 py-9 max-w-7xl mx-auto lg:grid-cols-[3fr_2fr] lg:gap-12">
@@ -73,7 +74,11 @@ templ ShowItem(item store.Item, products []store.Product) {
 					<h2 class="text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>
 					<p id="garantia:price" class="text-3xl font-semibold text-navy">
 						if len(products) >= 1 {
-							{ fmt.Sprintf("US$ %.2f", float64(products[0].Price)/100.0) }
+							if price, err := products[0].CalculateIndividualPrice(rate); err != nil {
+								ERROR
+							} else {
+								{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+							}
 						} else {
 							No disponible!
 						}
@@ -114,7 +119,11 @@ templ ShowItem(item store.Item, products []store.Product) {
 								for _, p := range products {
 									<option
 										value={ fmt.Sprintf("%d", p.Id) }
-										data-price={ fmt.Sprintf("US$ %.2f", float64(p.Price)/100.0) }
+										if price, err := p.CalculateIndividualPrice(rate); err != nil {
+											data-price="ERROR"
+										} else {
+											data-price={ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+										}
 									>{ p.Name }</option>
 								}
 							</select>

@@ -3,11 +3,12 @@ package checkout
 import (
 	"alc/model/auth"
 	"alc/model/cart"
-	"alc/view/layout"
 	"alc/model/checkout"
+	"alc/model/currency"
+	"alc/view/layout"
 )
 
-templ BillingPage(items []cart.Item, msg string) {
+templ BillingPage(items []cart.Item, msg string, rate currency.ExchangeRate) {
 	@layout.Base("Checkout") {
 		<main class="py-12 min-h-dvh bg-sky-100 sm:px-12">
 			<div class="px-4 py-12 mx-auto w-full max-w-7xl bg-white lg:px-9">
@@ -26,7 +27,7 @@ templ BillingPage(items []cart.Item, msg string) {
 					<hr class="border-gray-400 lg:hidden"/>
 					<!-- Cart summary -->
 					<div class="lg:col-span-1">
-						@CartProducts(items)
+						@CartProducts(items, rate)
 					</div>
 				</section>
 			</div>

@@ -1,6 +1,7 @@
 package public
 
 import (
+	"alc/config"
 	"alc/handler/util"
 	"alc/model/cart"
 	"alc/model/store"
@@ -79,6 +80,12 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 	// Get cart items
 	items := cart.GetItems(c.Request().Context())
 
+	// Get exchange rate
+	rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
+	if err != nil {
+		return err
+	}
+
 	// Insert the new item
 	found := false
 	for n, i := range items {
@@ -133,7 +140,7 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error al guardar el item")
 	}
 
-	return util.Render(c, http.StatusOK, view.Show(items))
+	return util.Render(c, http.StatusOK, view.Show(items, rate))
 }
 
 // DELETE "/cart"
@@ -146,6 +153,12 @@ func (h *Handler) HandleRemoveCartItem(c echo.Context) error {
 
 	// Get cart items
 	prevItems := cart.GetItems(c.Request().Context())
+
+	// Get exchange rate
+	rate, err := h.CurrencyService.GetExchangeRate(config.STORE_CURRENCY)
+	if err != nil {
+		return err
+	}
 
 	// Remove cart item
 	items := make([]cart.Item, 0, len(prevItems))
@@ -174,5 +187,5 @@ func (h *Handler) HandleRemoveCartItem(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error al eliminar el item")
 	}
 
-	return util.Render(c, http.StatusOK, view.Show(items))
+	return util.Render(c, http.StatusOK, view.Show(items, rate))
 }

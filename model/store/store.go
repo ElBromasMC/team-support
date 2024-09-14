@@ -2,11 +2,15 @@ package store
 
 import (
 	"alc/model/auth"
+	"alc/model/currency"
 	"errors"
+	"math"
 	"strings"
 	"time"
 	"unicode"
 )
+
+// Store management
 
 type Image struct {
 	Id       int    `json:"id"`
@@ -20,6 +24,22 @@ const (
 	StoreType    Type = "STORE"
 	GarantiaType Type = "GARANTIA"
 )
+
+func (t Type) ToSlug() string {
+	if t == GarantiaType {
+		return "garantia"
+	} else {
+		return "store"
+	}
+}
+
+func (t Type) ToTitle() string {
+	if t == GarantiaType {
+		return "Garantías"
+	} else {
+		return "Tienda"
+	}
+}
 
 type Category struct {
 	Id          int    `json:"id"`
@@ -41,69 +61,18 @@ type Item struct {
 	Slug            string   `json:"slug"`
 }
 
-type Currency string
-
-const (
-	USD Currency = "USD"
-	PEN Currency = "PEN"
-)
-
 type Product struct {
 	Id                    int               `json:"id"`
 	Item                  Item              `json:"item"`
 	Name                  string            `json:"name"`
 	Price                 int               `json:"price"`
-	Currency              Currency          `json:"currency"`
+	Currency              currency.Currency `json:"currency"`
 	Stock                 *int              `json:"stock"`
 	Details               map[string]string `json:"details"`
 	PartNumber            string            `json:"partNumber"`
 	AcceptBeforeSixMonths bool              `json:"acceptBefore"`
 	AcceptAfterSixMonths  bool              `json:"acceptAfter"`
 	Slug                  string            `json:"slug"`
-}
-
-type ProductDiscount struct {
-	Id            int
-	Product       Product
-	DiscountValue int
-	ValidFrom     time.Time
-	ValidUntil    time.Time
-	CouponCode    *string
-	MinimumAmount *int
-	MaximumAmount *int
-}
-
-// Comment management
-type ItemComment struct {
-	Id          int
-	Item        Item
-	CommentedBy auth.User
-	Title       string
-	Message     string
-	Rating      int
-	UpVotes     int
-	DownVotes   int
-	IsEdited    bool
-	CreatedAt   time.Time
-	EditedAt    time.Time
-}
-
-// Serial management
-type Device struct {
-	Id                int
-	Serie             string
-	Valid             bool
-	IsBeforeSixMonths bool
-	IsAfterSixMonths  bool
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-}
-
-type DeviceHistory struct {
-	Id       int
-	Device   Device
-	IssuedBy string
-	IssuedAt time.Time
 }
 
 func (product Product) Normalize() (Product, error) {
@@ -136,6 +105,52 @@ func (product Product) Normalize() (Product, error) {
 	return product, nil
 }
 
+type ProductDiscount struct {
+	Id            int
+	Product       Product
+	DiscountValue int
+	ValidFrom     time.Time
+	ValidUntil    time.Time
+	CouponCode    *string
+	MinimumAmount *int
+	MaximumAmount *int
+}
+
+// Comment management
+
+type ItemComment struct {
+	Id          int
+	Item        Item
+	CommentedBy auth.User
+	Title       string
+	Message     string
+	Rating      int
+	UpVotes     int
+	DownVotes   int
+	IsEdited    bool
+	CreatedAt   time.Time
+	EditedAt    time.Time
+}
+
+// Serial management
+
+type Device struct {
+	Id                int
+	Serie             string
+	Valid             bool
+	IsBeforeSixMonths bool
+	IsAfterSixMonths  bool
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
+
+type DeviceHistory struct {
+	Id       int
+	Device   Device
+	IssuedBy string
+	IssuedAt time.Time
+}
+
 func (device Device) Normalize() (Device, error) {
 	// Remove spaces and uppercase serial
 	device.Serie = strings.Map(func(r rune) rune {
@@ -154,18 +169,11 @@ func (device Device) Normalize() (Device, error) {
 
 }
 
-func (t Type) ToSlug() string {
-	if t == GarantiaType {
-		return "garantia"
-	} else {
-		return "store"
+func (product Product) CalculateIndividualPrice(r currency.ExchangeRate) (int, error) {
+	rate, ok := r.Get(product.Currency)
+	if !ok {
+		return 0, errors.New("invalid currency")
 	}
-}
-
-func (t Type) ToTitle() string {
-	if t == GarantiaType {
-		return "Garantías"
-	} else {
-		return "Tienda"
-	}
+	newPrice := float64(product.Price) * rate
+	return int(math.Round(newPrice)), nil
 }

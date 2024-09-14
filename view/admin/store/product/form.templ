@@ -1,9 +1,10 @@
 package product 
 
 import (
+	"alc/model/currency"
+	"alc/model/store"
 	"fmt"
 	"path"
-	"alc/model/store"
 )
 
 templ InsertionForm(item store.Item) {
@@ -21,8 +22,15 @@ templ InsertionForm(item store.Item) {
 			<input class="block w-full border border-livid" type="text" name="name" required/>
 		</div>
 		<div>
+			<label>Divisa:</label>
+			<select class="block w-full border border-livid" name="currency" required>
+				<option value="USD">USD</option>
+				<option value="PEN">PEN</option>
+			</select>
+		</div>
+		<div>
 			<label>Precio:</label>
-			<input class="block w-full border border-livid" placeholder="US$" type="number" min="0" step="0.01" name="price" required/>
+			<input class="block w-full border border-livid" type="number" min="0" step="0.01" name="price" required/>
 		</div>
 		if item.Category.Type == store.StoreType {
 			<div>
@@ -71,10 +79,30 @@ templ UpdateForm(product store.Product) {
 			<input class="block w-full border border-livid" type="text" name="name" value={ product.Name } required/>
 		</div>
 		<div>
+			<label>Divisa:</label>
+			<select class="block w-full border border-livid" name="currency" required>
+				<option
+					value="USD"
+					if product.Currency == currency.USD {
+						selected
+					}
+				>
+					USD
+				</option>
+				<option
+					value="PEN"
+					if product.Currency == currency.PEN {
+						selected
+					}
+				>
+					PEN
+				</option>
+			</select>
+		</div>
+		<div>
 			<label>Precio:</label>
 			<input
 				class="block w-full border border-livid"
-				placeholder="US$"
 				type="number"
 				min="0"
 				step="0.01"

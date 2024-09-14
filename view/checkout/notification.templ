@@ -1,19 +1,21 @@
 package checkout
 
 import (
+	"alc/config"
 	"alc/model/checkout"
+	"alc/model/currency"
 	"encoding/json"
 	"fmt"
 )
 
-templ ClientSuccessNotification(order checkout.Order, products []checkout.OrderProduct, hostname string) {
+templ ClientSuccessNotification(order checkout.Order, products []checkout.OrderProduct, hostname string, rate currency.ExchangeRate) {
 	@EmailLayout("Confirmación de la orden", hostname) {
 		<div class="content">
 			<h1>Confirmación de la orden</h1>
 			<p>
 				Gracias por su compra. Su pedido se ha procesado correctamente. A continuación encontrará los detalles de su pedido:
 			</p>
-			@ClientSummary(order, products)
+			@ClientSummary(order, products, rate)
 			<div class="order-status">
 				<h2>Consulta el estado de tu orden</h2>
 				<p>Puede comprobar el estado de su pedido en cualquier momento haciendo clic en el siguiente botón:</p>
@@ -28,7 +30,7 @@ templ ClientSuccessNotification(order checkout.Order, products []checkout.OrderP
 	}
 }
 
-templ ClientErrorNotification(order checkout.Order, products []checkout.OrderProduct, hostname string) {
+templ ClientErrorNotification(order checkout.Order, products []checkout.OrderProduct, hostname string, rate currency.ExchangeRate) {
 	@EmailLayout("Error al procesar la orden", hostname) {
 		<div class="content">
 			<h1>Error al procesar la orden</h1>
@@ -42,7 +44,7 @@ templ ClientErrorNotification(order checkout.Order, products []checkout.OrderPro
 				<p>Póngase en contacto con nuestro equipo de atención al cliente.</p>
 				<p><a href="mailto:ventas@teamsupportperu.com">ventas@teamsupportperu.com</a></p>
 			</div>
-			@ClientSummary(order, products)
+			@ClientSummary(order, products, rate)
 			<div class="order-status">
 				<h2>Consulta el estado de tu orden</h2>
 				<p>Puede comprobar el estado de su pedido en cualquier momento haciendo clic en el siguiente botón:</p>
@@ -52,28 +54,28 @@ templ ClientErrorNotification(order checkout.Order, products []checkout.OrderPro
 	}
 }
 
-templ CompanySuccessNotification(order checkout.Order, products []checkout.OrderProduct, hostname string, transUuid string, transDate string) {
+templ CompanySuccessNotification(order checkout.Order, products []checkout.OrderProduct, hostname string, transUuid string, transDate string, rate currency.ExchangeRate) {
 	@EmailLayout("Orden procesada exitosamente", hostname) {
 		<div class="content">
 			<h1>Orden procesada exitosamente</h1>
-			@CompanySummary(order, products, transUuid, transDate)
+			@CompanySummary(order, products, transUuid, transDate, rate)
 		</div>
 	}
 }
 
-templ CompanyErrorNotification(order checkout.Order, products []checkout.OrderProduct, hostname string, transUuid string, transDate string) {
+templ CompanyErrorNotification(order checkout.Order, products []checkout.OrderProduct, hostname string, transUuid string, transDate string, rate currency.ExchangeRate) {
 	@EmailLayout("Error al procesar la orden", hostname) {
 		<div class="content">
 			<h1>Error al procesar la orden</h1>
 			<p>
 				Info: Al momento de procesar el stock se detectó una inconsistencia (Stock insuficiente o producto no existente)
 			</p>
-			@CompanySummary(order, products, transUuid, transDate)
+			@CompanySummary(order, products, transUuid, transDate, rate)
 		</div>
 	}
 }
 
-templ ClientSummary(order checkout.Order, products []checkout.OrderProduct) {
+templ ClientSummary(order checkout.Order, products []checkout.OrderProduct, rate currency.ExchangeRate) {
 	<div class="order-details">
 		<h2>Resumen del pedido</h2>
 		<p>
@@ -112,27 +114,45 @@ templ ClientSummary(order checkout.Order, products []checkout.OrderProduct) {
 						<td>{ p.ProductItem + " - " + p.ProductName }</td>
 						<td>{ p.ProductPartNumber }</td>
 						<td>{ fmt.Sprintf("%d", p.Quantity) }</td>
-						<td>{ ToUSD(p.ProductPrice) }</td>
+						<td>
+							if price, err := p.CalculateIndividualPrice(rate); err != nil {
+								ERROR
+							} else {
+								{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+							}
+						</td>
 						<td>
 							if details, err := json.Marshal(p.Details); err == nil {
 								{ string(details) }
 							}
 						</td>
-						<td>{ ToUSD(p.CalculateSubtotal()) }</td>
+						<td>
+							if price, err := p.CalculateSubtotal(rate); err != nil {
+								ERROR
+							} else {
+								{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+							}
+						</td>
 					</tr>
 				}
 			</tbody>
 			<tfoot>
 				<tr>
 					<th colspan="5">Total</th>
-					<th>{ ToUSD(checkout.CalculateAmount(products)) }</th>
+					<th>
+						if amount, err := checkout.CalculateAmount(rate, products); err != nil {
+							ERROR
+						} else {
+							{ currency.DisplayPrice(config.CURRENCY_CODES, amount, rate.To()) }
+						}
+					</th>
 				</tr>
 			</tfoot>
 		</table>
 	</div>
 }
 
-templ CompanySummary(order checkout.Order, products []checkout.OrderProduct, transUuid string, transDate string) {
+templ CompanySummary(order checkout.Order, products []checkout.OrderProduct, transUuid string, transDate string, rate currency.ExchangeRate) {
 	<div class="transaction-details">
 		<h2>Resumen de la transacción</h2>
 		<p>
@@ -204,20 +224,38 @@ templ CompanySummary(order checkout.Order, products []checkout.OrderProduct, tra
 						<td>{ p.ProductCategory + " - " + p.ProductItem + " - " + p.ProductName }</td>
 						<td>{ p.ProductPartNumber }</td>
 						<td>{ fmt.Sprintf("%d", p.Quantity) }</td>
-						<td>{ ToUSD(p.ProductPrice) }</td>
+						<td>
+							if price, err := p.CalculateIndividualPrice(rate); err != nil {
+								ERROR
+							} else {
+								{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+							}
+						</td>
 						<td>
 							if details, err := json.Marshal(p.Details); err == nil {
 								{ string(details) }
 							}
 						</td>
-						<td>{ ToUSD(p.CalculateSubtotal()) }</td>
+						<td>
+							if price, err := p.CalculateSubtotal(rate); err != nil {
+								ERROR
+							} else {
+								{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+							}
+						</td>
 					</tr>
 				}
 			</tbody>
 			<tfoot>
 				<tr>
 					<th colspan="6">Total</th>
-					<th>{ ToUSD(checkout.CalculateAmount(products)) }</th>
+					<th>
+						if amount, err := checkout.CalculateAmount(rate, products); err != nil {
+							ERROR
+						} else {
+							{ currency.DisplayPrice(config.CURRENCY_CODES, amount, rate.To()) }
+						}
+					</th>
 				</tr>
 			</tfoot>
 		</table>

@@ -3,6 +3,7 @@ package store
 import (
 	"alc/config"
 	"alc/handler/util"
+	"alc/model/currency"
 	"alc/model/store"
 	"alc/view/admin/store/bulk"
 	"alc/view/admin/store/bulk/asus"
@@ -97,7 +98,7 @@ func (h *Handler) HandleBulkLoaderProductsInsertion(c echo.Context) error {
 
 		// Attach data
 		product.Item.Id = itemId
-		product.Currency = store.USD
+		product.Currency = currency.USD
 
 		if _, err := h.AdminService.InsertProduct(product); err != nil {
 			productErrors = append(productErrors, product)
@@ -333,7 +334,7 @@ func (h *Handler) HandleBulkLoaderAsusInsertion(c echo.Context) error {
 			continue
 		}
 		product.Item.Id = itemId
-		product.Currency = store.USD
+		product.Currency = currency.USD
 
 		// Insert the product
 		if _, err := h.AdminService.InsertProductWithSlug(product); err != nil {
