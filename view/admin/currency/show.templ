@@ -1,0 +1,54 @@
+package currency
+
+import (
+	"alc/model/currency"
+	"alc/view/component"
+	"alc/view/layout"
+)
+
+templ Show(rate currency.ExchangeRate) {
+	@layout.BaseAdmin("Tasa de cambio") {
+		<!-- Dialogs -->
+		<div>
+			<!-- Update item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<div class="flex gap-4 items-center">
+						<h2 class="font-bold text-2xl">Actualizar</h2>
+						<img id="update-indicator" class="htmx-indicator w-9" src="/static/img/bars.svg"/>
+					</div>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="update-item-form"></div>
+			</dialog>
+		</div>
+		<main>
+			<!-- Navigation -->
+			<div>
+				<span class="font-semibold text-azure"><a href="/admin">Administración</a></span>
+				@component.IconRight()
+				<span class="text-livid">Tasa de cambio</span>
+			</div>
+			<!-- Title -->
+			<h1 class="mt-3 font-bold text-3xl">Tasa de cambio</h1>
+			<!-- Control buttons -->
+			<div>
+				<button
+					class="font-semibold text-azure"
+					hx-get="/admin/currency/update"
+					hx-target="#update-item-form"
+				>
+					Actualizar tasa de cambio
+				</button>
+			</div>
+			<!-- Items show table -->
+			<div id="table-items">
+				@Table(rate)
+			</div>
+		</main>
+	}
+}

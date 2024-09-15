@@ -149,7 +149,7 @@ func (h *Handler) HandleCheckoutPaymentShow(c echo.Context) error {
 		// Create and attach transaction
 		amount, err := checkout.CalculateAmount(rate, products)
 		if err != nil {
-			return err
+			return echo.NewHTTPError(http.StatusInternalServerError, "Error en el servidor de tasa de cambios")
 		}
 		trans, err = h.TransactionService.InsertTransaction(order, amount, rate.To(), "IZIPAY")
 		if err != nil {

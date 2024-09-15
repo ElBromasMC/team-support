@@ -104,6 +104,14 @@ CREATE TABLE IF NOT EXISTS item_images (
 
 CREATE TYPE store_currency AS ENUM ('USD', 'PEN');
 
+CREATE TABLE IF NOT EXISTS exchange_rates (
+    id SERIAL PRIMARY KEY,
+    base_currency store_currency NOT NULL,
+    target_currency store_currency NOT NULL,
+    rate NUMERIC(15, 6) NOT NULL,
+    UNIQUE (base_currency, target_currency)
+);
+
 CREATE TABLE IF NOT EXISTS store_products (
     id SERIAL PRIMARY KEY,
     item_id INT NOT NULL,

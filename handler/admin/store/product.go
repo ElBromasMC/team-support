@@ -2,6 +2,7 @@ package store
 
 import (
 	"alc/handler/util"
+	"alc/model/currency"
 	"alc/model/store"
 	"alc/view/admin/store/product"
 	"math"
@@ -327,7 +328,9 @@ func (h *Handler) HandleProductInsertionFormShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, product.InsertionForm(i))
+	currencies := currency.GetCurrencies()
+
+	return util.Render(c, http.StatusOK, product.InsertionForm(i, currencies))
 }
 
 // GET "/admin/tienda/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/update"
@@ -356,7 +359,9 @@ func (h *Handler) HandleProductUpdateFormShow(c echo.Context) error {
 		return err
 	}
 
-	return util.Render(c, http.StatusOK, product.UpdateForm(p))
+	currencies := currency.GetCurrencies()
+
+	return util.Render(c, http.StatusOK, product.UpdateForm(p, currencies))
 }
 
 // GET "/admin/tienda/type/:typeSlug/categories/:categorySlug/items/:itemSlug/products/:productSlug/delete"

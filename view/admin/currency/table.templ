@@ -1,0 +1,27 @@
+package currency
+
+import (
+	"alc/model/currency"
+	"fmt"
+)
+
+templ Table(rate currency.ExchangeRate) {
+	<table class="table-auto w-full">
+		<thead>
+			<tr class="border-b border-black text-left">
+				<th scope="col">Divisa base</th>
+				<th scope="col">Divisa objetivo</th>
+				<th scope="col">Tasa de cambio</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, pair := range rate.GetTable() {
+				<tr class="border-b border-black">
+					<td>{ string(pair.Curr) }</td>
+					<td>{ string(rate.To()) }</td>
+					<td>{ fmt.Sprintf("%.3f", pair.Rate) }</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

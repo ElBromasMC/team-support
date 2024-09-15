@@ -2,6 +2,7 @@ package main
 
 import (
 	"alc/handler/admin"
+	"alc/handler/admin/currency"
 	"alc/handler/admin/device"
 	"alc/handler/admin/store"
 	"alc/handler/admin/user"
@@ -92,6 +93,7 @@ func main() {
 	sh := store.Handler(ah)
 	uh := user.Handler(ah)
 	dh := device.Handler(ah)
+	ch := currency.Handler(ah)
 	nh := notification.Handler{
 		TransactionService: ts,
 		PaymentService:     pys,
@@ -251,6 +253,13 @@ func main() {
 	g33.GET("/insert", dh.HandleInsertionFormShow)
 	g33.GET("/:deviceId/history", dh.HandleHistoryShow)
 	g33.GET("/:deviceId/desactivate", dh.HandleDeactivationFormShow)
+
+	// Admin currency group
+	g34 := g3.Group("/currency")
+	g34.Use(middle.RoleAdmin)
+	g34.GET("", ch.HandleRateShow)
+	g34.PUT("", ch.HandleRateUpdate)
+	g34.GET("/update", ch.HandleRateUpdateFormShow)
 
 	// Error handler
 	e.HTTPErrorHandler = util.HTTPErrorHandler

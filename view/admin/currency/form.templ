@@ -1,0 +1,52 @@
+package currency
+
+import "alc/model/currency"
+
+templ UpdateForm(rate currency.ExchangeRate, currencies []currency.Currency) {
+	<form
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
+		autocomplete="off"
+		hx-put="/admin/currency"
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+	>
+		<div>
+			<label>Divisa base:</label>
+			<select
+				class="block w-full border border-livid"
+				name="base_currency"
+				required
+			>
+				for _, currency := range currencies {
+					<option value={ string(currency) }>{ string(currency) }</option>
+				}
+			</select>
+		</div>
+		<div>
+			<label>Divisa objetivo:</label>
+			<input
+				class="block w-full border border-livid"
+				type="text"
+				value={ string(rate.To()) }
+				name="target_currency"
+				readonly
+				required
+			/>
+		</div>
+		<div>
+			<label>Tasa de cambio:</label>
+			<input
+				class="block w-full border border-livid"
+				type="number"
+				min="0.001"
+				step="0.001"
+				name="rate"
+				required
+			/>
+		</div>
+		<div class="flex gap-6 !mt-3">
+			<button class="font-bold text-azure" type="submit">Actualizar</button>
+		</div>
+	</form>
+}
