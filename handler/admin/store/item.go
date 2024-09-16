@@ -45,6 +45,7 @@ func (h *Handler) HandleItemInsertion(c echo.Context) error {
 	i.Name = c.FormValue("name")
 	i.Description = c.FormValue("description")
 	i.LongDescription = c.FormValue("longDescription")
+	i.VendorLink = c.FormValue("vendorLink")
 	img, imgErr := c.FormFile("img")
 	largeImg, largeImgErr := c.FormFile("largeImg")
 
@@ -103,6 +104,7 @@ func (h *Handler) HandleItemUpdate(c echo.Context) error {
 	i.Name = c.FormValue("name")
 	i.Description = c.FormValue("description")
 	i.LongDescription = c.FormValue("longDescription")
+	i.VendorLink = c.FormValue("vendorLink")
 	img, imgErr := c.FormFile("img")
 	largeImg, largeImgErr := c.FormFile("largeImg")
 

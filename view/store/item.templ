@@ -7,6 +7,7 @@ import (
 	"alc/view/layout"
 	"fmt"
 	"path"
+	"strings"
 )
 
 script HandleProductChange() {
@@ -78,6 +79,18 @@ templ Item(item store.Item, products []store.Product, imgs []store.Image, rate c
 				<div class="space-y-6 lg:col-span-1 lg:row-span-2">
 					<h2 class="text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>
 					<p>{ item.Description }</p>
+					if len(strings.TrimSpace(item.VendorLink)) != 0 {
+						<a
+							class="inline-flex items-center gap-1 p-2 border-2 rounded-lg border-azure text-azure hover:border-livid hover:text-livid"
+							target="_blank"
+							href={ templ.URL(item.VendorLink) }
+						>
+							<svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+							</svg>
+							<span>Información del Fabricante</span>
+						</a>
+					}
 					<p id="store:price" class="text-3xl font-semibold text-azure">
 						if len(products) >= 1 {
 							if price, err := products[0].CalculateIndividualPrice(rate); err != nil {

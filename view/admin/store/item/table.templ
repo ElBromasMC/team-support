@@ -16,6 +16,7 @@ templ Table(cat store.Category, items []store.Item) {
 				<th scope="col">Miniatura</th>
 				if cat.Type == store.StoreType {
 					<th scope="col">Descripción larga</th>
+					<th class="w-48" scope="col">Link del fabricante</th>
 				}
 				<th scope="col">Acciones</th>
 			</tr>
@@ -44,6 +45,7 @@ templ Table(cat store.Category, items []store.Item) {
 					</td>
 					if cat.Type == store.StoreType {
 						<td>{ i.LongDescription }</td>
+						<td>{ i.VendorLink }</td>
 					}
 					<td>
 						<button

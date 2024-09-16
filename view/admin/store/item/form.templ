@@ -34,12 +34,10 @@ templ InsertionForm(cat store.Category) {
 				<label>Descripción larga:</label>
 				<textarea class="block resize-none w-full h-36 border border-livid" name="longDescription"></textarea>
 			</div>
-			<!--
-				<div>
-					<label>Imagen:</label>
-					<input class="block" type="file" name="largeImg" accept="image/png, image/jpeg, image/webp"/>
-				</div>
-			-->
+			<div>
+				<label>Link del fabricante:</label>
+				<input class="block w-full border border-livid" type="text" name="vendorLink"/>
+			</div>
 		}
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Guardar</button>
@@ -74,12 +72,10 @@ templ UpdateForm(item store.Item) {
 				<label>Descripción larga:</label>
 				<textarea class="block resize-none w-full h-36 border border-livid" name="longDescription">{ item.LongDescription }</textarea>
 			</div>
-			<!--
-				<div>
-					<label>Imagen:</label>
-					<input class="block" type="file" name="largeImg" accept="image/png, image/jpeg, image/webp"/>
-				</div>
-			-->
+			<div>
+				<label>Link del fabricante:</label>
+				<input class="block w-full border border-livid" type="text" name="vendorLink" value={ item.VendorLink }/>
+			</div>
 		}
 		<div class="flex gap-6 !mt-3">
 			<button class="font-bold text-azure" type="submit">Actualizar</button>

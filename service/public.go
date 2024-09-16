@@ -198,7 +198,7 @@ func (ps Public) GetItemsLike(cat store.Category, like string, page int, n int) 
 
 // Check
 func (ps Public) GetItems(cat store.Category) ([]store.Item, error) {
-	rows, err := ps.DB.Query(context.Background(), `SELECT si.id, si.name, si.description, si.long_description, si.slug,
+	rows, err := ps.DB.Query(context.Background(), `SELECT si.id, si.name, si.description, si.long_description, si.slug, si.vendor_link,
 img.id, img.filename, largeimg.id, largeimg.filename
 FROM store_items AS si
 LEFT JOIN images AS img
@@ -218,7 +218,7 @@ ORDER BY si.id DESC`, cat.Id)
 		var imgFilename *string
 		var largeimgId *int
 		var largeimgFilename *string
-		err := row.Scan(&item.Id, &item.Name, &item.Description, &item.LongDescription, &item.Slug,
+		err := row.Scan(&item.Id, &item.Name, &item.Description, &item.LongDescription, &item.Slug, &item.VendorLink,
 			&imgId, &imgFilename, &largeimgId, &largeimgFilename)
 		if imgId != nil {
 			item.Img.Id = *imgId
@@ -245,14 +245,14 @@ func (ps Public) GetItem(cat store.Category, slug string) (store.Item, error) {
 	var imgFilename *string
 	var largeimgId *int
 	var largeimgFilename *string
-	if err := ps.DB.QueryRow(context.Background(), `SELECT si.id, si.name, si.description, si.long_description,
+	if err := ps.DB.QueryRow(context.Background(), `SELECT si.id, si.name, si.description, si.long_description, si.vendor_link,
 img.id, img.filename, largeimg.id, largeimg.filename
 FROM store_items AS si
 LEFT JOIN images AS img
 ON si.img_id = img.id
 LEFT JOIN images AS largeimg
 ON si.largeimg_id = largeimg.id
-WHERE si.category_id = $1 AND si.slug = $2`, cat.Id, slug).Scan(&item.Id, &item.Name, &item.Description, &item.LongDescription,
+WHERE si.category_id = $1 AND si.slug = $2`, cat.Id, slug).Scan(&item.Id, &item.Name, &item.Description, &item.LongDescription, &item.VendorLink,
 		&imgId, &imgFilename, &largeimgId, &largeimgFilename); err != nil {
 		return store.Item{}, echo.NewHTTPError(http.StatusNotFound, "Item not found")
 	}
@@ -280,14 +280,14 @@ func (ps Public) GetItemById(id int) (store.Item, error) {
 	var largeimgFilename *string
 
 	var catId int
-	if err := ps.DB.QueryRow(context.Background(), `SELECT si.name, si.description, si.long_description, si.slug,
+	if err := ps.DB.QueryRow(context.Background(), `SELECT si.name, si.description, si.long_description, si.slug, si.vendor_link,
 img.id, img.filename, largeimg.id, largeimg.filename, si.category_id
 FROM store_items AS si
 LEFT JOIN images AS img
 ON si.img_id = img.id
 LEFT JOIN images AS largeimg
 ON si.largeimg_id = largeimg.id
-WHERE si.id = $1`, id).Scan(&item.Name, &item.Description, &item.LongDescription, &item.Slug,
+WHERE si.id = $1`, id).Scan(&item.Name, &item.Description, &item.LongDescription, &item.Slug, &item.VendorLink,
 		&imgId, &imgFilename, &largeimgId, &largeimgFilename, &catId); err != nil {
 		return store.Item{}, echo.NewHTTPError(http.StatusNotFound, "Item not found")
 	}

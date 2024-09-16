@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS store_items (
     name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL DEFAULT '',
     long_description TEXT NOT NULL DEFAULT '',
+    vendor_link TEXT NOT NULL DEFAULT '',
     img_id INT,
     largeimg_id INT,
     slug VARCHAR(255) NOT NULL,

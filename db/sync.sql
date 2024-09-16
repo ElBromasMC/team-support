@@ -9,6 +9,9 @@ ADD COLUMN IF NOT EXISTS product_currency store_currency NOT NULL DEFAULT 'USD';
 ALTER TABLE store_transactions
 ADD COLUMN IF NOT EXISTS currency store_currency NOT NULL DEFAULT 'USD';
 
+ALTER TABLE store_items
+ADD COLUMN IF NOT EXISTS vendor_link TEXT NOT NULL DEFAULT '';
+
 CREATE TABLE IF NOT EXISTS exchange_rates (
     id SERIAL PRIMARY KEY,
     base_currency store_currency NOT NULL,

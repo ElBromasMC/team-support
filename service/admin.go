@@ -145,9 +145,9 @@ func (as Admin) InsertItem(item store.Item) (int, error) {
 
 	// Insert new item
 	var id int
-	if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_items (category_id, name, description, long_description, img_id, largeimg_id, slug)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id`, item.Category.Id, item.Name, item.Description, item.LongDescription, imgId, largeimgId, slug).Scan(&id); err != nil {
+	if err := as.DB.QueryRow(context.Background(), `INSERT INTO store_items (category_id, name, description, long_description, img_id, largeimg_id, slug, vendor_link)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id`, item.Category.Id, item.Name, item.Description, item.LongDescription, imgId, largeimgId, slug, item.VendorLink).Scan(&id); err != nil {
 		return 0, echo.NewHTTPError(http.StatusInternalServerError, "Error inserting new item into database")
 	}
 	return id, nil
@@ -201,8 +201,8 @@ func (as Admin) UpdateItem(id int, uptItem store.Item) error {
 
 	// Update item
 	if _, err := as.DB.Exec(context.Background(), `UPDATE store_items
-SET name = $1, description = $2, long_description = $3, img_id = $4, largeimg_id = $5
-WHERE id = $6`, uptItem.Name, uptItem.Description, uptItem.LongDescription, imgId, largeimgId, id); err != nil {
+SET name = $1, description = $2, long_description = $3, img_id = $4, largeimg_id = $5, vendor_link = $6
+WHERE id = $7`, uptItem.Name, uptItem.Description, uptItem.LongDescription, imgId, largeimgId, uptItem.VendorLink, id); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Error updating the item into database")
 	}
 

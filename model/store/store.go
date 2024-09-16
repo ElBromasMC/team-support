@@ -56,6 +56,7 @@ type Item struct {
 	Name            string   `json:"name"`
 	Description     string   `json:"description"`
 	LongDescription string   `json:"longDescription"`
+	VendorLink      string   `json:"vendorLink"`
 	Img             Image    `json:"img"`
 	LargeImg        Image    `json:"largeImg"`
 	Slug            string   `json:"slug"`
