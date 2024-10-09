@@ -8,7 +8,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -261,63 +260,103 @@ func (ss Survey) GetResponses(s survey.Survey) ([]survey.Question, []survey.Surv
 		return []survey.Question{}, []survey.SurveyResponse{}, err
 	}
 
-	q_ids := make([]int, 0, len(qs))
-	for _, q := range qs {
-		q_ids = append(q_ids, q.Id)
-	}
+	if len(qs) > 0 {
+		q_ids := make([]int, 0, len(qs))
+		for _, q := range qs {
+			q_ids = append(q_ids, q.Id)
+		}
 
-	sql := `
-	WITH question_list AS (
-		SELECT 
-			unnest($1::int[]) AS question_id,
-			generate_series(1, array_length($1::int[], 1)) AS idx
-	)
-	SELECT
-		sr.id,
-		sr.name,
-		sr.email,
-		sr.phone_number,
-		sr.rating,
-		sr.created_at,
-		array_agg(
-			COALESCE(qr.response_text, '') ORDER BY ql.idx
-		) AS responses
-	FROM
-		survey_respondents sr
-		CROSS JOIN question_list ql
-		LEFT JOIN question_responses qr ON sr.id = qr.respondent_id AND ql.question_id = qr.question_id
-	WHERE
-		sr.survey_id = $2
-	GROUP BY
-		sr.id, sr.name, sr.email, sr.phone_number, sr.rating, sr.created_at
-	ORDER BY
-    	sr.created_at
-	`
-	rows, err := ss.db.Query(context.Background(), sql, q_ids, s.Id)
-	if err != nil {
-		log.Println(err)
-		return []survey.Question{}, []survey.SurveyResponse{}, echo.NewHTTPError(http.StatusInternalServerError)
-	}
-	defer rows.Close()
-
-	responses, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (survey.SurveyResponse, error) {
-		var response survey.SurveyResponse
-		err := row.Scan(
-			&response.Id,
-			&response.Name,
-			&response.Email,
-			&response.PhoneNumber,
-			&response.Rating,
-			&response.CreatedAt,
-			&response.Responses,
+		sql := `
+		WITH question_list AS (
+			SELECT 
+				unnest($1::int[]) AS question_id,
+				generate_series(1, array_length($1::int[], 1)) AS idx
 		)
-		response.Survey = s
-		return response, err
-	})
-	if err != nil {
-		return []survey.Question{}, []survey.SurveyResponse{}, echo.NewHTTPError(http.StatusInternalServerError)
+		SELECT
+			sr.id,
+			sr.name,
+			sr.email,
+			sr.phone_number,
+			sr.rating,
+			sr.created_at,
+			array_agg(
+				COALESCE(qr.response_text, '') ORDER BY ql.idx
+			) AS responses
+		FROM
+			survey_respondents sr
+			CROSS JOIN question_list ql
+			LEFT JOIN question_responses qr ON sr.id = qr.respondent_id AND ql.question_id = qr.question_id
+		WHERE
+			sr.survey_id = $2
+		GROUP BY
+			sr.id, sr.name, sr.email, sr.phone_number, sr.rating, sr.created_at
+		ORDER BY
+			sr.created_at
+		`
+		rows, err := ss.db.Query(context.Background(), sql, q_ids, s.Id)
+		if err != nil {
+			return []survey.Question{}, []survey.SurveyResponse{}, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+		defer rows.Close()
+
+		responses, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (survey.SurveyResponse, error) {
+			var response survey.SurveyResponse
+			err := row.Scan(
+				&response.Id,
+				&response.Name,
+				&response.Email,
+				&response.PhoneNumber,
+				&response.Rating,
+				&response.CreatedAt,
+				&response.Responses,
+			)
+			response.Survey = s
+			return response, err
+		})
+		if err != nil {
+			return []survey.Question{}, []survey.SurveyResponse{}, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+		return qs, responses, nil
+	} else {
+		sql := `
+		SELECT
+			id,
+			name,
+			email,
+			phone_number,
+			rating,
+			created_at
+		FROM
+			survey_respondents
+		WHERE
+			survey_id = $1
+		ORDER BY
+			created_at
+		`
+		rows, err := ss.db.Query(context.Background(), sql, s.Id)
+		if err != nil {
+			return []survey.Question{}, []survey.SurveyResponse{}, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+		defer rows.Close()
+
+		responses, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (survey.SurveyResponse, error) {
+			var response survey.SurveyResponse
+			err := row.Scan(
+				&response.Id,
+				&response.Name,
+				&response.Email,
+				&response.PhoneNumber,
+				&response.Rating,
+				&response.CreatedAt,
+			)
+			response.Survey = s
+			return response, err
+		})
+		if err != nil {
+			return []survey.Question{}, []survey.SurveyResponse{}, echo.NewHTTPError(http.StatusInternalServerError)
+		}
+		return qs, responses, nil
 	}
-	return qs, responses, nil
 }
 
 func getTime(t time.Time) string {

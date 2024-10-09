@@ -13,4 +13,5 @@ type Handler struct {
 	PaymentService     service.Payment
 	DeviceService      service.Device
 	CurrencyService    service.Currency
+	SurveyService      service.Survey
 }

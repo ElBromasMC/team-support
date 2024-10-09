@@ -1,0 +1,79 @@
+package page
+
+import (
+	"alc/config"
+	"alc/model/store"
+	"alc/model/survey"
+	"alc/view/layout"
+	"fmt"
+	"path"
+)
+
+templ Landing(l survey.Landing, qs []survey.Question, imgs []store.Image) {
+	@layout.BasePage("Team Support Services") {
+		<main class="min-h-[calc(100dvh-16rem)]">
+			<!-- Carousel -->
+			if len(imgs) > 0 {
+				<my-carousel class="h-[36rem]" controls indicator autoplay="5000">
+					for _, img := range imgs {
+						<div>
+							<img
+								class="relative object-cover w-full h-full"
+								src={ path.Join(config.IMAGES_PATH, img.Filename) }
+							/>
+						</div>
+					}
+				</my-carousel>
+			}
+			<section>
+				<h2>{ l.Title }</h2>
+				<p>{ l.Content }</p>
+			</section>
+			if l.Survey.Id != 0 {
+				<section>
+					<form
+						class=""
+						enctype="multipart/form-data"
+						autocomplete="off"
+						hx-post={ fmt.Sprintf("/survey/%d", l.Survey.Id) }
+						hx-target="#form-message"
+						hx-encoding="multipart/form-data"
+						hx-on::after-request="this.reset();"
+					>
+						<h3>{ l.Survey.Title }</h3>
+						<div>
+							<label>Nombre y Apellido</label>
+							<input class="" type="text" name="Name" required/>
+						</div>
+						<div>
+							<label>Número</label>
+							<input class="" type="text" name="PhoneNumber"/>
+						</div>
+						<div>
+							<label>Correo</label>
+							<input class="" type="text" name="Email"/>
+						</div>
+						for _, q := range qs {
+							<div>
+								<label>{ q.QuestionText }</label>
+								<input class="" type="text" name={ fmt.Sprintf("Question_%d", q.Id) }/>
+							</div>
+						}
+						<div>
+							<label>En una escala de 1 al 5 ¿Como calificaría nuestro servicio?</label>
+							<select name="Rating" required>
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+							</select>
+						</div>
+						<button class="" type="submit">Enviar</button>
+					</form>
+					<div id="form-message"></div>
+				</section>
+			}
+		</main>
+	}
+}

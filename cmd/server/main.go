@@ -84,6 +84,7 @@ func main() {
 		PaymentService:     pys,
 		DeviceService:      ds,
 		CurrencyService:    cs,
+		SurveyService:      ss,
 	}
 
 	ah := admin.Handler{
@@ -131,6 +132,8 @@ func main() {
 	// Page routes
 	e.GET("/", ph.HandleIndexShow, authMiddleware, cartMiddleware)
 	e.GET("/ticket", ph.HandleTicketShow, authMiddleware, cartMiddleware)
+	e.GET("/landing", ph.HandleLandingShow, authMiddleware, cartMiddleware)
+	e.POST("/survey/:surveyId", ph.HandleSurveyInsertion)
 
 	// Auth routes
 	e.GET("/login", ph.HandleLoginShow)
