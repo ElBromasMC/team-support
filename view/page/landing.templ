@@ -25,14 +25,14 @@ templ Landing(l survey.Landing, qs []survey.Question, imgs []store.Image) {
 					}
 				</my-carousel>
 			}
-			<section>
-				<h2>{ l.Title }</h2>
+			<section class="px-4 py-16 space-y-8 max-w-7xl mx-auto">
+				<h2 class="font-semibold text-3xl text-azure text-center">{ l.Title }</h2>
 				<p>{ l.Content }</p>
 			</section>
 			if l.Survey.Id != 0 {
-				<section>
+				<section class="px-4 pb-16 space-y-8 max-w-7xl mx-auto">
 					<form
-						class=""
+						class="grid px-4 py-9 border rounded-3xl shadow gap-x-9 gap-y-3 lg:grid-cols-2 lg:px-16 lg:py-12"
 						enctype="multipart/form-data"
 						autocomplete="off"
 						hx-post={ fmt.Sprintf("/survey/%d", l.Survey.Id) }
@@ -40,36 +40,42 @@ templ Landing(l survey.Landing, qs []survey.Question, imgs []store.Image) {
 						hx-encoding="multipart/form-data"
 						hx-on::after-request="this.reset();"
 					>
-						<h3>{ l.Survey.Title }</h3>
-						<div>
-							<label>Nombre y Apellido</label>
-							<input class="" type="text" name="Name" required/>
+						<h3 class="font-semibold text-3xl text-azure text-center lg:col-span-2 lg:mb-3">{ l.Survey.Title }</h3>
+						<div class="space-y-2">
+							<label class="font-semibold text-lg text-azure">Nombre y Apellido</label>
+							<input class="block w-full px-2 py-1 rounded-2xl border border-gray-600" type="text" name="Name" required/>
 						</div>
-						<div>
-							<label>Número</label>
-							<input class="" type="text" name="PhoneNumber"/>
+						<div class="space-y-2">
+							<label class="font-semibold text-lg text-azure">Número</label>
+							<input class="block w-full px-2 py-1 rounded-2xl border border-gray-600" type="text" name="PhoneNumber"/>
 						</div>
-						<div>
-							<label>Correo</label>
-							<input class="" type="text" name="Email"/>
+						<div class="space-y-2 lg:col-span-2">
+							<label class="font-semibold text-lg text-azure">Correo</label>
+							<input class="block w-full px-2 py-1 rounded-2xl border border-gray-600" type="text" name="Email"/>
 						</div>
 						for _, q := range qs {
-							<div>
-								<label>{ q.QuestionText }</label>
-								<input class="" type="text" name={ fmt.Sprintf("Question_%d", q.Id) }/>
+							<div class="space-y-2 lg:col-span-2">
+								<label class="font-semibold text-lg text-azure">{ q.QuestionText }</label>
+								<input class="block w-full px-2 py-1 rounded-2xl border border-gray-600" type="text" name={ fmt.Sprintf("Question_%d", q.Id) }/>
 							</div>
 						}
-						<div>
-							<label>En una escala de 1 al 5 ¿Como calificaría nuestro servicio?</label>
-							<select name="Rating" required>
-								<option value="1">1</option>
-								<option value="2">2</option>
-								<option value="3">3</option>
-								<option value="4">4</option>
-								<option value="5">5</option>
-							</select>
+						<div class="space-y-2 lg:col-span-2">
+							<label class="font-semibold text-lg text-azure">
+								En una escala de 1 al 5 ¿Como calificaría nuestro servicio?
+							</label>
+							<div class="flex justify-center">
+								<select class="block w-12 font-semibold text-lg" name="Rating" required>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+								</select>
+							</div>
 						</div>
-						<button class="" type="submit">Enviar</button>
+						<div class="flex justify-center lg:col-span-2">
+							<button class="px-6 py-1 font-semibold text-lg bg-azure text-white rounded-2xl" type="submit">Enviar</button>
+						</div>
 					</form>
 					<div id="form-message"></div>
 				</section>
