@@ -4,6 +4,7 @@ import (
 	"alc/handler/admin"
 	"alc/handler/admin/currency"
 	"alc/handler/admin/device"
+	"alc/handler/admin/page"
 	"alc/handler/admin/store"
 	"alc/handler/admin/user"
 	"alc/handler/notification"
@@ -71,6 +72,7 @@ func main() {
 	ts := service.NewTransactionService(dbpool)
 	pys := service.NewPaymentService(mode, os.Getenv("IZIPAY_STOREID"), os.Getenv("IZIPAY_APIKEY"), os.Getenv("WEBSERVER_HOSTNAME"))
 	cs := service.NewCurrencyService(dbpool)
+	ss := service.NewSurveyService(dbpool)
 
 	// Initialize handlers
 	ph := public.Handler{
@@ -89,11 +91,13 @@ func main() {
 		AuthService:     us,
 		DeviceService:   ds,
 		CurrencyService: cs,
+		SurveyService:   ss,
 	}
 	sh := store.Handler(ah)
 	uh := user.Handler(ah)
 	dh := device.Handler(ah)
 	ch := currency.Handler(ah)
+	gh := page.Handler(ah)
 	nh := notification.Handler{
 		TransactionService: ts,
 		PaymentService:     pys,
@@ -260,6 +264,42 @@ func main() {
 	g34.GET("", ch.HandleRateShow)
 	g34.PUT("", ch.HandleRateUpdate)
 	g34.GET("/update", ch.HandleRateUpdateFormShow)
+
+	g35 := g3.Group("/page")
+	g35.Use(middle.RoleAdmin)
+	g35.GET("", gh.HandleIndexShow)
+
+	g351 := g35.Group("/survey")
+	g351.GET("", gh.HandleSurveysShow)
+	g351.POST("", gh.HandleSurveyInsertion)
+	g351.PUT("/:surveyId", gh.HandleSurveyUpdate)
+	g351.DELETE("/:surveyId", gh.HandleSurveyDeletion)
+	g351.GET("/insert", gh.HandleSurveyInsertionFormShow)
+	g351.GET("/:surveyId/update", gh.HandleSurveyUpdateFormShow)
+	g351.GET("/:surveyId/delete", gh.HandleSurveyDeletionFormShow)
+	g351.GET("/:surveyId/results", gh.HandleSurveyResultsDownload)
+
+	g351.GET("/:surveyId/questions", gh.HandleQuestionsShow)
+	g351.POST("/:surveyId/questions", gh.HandleQuestionInsertion)
+	g351.PUT("/:surveyId/questions/:questionId", gh.HandleQuestionUpdate)
+	g351.DELETE("/:surveyId/questions/:questionId", gh.HandleQuestionDeletion)
+	g351.GET("/:surveyId/questions/insert", gh.HandleQuestionInsertionFormShow)
+	g351.GET("/:surveyId/questions/:questionId/update", gh.HandleQuestionUpdateFormShow)
+	g351.GET("/:surveyId/questions/:questionId/delete", gh.HandleQuestionDeletionFormShow)
+
+	g352 := g35.Group("/landing")
+	g352.GET("", gh.HandleLandingsShow)
+	g352.POST("", gh.HandleLandingInsertion)
+	g352.PUT("/:landingId", gh.HandleLandingUpdate)
+	g352.DELETE("/:landingId", gh.HandleLandingDeletion)
+	g352.PUT("/:landingId/publish", gh.HandleLandingPublication)
+	g352.PUT("/:landingId/hide", gh.HandleLandingHide)
+	g352.PATCH("/:landingId/images", gh.HandleLandingImagesModification)
+	g352.DELETE("/:landingId/images", gh.HandleLandingImageDeletion)
+	g352.GET("/insert", gh.HandleLandingInsertionFormShow)
+	g352.GET("/:landingId/update", gh.HandleLandingUpdateFormShow)
+	g352.GET("/:landingId/delete", gh.HandleLandingDeletionFormShow)
+	g352.GET("/:landingId/images", gh.HandleLandingImagesFormShow)
 
 	// Error handler
 	e.HTTPErrorHandler = util.HTTPErrorHandler

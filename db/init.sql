@@ -284,15 +284,15 @@ CREATE TABLE IF NOT EXISTS survey_respondents (
     email VARCHAR(255) NOT NULL,
     phone_number VARCHAR(25) NOT NULL,
     rating INT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS question_responses (
-    id SERIAL PRIMARY KEY,
     respondent_id INT NOT NULL,
     question_id INT NOT NULL,
-    response_text VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    response_text VARCHAR(255) NOT NULL DEFAULT '',
+    PRIMARY KEY (respondent_id, question_id),
     FOREIGN KEY (respondent_id) REFERENCES survey_respondents(id) ON DELETE CASCADE,
     FOREIGN KEY (question_id) REFERENCES survey_questions(id) ON DELETE CASCADE
 );

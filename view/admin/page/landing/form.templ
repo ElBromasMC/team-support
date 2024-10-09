@@ -1,0 +1,165 @@
+package landing
+
+import (
+	"alc/config"
+	"alc/model/store"
+	"alc/model/survey"
+	"fmt"
+	"path"
+)
+
+templ InsertionForm(surveys []survey.Survey) {
+	<form
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
+		autocomplete="off"
+		hx-post="/admin/page/landing"
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+		hx-on::after-request="this.reset();"
+	>
+		<div>
+			<label>Título:</label>
+			<input class="block w-full border border-livid" type="text" name="Title" required/>
+		</div>
+		<div>
+			<label>Contenido:</label>
+			<textarea class="block resize-none w-full h-36 border border-livid" name="Content"></textarea>
+		</div>
+		<div>
+			<label>Encuesta:</label>
+			<select class="block w-full border border-livid" name="SurveyId" required>
+				<option value="0">NINGUNA</option>
+				for _, survey := range surveys {
+					<option
+						value={ fmt.Sprintf("%d", survey.Id) }
+					>
+						{ fmt.Sprintf("%d - %s", survey.Id, survey.Title) }
+					</option>
+				}
+			</select>
+		</div>
+		<div class="flex gap-6 !mt-3">
+			<button class="font-bold text-azure" type="submit">Guardar</button>
+			<button class="font-bold text-azure" type="reset">Reiniciar</button>
+		</div>
+	</form>
+}
+
+templ UpdateForm(surveys []survey.Survey, landing survey.Landing) {
+	<form
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
+		autocomplete="off"
+		hx-put={ fmt.Sprintf("/admin/page/landing/%d", landing.Id) }
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+	>
+		<div>
+			<label>Título:</label>
+			<input class="block w-full border border-livid" type="text" value={ landing.Title } name="Title" required/>
+		</div>
+		<div>
+			<label>Contenido:</label>
+			<textarea class="block resize-none w-full h-36 border border-livid" name="Content">{ landing.Content }</textarea>
+		</div>
+		<div>
+			<label>Encuesta:</label>
+			<select class="block w-full border border-livid" name="SurveyId" required>
+				<option
+					value="0"
+					if landing.Survey.Id == 0 {
+						selected
+					}
+				>
+					NINGUNA
+				</option>
+				for _, survey := range surveys {
+					<option
+						value={ fmt.Sprintf("%d", survey.Id) }
+						if landing.Survey.Id == survey.Id {
+							selected
+						}
+					>
+						{ fmt.Sprintf("%d - %s", survey.Id, survey.Title) }
+					</option>
+				}
+			</select>
+		</div>
+		<div class="flex gap-6 !mt-3">
+			<button class="font-bold text-azure" type="submit">Actualizar</button>
+		</div>
+	</form>
+}
+
+templ DeletionForm(landing survey.Landing) {
+	<form
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
+		autocomplete="off"
+		hx-delete={ fmt.Sprintf("/admin/page/landing/%d", landing.Id) }
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+	>
+		<div>
+			<label>Título:</label>
+			<input class="block w-full border border-livid" type="text" value={ landing.Title } disabled/>
+		</div>
+		<div class="flex gap-6 !mt-3">
+			<button class="font-bold text-azure" type="submit">Sí</button>
+		</div>
+	</form>
+}
+
+templ ModifyImagesForm(landing survey.Landing, imgs []store.Image) {
+	<div
+		class="mt-3 space-y-2"
+	>
+		<ul class="grid grid-cols-3 gap-3">
+			for _, img := range imgs {
+				<li class="relative w-36 aspect-[7/4] border border-navy rounded overflow-hidden">
+					<div class="absolute w-full p-1 flex justify-end">
+						<form
+							enctype="multipart/form-data"
+							hx-delete={ fmt.Sprintf("/admin/page/landing/%d/images", landing.Id) }
+							hx-target="#modify-item-images-form"
+							hx-indicator="#item-images-indicator"
+							hx-encoding="multipart/form-data"
+						>
+							<input type="hidden" name="Id" value={ fmt.Sprintf("%d", img.Id) } required/>
+							<button class="relative flex items-center justify-center" type="submit">
+								<svg class="w-4 h-4 z-10" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6m0 12L6 6"></path>
+								</svg>
+								<div class="absolute -inset-y-[0.1rem] aspect-square rounded-full bg-gray-300"></div>
+							</button>
+						</form>
+					</div>
+					<img
+						class="relative w-full h-full object-cover -z-10"
+						src={ path.Join(config.IMAGES_PATH, img.Filename) }
+					/>
+				</li>
+			}
+			<li class="w-36 aspect-[7/4] border border-navy rounded overflow-hidden">
+				<label class="w-full h-full flex justify-center items-center cursor-pointer text-navy hover:text-livid" for="img-add">
+					<svg class="w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"></path>
+					</svg>
+				</label>
+				<input
+					id="img-add"
+					class="hidden"
+					type="file"
+					accept="image/png, image/jpeg, image/webp"
+					multiple
+					name="imgs"
+					hx-patch={ fmt.Sprintf("/admin/page/landing/%d/images", landing.Id) }
+					hx-target="#modify-item-images-form"
+					hx-indicator="#item-images-indicator"
+					hx-encoding="multipart/form-data"
+				/>
+			</li>
+		</ul>
+	</div>
+}

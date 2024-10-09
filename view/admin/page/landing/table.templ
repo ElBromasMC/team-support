@@ -1,0 +1,91 @@
+package landing
+
+import (
+	"alc/model/survey"
+	"fmt"
+	"time"
+)
+
+func GetTime(t time.Time) string {
+	loc, _ := time.LoadLocation("America/Lima")
+	locTime := t.In(loc)
+	return locTime.Format(time.DateTime)
+}
+
+templ Table(landings []survey.Landing) {
+	<table class="table-auto w-full">
+		<thead>
+			<tr class="border-b border-black text-left">
+				<th>Título</th>
+				<th class="w-60">Contenido</th>
+				<th>Encuesta</th>
+				<th>Publicado</th>
+				<th>Creado el</th>
+				<th>Acciones</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, landing := range landings {
+				<tr class="border-b border-black">
+					<td>{ landing.Title }</td>
+					<td>{ landing.Content }</td>
+					<td>
+						if landing.Survey.Id != 0 {
+							{ fmt.Sprintf("%d - %s", landing.Survey.Id, landing.Survey.Title) }
+						} else {
+							NO ASIGNADA
+						}
+					</td>
+					<td>
+						if landing.IsPublished {
+							SI
+						} else {
+							NO
+						}
+					</td>
+					<td>{ GetTime(landing.CreatedAt) }</td>
+					<td>
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ fmt.Sprintf("/admin/page/landing/%d/update", landing.Id) }
+							hx-target="#update-item-form"
+						>
+							Editar
+						</button>
+						if !landing.IsPublished {
+							<button
+								class="block font-semibold text-azure"
+								hx-put={ fmt.Sprintf("/admin/page/landing/%d/publish", landing.Id) }
+								hx-target="#table-items"
+							>
+								Publicar
+							</button>
+						} else {
+							<button
+								class="block font-semibold text-azure"
+								hx-put={ fmt.Sprintf("/admin/page/landing/%d/hide", landing.Id) }
+								hx-target="#table-items"
+							>
+								Ocultar
+							</button>
+						}
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ fmt.Sprintf("/admin/page/landing/%d/images", landing.Id) }
+							hx-target="#modify-item-images-form"
+						>
+							Editar imágenes
+						</button>
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ fmt.Sprintf("/admin/page/landing/%d/delete", landing.Id) }
+							hx-target="#delete-item-form"
+						>
+							Borrar
+						</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

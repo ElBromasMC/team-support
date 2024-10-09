@@ -1,0 +1,40 @@
+package question
+
+import (
+	"alc/model/survey"
+	"fmt"
+)
+
+templ Table(questions []survey.Question) {
+	<table class="table-auto w-full">
+		<thead>
+			<tr class="border-b border-black text-left">
+				<th>Pregunta</th>
+				<th>Acciones</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, question := range questions {
+				<tr class="border-b border-black">
+					<td>{ question.QuestionText }</td>
+					<td>
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ fmt.Sprintf("/admin/page/survey/%d/questions/%d/update", question.Survey.Id, question.Id) }
+							hx-target="#update-item-form"
+						>
+							Editar
+						</button>
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ fmt.Sprintf("/admin/page/survey/%d/questions/%d/delete", question.Survey.Id, question.Id) }
+							hx-target="#delete-item-form"
+						>
+							Borrar
+						</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

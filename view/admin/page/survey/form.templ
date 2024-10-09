@@ -1,0 +1,65 @@
+package survey
+
+import (
+	"alc/model/survey"
+	"fmt"
+)
+
+templ InsertionForm() {
+	<form
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
+		autocomplete="off"
+		hx-post="/admin/page/survey"
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+		hx-on::after-request="this.reset();"
+	>
+		<div>
+			<label>Nombre:</label>
+			<input class="block w-full border border-livid" type="text" name="Title" required/>
+		</div>
+		<div class="flex gap-6 !mt-3">
+			<button class="font-bold text-azure" type="submit">Guardar</button>
+			<button class="font-bold text-azure" type="reset">Reiniciar</button>
+		</div>
+	</form>
+}
+
+templ UpdateForm(s survey.Survey) {
+	<form
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
+		autocomplete="off"
+		hx-put={ fmt.Sprintf("/admin/page/survey/%d", s.Id) }
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+	>
+		<div>
+			<label>Nombre:</label>
+			<input class="block w-full border border-livid" type="text" value={ s.Title } name="Title" required/>
+		</div>
+		<div class="flex gap-6 !mt-3">
+			<button class="font-bold text-azure" type="submit">Actualizar</button>
+		</div>
+	</form>
+}
+
+templ DeletionForm(s survey.Survey) {
+	<form
+		class="mt-3 space-y-2"
+		enctype="multipart/form-data"
+		autocomplete="off"
+		hx-delete={ fmt.Sprintf("/admin/page/survey/%d", s.Id) }
+		hx-target="#table-items"
+		hx-encoding="multipart/form-data"
+	>
+		<div>
+			<label>Nombre:</label>
+			<input class="block w-full border border-livid" type="text" value={ s.Title } disabled/>
+		</div>
+		<div class="flex gap-6 !mt-3">
+			<button class="font-bold text-azure" type="submit">Sí</button>
+		</div>
+	</form>
+}

@@ -1,0 +1,39 @@
+package page
+
+import (
+	"alc/view/component"
+	"alc/view/layout"
+)
+
+templ Show() {
+	@layout.BaseAdmin("Administrador de páginas") {
+		<main>
+			<!-- Navigation -->
+			<div>
+				<span class="font-semibold text-azure"><a href="/admin">Administración</a></span>
+				@component.IconRight()
+				<span class="text-livid">Administrador de páginas</span>
+			</div>
+			<!-- Title -->
+			<h1 class="mt-3 font-bold text-3xl">Administrador de páginas</h1>
+			<ul class="mt-6 space-y-2">
+				<li>
+					<a
+						class="font-semibold text-azure"
+						href="/admin/page/survey"
+					>
+						Encuestas
+					</a>
+				</li>
+				<li>
+					<a
+						class="font-semibold text-azure"
+						href="/admin/page/landing"
+					>
+						Landing
+					</a>
+				</li>
+			</ul>
+		</main>
+	}
+}

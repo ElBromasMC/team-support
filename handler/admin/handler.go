@@ -9,4 +9,5 @@ type Handler struct {
 	AuthService     service.Auth
 	DeviceService   service.Device
 	CurrencyService service.Currency
+	SurveyService   service.Survey
 }

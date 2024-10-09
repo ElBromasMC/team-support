@@ -21,21 +21,21 @@ type Question struct {
 	QuestionType QuestionType
 }
 
-type Respondents struct {
-	Id          int
-	Survey      Survey
-	Name        string
-	Email       string
-	PhoneNumber string
-	Rating      int
-}
-
-type Responses struct {
-	Id           int
-	Respondents  Respondents
+type QuestionResponse struct {
 	Question     Question
 	ResponseText string
-	CreatedAt    time.Time
+}
+
+type SurveyResponse struct {
+	Id                int
+	Survey            Survey
+	Name              string
+	Email             string
+	PhoneNumber       string
+	Rating            int
+	QuestionResponses []QuestionResponse
+	Responses         []string // For csv generation
+	CreatedAt         time.Time
 }
 
 type Landing struct {

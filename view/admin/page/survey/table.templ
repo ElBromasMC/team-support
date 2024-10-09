@@ -1,0 +1,63 @@
+package survey
+
+import (
+	"alc/model/survey"
+	"fmt"
+	"time"
+)
+
+func GetTime(t time.Time) string {
+	loc, _ := time.LoadLocation("America/Lima")
+	locTime := t.In(loc)
+	return locTime.Format(time.DateTime)
+}
+
+templ Table(surveys []survey.Survey) {
+	<table class="table-auto w-full">
+		<thead>
+			<tr class="border-b border-black text-left">
+				<th>Id</th>
+				<th>Nombre</th>
+				<th>Creado el</th>
+				<th>Acciones</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, survey := range surveys {
+				<tr class="border-b border-black">
+					<td>{ fmt.Sprintf("%d", survey.Id) }</td>
+					<td>{ survey.Title }</td>
+					<td>{ GetTime(survey.CreatedAt) }</td>
+					<td>
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ fmt.Sprintf("/admin/page/survey/%d/update", survey.Id) }
+							hx-target="#update-item-form"
+						>
+							Editar
+						</button>
+						<a
+							class="block font-semibold text-azure"
+							href={ templ.URL(fmt.Sprintf("/admin/page/survey/%d/questions", survey.Id)) }
+						>
+							Editar preguntas
+						</a>
+						<button
+							class="block font-semibold text-azure"
+							hx-get={ fmt.Sprintf("/admin/page/survey/%d/delete", survey.Id) }
+							hx-target="#delete-item-form"
+						>
+							Borrar
+						</button>
+						<a
+							class="block font-semibold text-azure"
+							href={ templ.URL(fmt.Sprintf("/admin/page/survey/%d/results", survey.Id)) }
+						>
+							Descargar resultados
+						</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

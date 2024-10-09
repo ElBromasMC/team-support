@@ -1,0 +1,86 @@
+package question
+
+import (
+	"alc/model/survey"
+	"alc/view/component"
+	"alc/view/layout"
+	"fmt"
+)
+
+templ Show(survey survey.Survey, questions []survey.Question) {
+	@layout.BaseAdmin("Preguntas") {
+		<!-- Dialogs -->
+		<div>
+			<!-- New item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Nueva pregunta</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="insert-item-form"></div>
+			</dialog>
+			<!-- Update item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">Editar pregunta</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="update-item-form"></div>
+			</dialog>
+			<!-- Delete item dialog -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<h2 class="font-bold text-2xl">¿Estás seguro?</h2>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="delete-item-form"></div>
+			</dialog>
+		</div>
+		<main>
+			<!-- Navigation -->
+			<div>
+				<span class="font-semibold text-azure">
+					<a href="/admin">Administración</a>
+				</span>
+				@component.IconRight()
+				<span class="font-semibold text-azure">
+					<a href="/admin/page">Administrador de páginas</a>
+				</span>
+				@component.IconRight()
+				<span class="font-semibold text-azure">
+					<a href="/admin/page/survey">Encuestas</a>
+				</span>
+				@component.IconRight()
+				<span class="text-livid">{ survey.Title }</span>
+			</div>
+			<!-- Title -->
+			<h1 class="mt-3 font-bold text-3xl">Preguntas</h1>
+			<!-- Control buttons -->
+			<div>
+				<button
+					class="block font-semibold text-azure"
+					hx-get={ fmt.Sprintf("/admin/page/survey/%d/questions/insert", survey.Id) }
+					hx-target="#insert-item-form"
+				>
+					Nueva pregunta
+				</button>
+			</div>
+			<!-- Items show table -->
+			<div id="table-items">
+				@Table(questions)
+			</div>
+		</main>
+	}
+}
