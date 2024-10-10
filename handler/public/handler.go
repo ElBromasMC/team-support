@@ -14,4 +14,5 @@ type Handler struct {
 	DeviceService      service.Device
 	CurrencyService    service.Currency
 	SurveyService      service.Survey
+	BookService        service.Book
 }

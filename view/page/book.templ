@@ -1,0 +1,129 @@
+package page
+
+import "alc/view/layout"
+
+templ BookForm() {
+	@layout.Base("Libro de Reclamaciones") {
+		<div class="max-w-7xl mx-auto border-l border-r border-black">
+			<div class="p-4 flex justify-around items-center">
+				<div class="font-bold uppercase text-[#8b0000]">
+					<h1 class="text-xl">Libro de Reclamaciones:</h1>
+					<h2 class="text-lg">TEAM SUPPORT SERVICES S.A.C</h2>
+				</div>
+				<div class="aspect-[2363/1000] w-60">
+					<img class="w-full h-full object-cover" src="/static/img/book.jpg" alt="Libro"/>
+				</div>
+			</div>
+			<!-- autocomplete="off" -->
+			<form
+				class="text-sm"
+				action="/book"
+				method="post"
+				hx-post="/book"
+				hx-target-error="#error-message"
+			>
+				<div>
+					<div class="px-2 py-3 bg-black">
+						<h3 class="font-bold text-white">1. IDENTIFICACIÓN DEL CONSUMIDOR RECLAMANTE</h3>
+					</div>
+					<div class="grid gap-x-16 gap-y-3 p-3 lg:grid-cols-2 lg:px-24">
+						<div class="flex flex-col">
+							<label>TIPO DE DOCUMENTO</label>
+							<select class="border border-gray-400" name="DocumentType" required>
+								<option value="DNI">DNI</option>
+								<option value="CARNET">CARNE EXTRANJERIA</option>
+								<option value="OTHER">OTROS</option>
+							</select>
+						</div>
+						<div class="flex flex-col">
+							<label>Nro. Documento</label>
+							<input class="border border-gray-400" type="text" name="DocumentNumber" required/>
+						</div>
+						<div class="flex flex-col lg:col-span-2">
+							<label>NOMBRE</label>
+							<input class="border border-gray-400" type="text" name="Name" required/>
+						</div>
+						<div class="flex flex-col lg:col-span-2">
+							<label>DIRECCIÓN</label>
+							<input class="border border-gray-400" type="text" name="Address" required/>
+						</div>
+						<div class="flex flex-col">
+							<label>TELÉFONO/CELULAR</label>
+							<input class="border border-gray-400" type="text" name="PhoneNumber" required/>
+						</div>
+						<div class="flex flex-col">
+							<label>E-MAIL</label>
+							<input class="border border-gray-400" type="email" name="Email" required/>
+						</div>
+						<div class="flex flex-col lg:col-span-2">
+							<label>PADRE O MADRE</label>
+							<input class="border border-gray-400" type="text" name="ParentName"/>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="px-2 py-3 bg-black">
+						<h3 class="font-bold text-white">2. IDENTIFICACIÓN DEL BIEN CONTRATADO</h3>
+					</div>
+					<div class="grid gap-y-3 p-3 lg:px-24">
+						<div class="flex flex-col">
+							<label>TIPO DEL BIEN</label>
+							<select class="border border-gray-400" name="GoodType" required>
+								<option value="PRODUCT">PRODUCTO</option>
+								<option value="SERVICE">SERVICIO</option>
+							</select>
+						</div>
+						<div class="flex flex-col">
+							<label>DESCRIPCIÓN:</label>
+							<textarea class="resize-none border border-gray-400" rows="4" name="GoodDescription" required></textarea>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="px-2 py-3 bg-black">
+						<h3 class="font-bold text-white">3. DETALLE DE LA RECLAMACIÓN</h3>
+					</div>
+					<div class="px-3 pt-3 space-y-1 text-xs lg:px-24">
+						<div class="p-1 border border-black bg-[#dcdcdc]">
+							<strong class="font-extrabold">RECLAMO:</strong> DISCONFORMIDAD RELACIONADA A LOS PRODUCTOS O SERVICIOS.
+						</div>
+						<div class="p-1 border border-black bg-[#dcdcdc]">
+							<strong class="font-extrabold">QUEJA:</strong> DISCONFORMIDAD NO RELACIONADA A LOS PRODUCTOS O SERVICIOS O, MALESTAR O DESCONTENTO RESPECTO A LA ATENCIÓN AL PÚBLICO.
+						</div>
+					</div>
+					<div class="grid gap-y-3 p-3 lg:px-24">
+						<div class="flex flex-col">
+							<label>TIPO</label>
+							<select class="border border-gray-400" name="ComplaintType" required>
+								<option value="RECLAMO">RECLAMO</option>
+								<option value="QUEJA">QUEJA</option>
+							</select>
+						</div>
+						<div class="flex flex-col">
+							<label>DETALLE:</label>
+							<textarea class="resize-none border border-gray-400" rows="4" name="ComplaintDescription" required></textarea>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="px-2 py-3 bg-black">
+						<h3 class="font-bold text-white">4. ACCIONES ADOPTADAS POR EL PROVEEDOR</h3>
+					</div>
+					<div class="grid gap-y-3 p-3 lg:px-24">
+						<div class="flex flex-col">
+							<label>DETALLE:</label>
+							<textarea class="resize-none border border-gray-400" rows="4" name="ActionsDescription" required></textarea>
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="px-2 py-3 bg-black"></div>
+					<div class="flex justify-center p-3 lg:px-24">
+						<button class="text-xs px-9 py-1 border border-gray-400 bg-[#dcdcdc]" type="submit">ACEPTAR</button>
+					</div>
+				</div>
+			</form>
+			<div id="error-message" class="min-h-6 font-semibold text-center text-red-600"></div>
+		</div>
+	}
+}

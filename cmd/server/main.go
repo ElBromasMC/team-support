@@ -30,6 +30,11 @@ import (
 )
 
 func main() {
+	// Check environment variables
+	if len(os.Getenv("COMPANY_EMAIL")) == 0 || len(os.Getenv("BOOK_EMAIL")) == 0 {
+		log.Fatalln("There are some unset environment variables")
+	}
+
 	mode := payment.PRODUCTION
 	e := echo.New()
 	if os.Getenv("ENV") == "development" {
@@ -65,7 +70,7 @@ func main() {
 	// Initialize services
 	ps := service.NewPublicService(dbpool)
 	as := service.NewAdminService(ps)
-	ms := service.NewEmailService(client, os.Getenv("SMTP_USER"), os.Getenv("COMPANY_EMAIL"), os.Getenv("WEBSERVER_HOSTNAME"))
+	ms := service.NewEmailService(client, os.Getenv("SMTP_USER"), os.Getenv("COMPANY_EMAIL"), os.Getenv("BOOK_EMAIL"), os.Getenv("WEBSERVER_HOSTNAME"))
 	us := service.NewAuthService(dbpool)
 	ds := service.NewDeviceService(dbpool)
 	ors := service.NewOrderService(dbpool)
@@ -73,6 +78,7 @@ func main() {
 	pys := service.NewPaymentService(mode, os.Getenv("IZIPAY_STOREID"), os.Getenv("IZIPAY_APIKEY"), os.Getenv("WEBSERVER_HOSTNAME"))
 	cs := service.NewCurrencyService(dbpool)
 	ss := service.NewSurveyService(dbpool)
+	bs := service.NewBookService(dbpool)
 
 	// Initialize handlers
 	ph := public.Handler{
@@ -85,6 +91,7 @@ func main() {
 		DeviceService:      ds,
 		CurrencyService:    cs,
 		SurveyService:      ss,
+		BookService:        bs,
 	}
 
 	ah := admin.Handler{
@@ -134,6 +141,8 @@ func main() {
 	e.GET("/ticket", ph.HandleTicketShow, authMiddleware, cartMiddleware)
 	e.GET("/landing", ph.HandleLandingShow, authMiddleware, cartMiddleware)
 	e.POST("/survey/:surveyId", ph.HandleSurveyInsertion)
+	e.GET("/book", ph.HandleBookFormShow)
+	e.POST("/book", ph.HandleBookEntryInsertion)
 
 	// Auth routes
 	e.GET("/login", ph.HandleLoginShow)

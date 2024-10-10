@@ -32,6 +32,7 @@ SMTP_PASS=<password>
 IZIPAY_STOREID=
 IZIPAY_APIKEY=
 COMPANY_EMAIL=
+BOOK_EMAIL=
 ```
 
 ### Initialize the required tables
@@ -71,4 +72,5 @@ SMTP_PASS=<password>
 IZIPAY_STOREID=
 IZIPAY_APIKEY=
 COMPANY_EMAIL=
+BOOK_EMAIL=
 ```

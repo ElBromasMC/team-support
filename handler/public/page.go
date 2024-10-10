@@ -2,13 +2,19 @@ package public
 
 import (
 	"alc/handler/util"
+	"alc/model/book"
 	"alc/model/survey"
 	"alc/view/page"
+	"bytes"
+	"context"
 	"fmt"
 	"net/http"
+	gomail "net/mail"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/wneessen/go-mail"
 )
 
 func (h *Handler) HandleIndexShow(c echo.Context) error {
@@ -85,4 +91,102 @@ func (h *Handler) HandleSurveyInsertion(c echo.Context) error {
 	}
 
 	return nil
+}
+
+func (h *Handler) HandleBookFormShow(c echo.Context) error {
+	return util.Render(c, http.StatusOK, page.BookForm())
+}
+
+func (h *Handler) HandleBookEntryInsertion(c echo.Context) error {
+	// Parse request
+	var entry book.Entry
+	dtype, err := h.BookService.GetDocumentType(c.FormValue("DocumentType"))
+	if err != nil {
+		return err
+	}
+	gtype, err := h.BookService.GetGoodType(c.FormValue("GoodType"))
+	if err != nil {
+		return err
+	}
+	ctype, err := h.BookService.GetComplaintType(c.FormValue("ComplaintType"))
+	if err != nil {
+		return err
+	}
+	entry.DocumentType = dtype
+	entry.DocumentNumber = c.FormValue("DocumentNumber")
+	entry.Name = c.FormValue("Name")
+	entry.Address = c.FormValue("Address")
+	entry.PhoneNumber = c.FormValue("PhoneNumber")
+	entry.Email = strings.ToLower(strings.TrimSpace(c.FormValue("Email")))
+	entry.ParentName = c.FormValue("ParentName")
+	entry.GoodType = gtype
+	entry.GoodDescription = c.FormValue("GoodDescription")
+	entry.ComplaintType = ctype
+	entry.ComplaintDescription = c.FormValue("ComplaintDescription")
+	entry.ActionsDescription = c.FormValue("ActionsDescription")
+
+	// Validate email
+	address, err := gomail.ParseAddress(entry.Email)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Email inválido")
+	}
+	entry.Email = address.Address
+
+	// Insert entry
+	id, err := h.BookService.InsertBookEntry(entry)
+	if err != nil {
+		return err
+	}
+
+	// Query data
+	entry, err = h.BookService.GetBookEntryById(id)
+	if err != nil {
+		return err
+	}
+
+	// Get PDF
+	m, err := h.BookService.GeneratePDF(entry)
+	if err != nil {
+		return err
+	}
+	document, err := m.Generate()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	reader := bytes.NewReader(document.GetBytes())
+
+	// Send the email
+	msg := mail.NewMsg()
+	if err := msg.From(h.EmailService.GetSenderEmail()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	if err := msg.To(entry.Email); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	if err := msg.Bcc(h.EmailService.GetBookEmail()); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	msg.Subject("Libro de Reclamaciones - Team Support Services")
+	msg.SetBodyString(mail.TypeTextPlain,
+		`Estimado cliente.
+
+Se adjunta el documento generado a través del Libro de Reclamaciones.
+Pronto nos pondremos en contacto con usted.
+
+Por favor, no responder a este correo.
+
+Saludos`,
+	)
+	msg.AttachReadSeeker("hoja.pdf", reader)
+	if err := h.EmailService.DialAndSend(context.Background(), msg); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Error en el servidor de correos")
+	}
+
+	_, ok := c.Request().Header[http.CanonicalHeaderKey("HX-Request")]
+	if !ok {
+		return c.Redirect(http.StatusFound, "/")
+	}
+
+	c.Response().Header().Set("HX-Redirect", "/")
+	return c.NoContent(http.StatusOK)
 }

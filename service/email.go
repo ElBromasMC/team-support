@@ -10,14 +10,16 @@ type Email struct {
 	client       *mail.Client
 	sender       string
 	company      string
+	book         string
 	web_hostname string
 }
 
-func NewEmailService(client *mail.Client, sender string, company string, web_hostname string) Email {
+func NewEmailService(client *mail.Client, sender string, company string, book string, web_hostname string) Email {
 	return Email{
 		client:       client,
 		sender:       sender,
 		company:      company,
+		book:         book,
 		web_hostname: web_hostname,
 	}
 }
@@ -32,6 +34,10 @@ func (es Email) GetSenderEmail() string {
 
 func (es Email) GetCompanyEmail() string {
 	return es.company
+}
+
+func (es Email) GetBookEmail() string {
+	return es.book
 }
 
 func (es Email) GetWebHostname() string {

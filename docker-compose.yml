@@ -46,6 +46,7 @@ services:
       - IZIPAY_STOREID=${IZIPAY_STOREID}
       - IZIPAY_APIKEY=${IZIPAY_APIKEY}
       - COMPANY_EMAIL=${COMPANY_EMAIL}
+      - BOOK_EMAIL=${BOOK_EMAIL}
     networks:
       - http_network
       - store_network
