@@ -14,11 +14,11 @@ templ BookForm() {
 					<img class="w-full h-full object-cover" src="/static/img/book.jpg" alt="Libro"/>
 				</div>
 			</div>
-			<!-- autocomplete="off" -->
 			<form
 				class="text-sm"
 				action="/book"
 				method="post"
+				autocomplete="off"
 				hx-post="/book"
 				hx-target-error="#error-message"
 			>
