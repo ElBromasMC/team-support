@@ -1,5 +1,17 @@
 package component
 
+import "fmt"
+
 templ ErrorMessage(msg string) {
 	{ msg }
+}
+
+templ ErrorsMessage(errs []error, m int, n int) {
+	<div>{ fmt.Sprintf("%d datos subidos", n) }</div>
+	<div>{ fmt.Sprintf("%d errores de parsing:", m) }</div>
+	<ul>
+		for _, err := range errs {
+			<li>{ err.Error() }</li>
+		}
+	</ul>
 }

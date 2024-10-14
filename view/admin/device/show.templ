@@ -54,6 +54,20 @@ templ Show(devices []store.Device) {
 				</form>
 				<div id="item-history"></div>
 			</dialog>
+			<!-- Data errors show -->
+			<dialog
+				class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 m-0 p-6 w-[90%] max-w-lg border border-black bg-white"
+				hx-on::after-swap="this.showModal();"
+				hx-on::after-request="this.close();"
+			>
+				<form class="flex justify-between" method="dialog">
+					<div class="flex gap-4 items-center">
+						<h2 class="font-bold text-2xl">Log de errores</h2>
+					</div>
+					<button class="font-bold text-azure" type="submit">Salir</button>
+				</form>
+				<div id="device-data-errors"></div>
+			</dialog>
 		</div>
 		<main>
 			<!-- Navigation -->
@@ -74,6 +88,21 @@ templ Show(devices []store.Device) {
 					Activar serie
 				</button>
 			</div>
+			<label class="font-semibold text-azure cursor-pointer" for="data-add">
+				Cargar base de datos
+			</label>
+			<img id="device-data-indicator" class="htmx-indicator w-9" src="/static/img/bars.svg"/>
+			<input
+				id="data-add"
+				class="hidden"
+				type="file"
+				multiple
+				name="DeviceData"
+				hx-post="/admin/dispositivos/data"
+				hx-target="#device-data-errors"
+				hx-indicator="#device-data-indicator"
+				hx-encoding="multipart/form-data"
+			/>
 			<!-- Items show table -->
 			<div id="table-items">
 				@Table(devices)

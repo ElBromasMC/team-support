@@ -22,4 +22,12 @@ var (
 		"HDD_RETENTION": "Disco duro",
 		"OSS":           "Domicilio",
 	}
+	ASUS_DEVICE_TYPE = map[string]string{
+		"N":    "NB",
+		"NR-S": "NR",
+		"NV-S": "NV",
+		"NX":   "NX",
+		"PF":   "PF",
+		"PT":   "PT",
+	}
 )

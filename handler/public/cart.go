@@ -9,21 +9,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
-
-func sameDate(t1, t2 time.Time, loc *time.Location) bool {
-	t1InLoc := t1.In(loc)
-	t2InLoc := t2.In(loc)
-
-	return t1InLoc.Year() == t2InLoc.Year() &&
-		t1InLoc.Month() == t2InLoc.Month() &&
-		t1InLoc.Day() == t2InLoc.Day()
-}
 
 // POST "/cart"
 func (h *Handler) HandleNewCartItem(c echo.Context) error {
@@ -61,20 +51,10 @@ func (h *Handler) HandleNewCartItem(c echo.Context) error {
 
 	// Check device registration
 	if item.Product.Item.Category.Type == store.GarantiaType {
-		dev, err := h.DeviceService.GetDevice(item.Details["Serie"])
-		if err != nil {
-			return err
-		}
-		if !dev.Valid {
-			return echo.NewHTTPError(http.StatusBadRequest, "La serie no se encuentra registrada")
-		}
-		loc, _ := time.LoadLocation("America/Lima")
-		if !sameDate(dev.UpdatedAt, time.Now(), loc) {
-			return echo.NewHTTPError(http.StatusBadRequest, "La serie registrada ha expirado")
-		}
-		if !((dev.IsAfterSixMonths && item.Product.AcceptAfterSixMonths) ||
-			(dev.IsBeforeSixMonths && item.Product.AcceptBeforeSixMonths)) {
-			return echo.NewHTTPError(http.StatusBadRequest, "La serie no aplica para esta garantía")
+		err1 := h.DeviceService.CheckSerialValidity(item.Product, item.Details["Serie"])
+		err2 := h.DeviceService.CheckSerialValidityByDeviceData(item.Product, item.Details["Serie"])
+		if err1 != nil && err2 != nil {
+			return err2
 		}
 	}
 	// Get cart items

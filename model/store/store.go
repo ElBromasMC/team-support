@@ -1,9 +1,11 @@
 package store
 
 import (
+	"alc/config"
 	"alc/model/auth"
 	"alc/model/currency"
 	"errors"
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -177,4 +179,81 @@ func (product Product) CalculateIndividualPrice(r currency.ExchangeRate) (int, e
 	}
 	newPrice := float64(product.Price) * rate
 	return int(math.Round(newPrice)), nil
+}
+
+type DeviceData struct {
+	Id                int
+	ProductSerial     string
+	ProductType       string
+	PartNoModel       string
+	WarrantyStartDate time.Time
+	WarrantyEndDate   time.Time
+}
+
+func toUpperAndRemoveSpaces(r rune) rune {
+	if unicode.IsSpace(r) {
+		return -1
+	}
+	return unicode.ToUpper(r)
+}
+
+func extractString(s string) (string, error) {
+	startIndex := strings.Index(s, "[")
+	if startIndex == -1 {
+		return "", errors.New("bad product type format")
+	}
+	endIndex := strings.Index(s[startIndex:], "]")
+	if endIndex == -1 {
+		return "", errors.New("bad product type format")
+	}
+	endIndex += startIndex
+	res := s[startIndex+1 : endIndex]
+	return strings.Map(toUpperAndRemoveSpaces, res), nil
+}
+
+// Parse csv
+// Header: RMA_SERIAL_NO, RMA_PRODUCT_TYPE_DESC, RMA_PART_NO_MODEL, WARRANTY_START_DATE, WARRANTY_END_DATE
+func ParseDeviceDataRow(row []string) (dd DeviceData, err error) {
+	// Query data
+	rma_serial_no := row[0]
+	rma_product_type_desc := row[1]
+	rma_part_no_model := row[2]
+	warranty_start_date := row[3]
+	warranty_end_date := row[4]
+
+	pType, err := extractString(rma_product_type_desc)
+	if err != nil {
+		return
+	}
+	pType, ok := config.ASUS_DEVICE_TYPE[pType]
+	if !ok {
+		err = errors.New("unknown product type")
+		return
+	}
+	dd.ProductSerial = strings.Map(toUpperAndRemoveSpaces, rma_serial_no)
+	dd.ProductType = pType
+	dd.PartNoModel = strings.Map(toUpperAndRemoveSpaces, rma_part_no_model)
+	dd.WarrantyStartDate, err = time.Parse("2006-01-02", warranty_start_date)
+	if err != nil {
+		return
+	}
+	dd.WarrantyEndDate, err = time.Parse("2006-01-02", warranty_end_date)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func ParseDeviceDataCSV(data [][]string) ([]DeviceData, []error) {
+	dds := make([]DeviceData, 0, len(data))
+	errs := make([]error, 0, len(data))
+	for i, row := range data {
+		dd, err := ParseDeviceDataRow(row)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("parse error in row %d: %w", i+1, err))
+		} else {
+			dds = append(dds, dd)
+		}
+	}
+	return dds, errs
 }

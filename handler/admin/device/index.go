@@ -5,6 +5,8 @@ import (
 	"alc/model/auth"
 	"alc/model/store"
 	"alc/view/admin/device"
+	"alc/view/component"
+	"encoding/csv"
 	"net/http"
 	"strconv"
 
@@ -124,4 +126,34 @@ func (h *Handler) HandleDeactivationFormShow(c echo.Context) error {
 	}
 
 	return util.Render(c, http.StatusOK, device.DesactivationForm(dev))
+}
+
+func (h *Handler) HandleDeviceDataBulkLoad(c echo.Context) error {
+	// Parsing request
+	file, err := c.FormFile("DeviceData")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Debe proporcionar los dispositivos")
+	}
+
+	// Data source
+	src, err := file.Open()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Error al abrir los dispositivos")
+	}
+	defer src.Close()
+
+	reader := csv.NewReader(src)
+	reader.FieldsPerRecord = 5
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Error al leer los dispositivos")
+	}
+
+	data, errs := store.ParseDeviceDataCSV(records)
+	n, err := h.DeviceService.InsertDeviceData(data)
+	if err != nil {
+		return err
+	}
+	return util.Render(c, http.StatusOK, component.ErrorsMessage(errs, len(errs), n))
 }

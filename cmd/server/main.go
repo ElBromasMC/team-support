@@ -269,6 +269,7 @@ func main() {
 	g33.GET("/insert", dh.HandleInsertionFormShow)
 	g33.GET("/:deviceId/history", dh.HandleHistoryShow)
 	g33.GET("/:deviceId/desactivate", dh.HandleDeactivationFormShow)
+	g33.POST("/data", dh.HandleDeviceDataBulkLoad)
 
 	// Admin currency group
 	g34 := g3.Group("/currency")
