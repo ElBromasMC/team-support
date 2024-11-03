@@ -420,6 +420,49 @@ func (ps Public) GetProductById(id int) (store.Product, error) {
 	return product, nil
 }
 
+// Doesn't query product details
+func (ps Public) GetProductByPartNumber(partNumber string) (store.Product, error) {
+	var product store.Product
+	var itemId int
+	sql := `
+	SELECT
+		id,
+		name,
+		price,
+		slug,
+		stock,
+		part_number,
+		accept_before_six_months,
+		accept_after_six_months,
+		currency,
+		item_id
+	FROM
+		store_products
+	WHERE
+		part_number = $1
+	`
+	if err := ps.DB.QueryRow(context.Background(), sql, partNumber).Scan(
+		&product.Id,
+		&product.Name,
+		&product.Price,
+		&product.Slug,
+		&product.Stock,
+		&product.PartNumber,
+		&product.AcceptBeforeSixMonths,
+		&product.AcceptAfterSixMonths,
+		&product.Currency,
+		&itemId,
+	); err != nil {
+		return store.Product{}, echo.NewHTTPError(http.StatusNotFound, "Producto no encontrado")
+	}
+
+	// Query and attach item
+	item, _ := ps.GetItemById(itemId)
+	product.Item = item
+
+	return product, nil
+}
+
 // Cart management
 
 func (ps Public) RequestToItem(i cart.ItemRequest) (cart.Item, error) {

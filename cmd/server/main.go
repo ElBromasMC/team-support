@@ -157,6 +157,7 @@ func main() {
 	g1.GET("", ph.HandleGarantiaShow)
 	g1.GET("/:slug", ph.HandleGarantiaCategoryShow)
 	g1.GET("/:categorySlug/:itemSlug", ph.HandleGarantiaItemShow)
+	g1.GET("/search", ph.HandleGarantiaPartNumberRedirection)
 
 	// Store routes
 	g2 := e.Group("/store")

@@ -1,17 +1,61 @@
 package garantia
 
 import (
+	"alc/config"
 	"alc/model/store"
 	"alc/view/layout"
-	"alc/config"
 	"path"
 )
 
 templ Show(cats []store.Category) {
 	@layout.BasePage("Garantía") {
 		<main class="min-h-[calc(100dvh-16rem)]">
-			<section class="px-4 py-20 max-w-7xl mx-auto lg:py-40">
-				<h1 class="mb-14 text-center text-3xl font-semibold text-azure uppercase lg:mb-40 lg:text-4xl">Paquetes de garantía ASUS</h1>
+			<section class="px-4 py-20 space-y-7 max-w-7xl mx-auto lg:py-40 lg:space-y-10">
+				<h1 class="text-center text-3xl font-semibold text-azure uppercase lg:text-4xl">Paquetes de garantía ASUS</h1>
+				<div class="space-y-2">
+					<form
+						class="flex justify-center items-center gap-3"
+						method="get"
+						action="/garantia/search"
+						autocomplete="off"
+						hx-get="/garantia/search"
+						hx-target-error="#error-message"
+					>
+						<div>
+							<input
+								class="px-2 py-1 border border-black rounded-lg"
+								placeholder="Número de parte"
+								type="text"
+								name="PartNumber"
+								required
+							/>
+						</div>
+						<div>
+							<button class="block p-1 aspect-square rounded-full bg-navy" type="submit">
+								<svg
+									class="w-6 h-6 text-white hover:text-azure"
+									aria-hidden="true"
+									xmlns="http://www.w3.org/2000/svg"
+									width="24"
+									height="24"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-width="2"
+										d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+									></path>
+								</svg>
+							</button>
+						</div>
+					</form>
+					<div
+						id="error-message"
+						class="flex justify-center min-h-6 font-semibold text-red-600"
+					></div>
+				</div>
 				if len(cats) == 0 {
 					<div class="flex flex-col justify-center items-center">
 						<svg class="w-80 h-80 text-livid" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">

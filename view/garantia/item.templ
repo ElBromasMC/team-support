@@ -44,7 +44,7 @@ script ScrollToContact() {
 	}, 1500);
 }
 
-templ ShowItem(item store.Item, products []store.Product, rate currency.ExchangeRate) {
+templ ShowItem(item store.Item, products []store.Product, defaultIndex int, rate currency.ExchangeRate) {
 	@layout.BasePage(item.Name) {
 		<main>
 			<div class="grid gap-9 px-4 py-9 max-w-7xl mx-auto lg:grid-cols-[3fr_2fr] lg:gap-12">
@@ -82,8 +82,8 @@ templ ShowItem(item store.Item, products []store.Product, rate currency.Exchange
 				<div class="space-y-9 lg:order-2">
 					<h2 class="text-2xl font-bold text-azure lg:text-3xl">{ item.Name }</h2>
 					<p id="garantia:price" class="text-3xl font-semibold text-navy">
-						if len(products) >= 1 {
-							if price, err := products[0].CalculateIndividualPrice(rate); err != nil {
+						if len(products) >= defaultIndex + 1 {
+							if price, err := products[defaultIndex].CalculateIndividualPrice(rate); err != nil {
 								ERROR
 							} else {
 								{ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
@@ -121,13 +121,16 @@ templ ShowItem(item store.Item, products []store.Product, rate currency.Exchange
 								name="Id"
 								required
 							>
-								for _, p := range products {
+								for n, p := range products {
 									<option
 										value={ fmt.Sprintf("%d", p.Id) }
 										if price, err := p.CalculateIndividualPrice(rate); err != nil {
 											data-price="ERROR"
 										} else {
 											data-price={ currency.DisplayPrice(config.CURRENCY_CODES, price, rate.To()) }
+										}
+										if n == defaultIndex {
+											selected
 										}
 									>{ p.Name }</option>
 								}
