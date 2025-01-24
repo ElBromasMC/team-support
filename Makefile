@@ -45,7 +45,7 @@ else
 endif
 
 # Build step for tailwind.css
-$(TAILWINDCSS_OUT): $(TEMPL_FILES) tailwind.config.js tailwind.css
+$(TAILWINDCSS_OUT): $(TEMPL_FILES) tailwind.config.cjs tailwind.css
 ifeq ($(ENV),development)
 	./scripts/tailwind.sh "$(TMP_DIR)" "$(TAILWINDCSS_LOG)"
 else

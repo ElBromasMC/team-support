@@ -7,6 +7,7 @@ var (
 		"NX": "NX",
 		"PF": "PF",
 		"PT": "PT",
+		"NX-C": "NX-C",
 	}
 	ASUS_LONGNAMES = map[string]string{
 		"LWEP":          "Garantía extendida",

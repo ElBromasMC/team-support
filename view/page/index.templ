@@ -6,7 +6,7 @@ templ Index() {
 	@layout.BasePage("Team Support Services") {
 		<main>
 			<!-- Carousel -->
-			<my-carousel class="h-[36rem]" controls indicator autoplay="6000">
+			<my-carousel class="h-[45rem] lg:h-[36rem]" controls indicator autoplay="10000">
 				<!--
 				<div>
 					<img class="relative object-cover w-full h-full" src="/static/img/fondo1.webp" alt=""/>
@@ -37,6 +37,79 @@ templ Index() {
 					</section>
 				</div>
 				-->
+                <!-- Enero 2025 -->
+				<div>
+					<img class="relative object-cover w-full h-full" src="/static/img/portada-enero2025/Fondo.webp" alt=""/>
+					<section class="absolute flex flex-col gap-5 px-6 py-9 max-w-7xl mx-auto inset-x-0 inset-y-0 text-chalky lg:flex-row lg:px-16 lg:items-center lg:py-16">
+                        <div class="flex gap-3 justify-end items-center lg:hidden">
+                            <div class="text-2xl font-bold">
+                                ¡Ya llegamos al <br/>
+                                norte del Perú!
+                            </div>
+                            <div>
+                                <img class="h-16" src="/static/img/portada-enero2025/Ubicación.webp"/>
+                            </div>
+                        </div>
+						<div class="mr-9 lg:flex-1 lg:mr-0">
+                            <my-carousel class="aspect-square max-h-[19rem] rounded-3xl border-4 border-white overflow-hidden sm:aspect-[3/2] sm:rounded-[2.5rem] lg:max-h-full" autoplay="3000">
+					            <img class="relative object-cover w-full h-full" src="/static/img/portada-enero2025/Foto 1.webp" alt=""/>
+					            <img class="relative object-cover w-full h-full" src="/static/img/portada-enero2025/Foto 2.webp" alt=""/>
+					            <img class="relative object-cover w-full h-full" src="/static/img/portada-enero2025/Foto 3.webp" alt=""/>
+					            <img class="relative object-cover w-full h-full" src="/static/img/portada-enero2025/Foto 4.webp" alt=""/>
+					            <img class="relative object-cover w-full h-full" src="/static/img/portada-enero2025/Foto 5.webp" alt=""/>
+					            <img class="relative object-cover w-full h-full" src="/static/img/portada-enero2025/Foto 6.webp" alt=""/>
+					            <img class="relative object-cover w-full h-full" src="/static/img/portada-enero2025/Foto 7.webp" alt=""/>
+                            </my-carousel>
+						</div>
+                        <div class="flex gap-3 lg:hidden">
+                            <div class="font-extrabold text-4xl">
+                                CHICLAYO
+                            </div>
+                            <div class="w-full relative">
+                                <div class="absolute -top-[19rem] right-5 bottom-[50%] left-0 border-b-4 border-r-4 border-white rounded-br-3xl"></div>
+                            </div>
+                        </div>
+						<div class="flex flex-col gap-6 lg:flex-1 lg:ml-9">
+                            <div class="hidden justify-between items-center lg:flex">
+                                <div class="text-4xl font-bold">
+                                    ¡Ya llegamos al <br/>
+                                    norte del Perú!
+                                </div>
+                                <div>
+                                    <img class="h-20" src="/static/img/portada-enero2025/Ubicación.webp"/>
+                                </div>
+                            </div>
+                            <div class="hidden font-black text-6xl lg:block">
+                                CHICLAYO
+                            </div>
+                            <div class="flex justify-center gap-6 lg:justify-start lg:mt-6">
+                                <img class="h-16 lg:h-20" src="/static/img/portada-enero2025/team-logo.webp" alt="team-support"/>
+                                <img class="h-16 lg:h-20" src="/static/img/portada-enero2025/bolognesi.webp" alt="plaza-bolognesi"/>
+                            </div>
+                            <a class="flex flex-col items-center gap-3 lg:items-start lg:gap-3" href="https://www.facebook.com/profile.php?id=61568378097435" target="_blank">
+                                <div class="flex gap-3 justify-center items-center lg:justify-start lg:gap-4">
+                                    <div class="font-bold lg:text-lg">
+                                        Síguenos en Facebook
+                                    </div>
+                                    <div class="px-2 py-1 rounded-2xl text-lg bg-azure font-bold hover:text-livid lg:text-xl">
+                                        CLIC AQUÍ
+                                    </div>
+                                </div>
+                                <div class="flex gap-3 justify-center items-center lg:gap-4">
+                                    <svg class="w-[1.6rem] h-[1.6rem] p-[0.1rem] bg-[#0165E1] rounded-full lg:w-[2rem] lg:h-[2rem]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd" d="M13.135 6H15V3h-1.865a4.147 4.147 0 0 0-4.142 4.142V9H7v3h2v9.938h3V12h2.021l.592-3H12V6.591A.6.6 0 0 1 12.592 6h.543Z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div class="font-bold text-sm lg:text-base">
+                                        Team Support Services Oficial
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="hidden w-full relative lg:block">
+                                <div class="absolute -top-[19rem] right-6 bottom-0 -left-[110%] border-b-4 border-r-4 border-white rounded-br-3xl"></div>
+                            </div>
+						</div>
+					</section>
+				</div>
 				<div>
 					<img class="relative object-cover w-full h-full" src="/static/img/fondo2.webp" alt=""/>
 					<section class="absolute flex flex-col gap-6 items-center px-4 py-16 max-w-7xl mx-auto inset-x-0 inset-y-0 text-chalky lg:flex-row-reverse lg:justify-between lg:gap-0">
