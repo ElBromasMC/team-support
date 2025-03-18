@@ -1,66 +1,49 @@
 # go-webserver-template
+
 Team Support Peru webpage
 
 ## Local environment
 
 ### Prerequisites
-* Go
-* Node and npm
-* Docker compose
-* [Air](https://github.com/cosmtrek/air#installation)
-* [Templ](https://templ.guide/quick-start/installation)
-* inotify-tools
 
-### Install build dependencies
-```shell
-$ npm install
-```
+* Docker
 
 ### .env file example
+
 ```
+USER_UID="1000" # It must match your current user UID
 ENV=development
-WEBSERVER_HOSTNAME=www.domain.tld
-DB_NAME=
-DB_PASSWORD=
-DATABASE_URL=postgres://postgres:${DB_PASSWORD}@localhost:5432/${DB_NAME}
-SESSION_KEY=mysecretkey
+DB_NAME=team-support
+DB_PASSWORD=qwerty$321
+SESSION_KEY=qwerty$321
 PORT=8080
 REL=1
 SMTP_HOSTNAME=mail.example.com
-SMTP_USER=<username>
-SMTP_PASS=<password>
-IZIPAY_STOREID=
-IZIPAY_APIKEY=
-COMPANY_EMAIL=
-BOOK_EMAIL=
-```
-
-### Initialize the required tables
-```shell
-$ docker compose -f docker-compose.dev.yml up -d
-```
-
-### Load env variables
-```shell
-$ set -a
-$ source .env
-$ set +a
+SMTP_USER=user
+SMTP_PASS=pass
+WEBSERVER_HOSTNAME=www.domain.tld
+IZIPAY_STOREID=id
+IZIPAY_APIKEY=apikey
+COMPANY_EMAIL=company@domain.tld
+BOOK_EMAIL=book@domain.tld
 ```
 
 ### Live reload
+
 ```shell
-$ make live
+$ bin/run-dev.sh
 ```
 
 ## Docker
 
 ### Prerequisites
+
 * [Traefik](https://doc.traefik.io/traefik/getting-started/quick-start/)
 
 ### Docker compose .env file example
+
 ```
 ENV=production
-WEBSERVER_HOSTNAME=www.domain.tld
 DB_NAME=<database_name>
 DB_PASSWORD=<password>
 SESSION_KEY=mysecretkey
@@ -69,8 +52,10 @@ REL=1
 SMTP_HOSTNAME=mail.example.com
 SMTP_USER=<username>
 SMTP_PASS=<password>
+WEBSERVER_HOSTNAME=www.domain.tld
 IZIPAY_STOREID=
 IZIPAY_APIKEY=
 COMPANY_EMAIL=
 BOOK_EMAIL=
 ```
+

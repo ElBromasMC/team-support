@@ -7,12 +7,12 @@ networks:
 services:
   db:
     image: postgres:16-alpine
-    restart: always
+    restart: unless-stopped
     user: postgres
     volumes:
       - db-data:/var/lib/postgresql/data
       - type: bind
-        source: ./init.sql
+        source: ./db/init.sql
         target: /docker-entrypoint-initdb.d/init.sql
         read_only: true
     environment:
@@ -35,7 +35,8 @@ services:
       - store-images:/images
     environment:
       - ENV=${ENV}
-      - DATABASE_URL=postgres://postgres:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable
+      - DB_NAME=${DB_NAME}
+      - DB_PASSWORD=${DB_PASSWORD}
       - SESSION_KEY=${SESSION_KEY}
       - PORT=${PORT}
       - REL=${REL}
@@ -52,12 +53,19 @@ services:
       - store_network
     labels:
       - "traefik.enable=true"
+      # Middleware
+      - "traefik.http.middlewares.redirect-non-www-to-www.redirectregex.permanent=true"
+      - "traefik.http.middlewares.redirect-non-www-to-www.redirectregex.regex=^https://teamsupportperu.com/(.*)"
+      - "traefik.http.middlewares.redirect-non-www-to-www.redirectregex.replacement=https://${WEBSERVER_HOSTNAME}/$${1}"
+      # The application
       - "traefik.docker.network=http_network"
       - "traefik.http.routers.webserver.entrypoints=websecure"
-      - "traefik.http.routers.webserver.rule=Host(`${WEBSERVER_HOSTNAME}`)"
+      - "traefik.http.routers.webserver.rule=Host(`${WEBSERVER_HOSTNAME}`) || Host(`teamsupportperu.com`)"
+      - "traefik.http.routers.webserver.middlewares=redirect-non-www-to-www"
       - "traefik.http.routers.webserver.tls=true"
       - "traefik.http.routers.webserver.tls.certresolver=letsencrypt"
       - "traefik.http.routers.webserver.tls.domains[0].main=${WEBSERVER_HOSTNAME}"
+      - "traefik.http.routers.webserver.tls.domains[0].sans=teamsupportperu.com"
       - "traefik.http.routers.webserver.tls.options=default"
       - "traefik.http.services.webserver.loadbalancer.server.port=8080"
       - "traefik.http.services.webserver.loadbalancer.server.scheme=http"
@@ -67,3 +75,4 @@ services:
 volumes:
   db-data:
   store-images:
+

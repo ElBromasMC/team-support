@@ -5,7 +5,7 @@ go 1.23
 toolchain go1.23.5
 
 require (
-	github.com/a-h/templ v0.3.819
+	github.com/a-h/templ v0.3.833
 	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/gorilla/sessions v1.4.0
 	github.com/gosimple/slug v1.15.0

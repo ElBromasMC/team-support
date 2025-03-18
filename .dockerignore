@@ -19,5 +19,4 @@ view/**/*_templ.go
 
 # Also
 .git
-scripts
 .air.toml

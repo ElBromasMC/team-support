@@ -19,6 +19,7 @@ import (
 	"os"
 	_ "time/tzdata"
 
+	"fmt"
 	"github.com/gorilla/sessions"
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
 	"github.com/jackc/pgx/v5"
@@ -43,7 +44,11 @@ func main() {
 	}
 
 	// Database connection
-	dbconfig, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
+	dburl := fmt.Sprintf("postgres://postgres:%s@db:5432/%s?sslmode=disable",
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+	)
+	dbconfig, err := pgxpool.ParseConfig(dburl)
 	if err != nil {
 		log.Fatalln("Failed to parse config:", err)
 	}
