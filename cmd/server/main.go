@@ -84,6 +84,7 @@ func main() {
 	cs := service.NewCurrencyService(dbpool)
 	ss := service.NewSurveyService(dbpool)
 	bs := service.NewBookService(dbpool)
+	cts := service.NewCaptchaService(os.Getenv("CAPTCHA_SITE_KEY"), os.Getenv("CAPTCHA_SECRET_KEY"))
 
 	// Initialize handlers
 	ph := public.Handler{
@@ -97,6 +98,7 @@ func main() {
 		CurrencyService:    cs,
 		SurveyService:      ss,
 		BookService:        bs,
+		CaptchaService:     cts,
 	}
 
 	ah := admin.Handler{

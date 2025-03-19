@@ -2,7 +2,7 @@ package page
 
 import "alc/view/layout"
 
-templ BookForm() {
+templ BookForm(siteKey string) {
 	@layout.Base("Libro de Reclamaciones") {
 		<div class="max-w-7xl mx-auto border-l border-r border-black">
 			<div class="p-4 flex justify-around items-center">
@@ -15,12 +15,16 @@ templ BookForm() {
 				</div>
 			</div>
 			<form
+				id="book-form"
 				class="text-sm"
 				action="/book"
 				method="post"
 				autocomplete="off"
+				hx-trigger="captcha-verified"
 				hx-post="/book"
 				hx-target-error="#error-message"
+				hx-disabled-elt="find button[type='submit']"
+				hx-indicator="#book-indicator"
 			>
 				<div>
 					<div class="px-2 py-3 bg-black">
@@ -118,12 +122,34 @@ templ BookForm() {
 				</div>
 				<div>
 					<div class="px-2 py-3 bg-black"></div>
-					<div class="flex justify-center p-3 lg:px-24">
-						<button class="text-xs px-9 py-1 border border-gray-400 bg-[#dcdcdc]" type="submit">ACEPTAR</button>
+					<div class="flex flex-col items-center">
+						<div class="flex justify-center p-3 lg:px-24">
+							<button
+								class="g-recaptcha text-xs px-9 py-1 border border-gray-400 bg-[#dcdcdc]"
+								type="submit"
+								data-sitekey={ siteKey }
+								data-callback="captchaAnnounce"
+								data-action="submit"
+							>
+								ACEPTAR
+							</button>
+						</div>
+						<div id="error-message" class="min-h-6 font-semibold text-center text-red-600"></div>
+						<div>
+							<img id="book-indicator" class="htmx-indicator w-9" src="/static/img/bars.svg"/>
+						</div>
 					</div>
 				</div>
 			</form>
-			<div id="error-message" class="min-h-6 font-semibold text-center text-red-600"></div>
 		</div>
+		<script src="https://www.google.com/recaptcha/api.js"></script>
+		<script>
+            function captchaAnnounce(){
+                const event = new Event('captcha-verified');
+                const elem = document.querySelector("#book-form");
+                elem.reportValidity()
+                elem.dispatchEvent(event);
+            }
+        </script>
 	}
 }

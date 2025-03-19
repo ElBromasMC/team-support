@@ -94,10 +94,28 @@ func (h *Handler) HandleSurveyInsertion(c echo.Context) error {
 }
 
 func (h *Handler) HandleBookFormShow(c echo.Context) error {
-	return util.Render(c, http.StatusOK, page.BookForm())
+	// Captcha verification
+	captchaSiteKey := h.CaptchaService.GetSiteKey()
+	return util.Render(c, http.StatusOK, page.BookForm(captchaSiteKey))
 }
 
 func (h *Handler) HandleBookEntryInsertion(c echo.Context) error {
+	// Captcha verification
+	// Get the reCAPTCHA token from the form.
+	captchaResponse := c.FormValue("g-recaptcha-response")
+	// Get the client's IP address.
+	remoteIP := c.RealIP()
+	// Verify the captcha token and retrieve the score.
+	valid, score, err := h.CaptchaService.Verify(captchaResponse, remoteIP)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Error de verificación del captcha")
+	}
+
+	// Set a threshold for the score
+	if !valid || score < 0.6 {
+		return echo.NewHTTPError(http.StatusBadRequest, "Error de verificación del captcha")
+	}
+
 	// Parse request
 	var entry book.Entry
 	dtype, err := h.BookService.GetDocumentType(c.FormValue("DocumentType"))

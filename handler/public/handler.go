@@ -15,4 +15,5 @@ type Handler struct {
 	CurrencyService    service.Currency
 	SurveyService      service.Survey
 	BookService        service.Book
+	CaptchaService     service.Captcha
 }

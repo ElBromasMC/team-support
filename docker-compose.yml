@@ -48,6 +48,8 @@ services:
       - IZIPAY_APIKEY=${IZIPAY_APIKEY}
       - COMPANY_EMAIL=${COMPANY_EMAIL}
       - BOOK_EMAIL=${BOOK_EMAIL}
+      - CAPTCHA_SITE_KEY=${CAPTCHA_SITE_KEY}
+      - CAPTCHA_SECRET_KEY=${CAPTCHA_SECRET_KEY}
     networks:
       - http_network
       - store_network
